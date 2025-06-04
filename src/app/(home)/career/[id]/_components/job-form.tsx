@@ -31,6 +31,7 @@ export const JobForm = () => {
 
     const onSubmit = (data: z.infer<typeof jobApplicationSchema>) => {
         // TODO: Add submit functionality
+        console.log(data)
     };
 
     const formatFileSize = (bytes: number) => {

@@ -6,14 +6,12 @@ import { BookOpen, Github, Menu, MessageCircle, Search, X } from 'lucide-react'
 import { DocsBreadcrumb } from '@/modules/docs/ui/components/docs-breadcrumb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { usePathname } from 'next/navigation'
 import { DocsSearch } from '@/modules/docs/ui/components/docs-search'
 
 const DocsLayout = ({ children }: { children: React.ReactNode }) => {
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [searchOpen, setSearchOpen] = useState(false)
-    const pathname = usePathname()
 
     return (
         <div className="relative flex min-h-screen flex-col">

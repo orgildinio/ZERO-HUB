@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
-import { Briefcase, Building, Calendar, CheckCircle, ChevronRight, DollarSign, Globe, MapPin, Users } from 'lucide-react'
+import { Briefcase, Building, Calendar, CheckCircle, ChevronRight,  Globe, MapPin, Users } from 'lucide-react'
 
 import { jobs } from '@/constants'
 import { Badge } from '@/components/ui/badge'
@@ -131,7 +131,7 @@ const Page = async ({ params }: Props) => {
                                     </div>
                                 </div>
                                 <p className="text-zinc-400">
-                                    You'll be joining a collaborative team of talented professionals who are passionate about building
+                                    You&apos;ll be joining a collaborative team of talented professionals who are passionate about building
                                     great products. We value open communication, continuous learning, and a healthy work-life balance.
                                 </p>
                             </div>
@@ -180,7 +180,7 @@ const Page = async ({ params }: Props) => {
                                         </span>
                                         <h3 className="font-semibold text-lg">Offer</h3>
                                         <p className="text-zinc-400">
-                                            If all goes well, we'll extend an offer within a week of your final interview.
+                                            If all goes well, we&apos;ll extend an offer within a week of your final interview.
                                         </p>
                                     </li>
                                 </ol>

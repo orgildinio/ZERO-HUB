@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
-interface DocsTocProps extends React.HTMLAttributes<HTMLDivElement> { }
+type DocsTocProps = React.HTMLAttributes<HTMLDivElement>
 
 export function DocsToc({ className, ...props }: DocsTocProps) {
     const [headings, setHeadings] = useState<{ id: string; text: string; level: number }[]>([])

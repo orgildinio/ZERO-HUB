@@ -8,7 +8,7 @@ import { NavbarSidebar } from "./navbar-sidebar"
 import { useState, useCallback, memo, useRef, useLayoutEffect, useMemo } from "react"
 
 import { Button } from "@/components/ui/button"
-import { featureItems, resourceItems } from "@/constants"
+import { resourceItems } from "@/constants"
 
 interface NavItem {
     href: string;

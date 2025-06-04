@@ -47,7 +47,7 @@ export function CodeBlock({ language, children, variant = "code", className, ...
                     {isCommand
                         ? children
                             .split("\n")
-                            .map((line, i) => (line.trim() ? `$ ${line}` : line))
+                            .map((line) => (line.trim() ? `$ ${line}` : line))
                             .join("\n")
                         : children}
                 </code>

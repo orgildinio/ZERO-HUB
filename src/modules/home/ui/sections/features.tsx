@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronRight, Layers, LineChart, Shield, Sparkles, Zap, ArrowRight, Code, Globe, Database } from "lucide-react"
+import { ChevronRight, Layers, LineChart, Shield, Sparkles, Zap, ArrowRight } from "lucide-react"
 import { memo, ReactNode } from "react"
 
 type IconComponent = React.ComponentType<{ className?: string }>
@@ -155,7 +155,6 @@ const FeatureCard = memo<FeatureCardProps>(({ feature, className = '' }) => {
         badge,
         gradient,
         hasImage,
-        imageAlt,
         ctaText
     } = feature
 

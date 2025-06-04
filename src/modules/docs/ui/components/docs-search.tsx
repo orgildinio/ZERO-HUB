@@ -132,7 +132,7 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
                     {results.length === 0 ? (
                         <div className="py-8 text-center text-zinc-400">
                             <Search className="mx-auto h-8 w-8 mb-2 opacity-50" />
-                            <p>No results found for "{query}"</p>
+                            <p>No results found for &quot;{query}&quot;</p>
                         </div>
                     ) : (
                         <div className="space-y-1">

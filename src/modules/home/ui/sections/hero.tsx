@@ -83,7 +83,7 @@ const CornerNode = memo<CornerNodeProps>(({ Icon, color, bgColor, position, dela
 });
 CornerNode.displayName = 'CornerNode';
 
-const FeatureDisplay = memo<FeatureDisplayProps>(({ features, activeFeature, onFeatureChange }) => (
+const FeatureDisplay = memo<FeatureDisplayProps>(({ features, activeFeature }) => (
     <div className="relative mx-auto mb-8 sm:mb-12" style={{ perspective: '1000px' }}>
         <div className="relative h-48 sm:h-56 md:h-64 w-64 sm:w-72 md:w-80 mx-auto rounded-xl bg-zinc-800 border border-zinc-700 overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-zinc-700/30 to-zinc-900/50 backdrop-blur-sm rounded-xl">
@@ -159,7 +159,7 @@ const FloatingParticles = memo(() => {
     const [particles, setParticles] = useState<Array<{ left: string; top: string; duration: number; delay: number }> | null>(null);
 
     useEffect(() => {
-        const generated = Array.from({ length: 10 }, (_, i) => ({
+        const generated = Array.from({ length: 10 }, () => ({
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             duration: 2 + Math.random() * 3,

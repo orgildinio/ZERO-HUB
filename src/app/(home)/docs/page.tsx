@@ -298,7 +298,7 @@ async function authenticateUser(email, password) {
                 <section id="next-steps" className="scroll-mt-20">
                     <h2 className="text-2xl font-bold tracking-tight mt-10 mb-4 scroll-m-20">Next Steps</h2>
                     <p className="text-zinc-300 leading-7">
-                        Now that you understand the basics, explore these resources to dive deeper into SaaSApp's capabilities.
+                        Now that you understand the basics, explore these resources to dive deeper into ZEROHUB&apos;s capabilities.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">

@@ -47,7 +47,7 @@ const AboutPage = () => {
                             transition={{ duration: 0.8, delay: 0.4 }}
                             className="mx-auto max-w-2xl text-md text-zinc-400 leading-relaxed text-justify"
                         >
-                            We're on a mission to empower businesses worldwide with intelligent automation and seamless workflows that
+                            We&apos;re on a mission to empower businesses worldwide with intelligent automation and seamless workflows that
                             drive growth and innovation.
                         </motion.p>
 
@@ -203,7 +203,7 @@ const AboutPage = () => {
                     >
                         <h2 className="text-3xl font-bold text-white sm:text-4xl mb-4">Join Our Journey</h2>
                         <p className="text-xl text-zinc-400 mb-8">
-                            Ready to be part of the future of work? We're always looking for talented individuals who share our
+                            Ready to be part of the future of work? We&apos;re always looking for talented individuals who share our
                             passion for innovation.
                         </p>
 

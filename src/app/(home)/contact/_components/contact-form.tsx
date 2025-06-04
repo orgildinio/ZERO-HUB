@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Send } from "lucide-react"
+import { CheckCircle, Send } from "lucide-react"
 import { useState } from "react"
 
 export const ContactForm = () => {
@@ -30,8 +30,33 @@ export const ContactForm = () => {
     const onSubmit = (data: z.infer<typeof contactFormSchema>) => {
         setIsSubmitting(true)
         // TODO: Handle submit funcitonality
+        console.log(data)
         setIsSubmitting(false)
         setIsSubmitted(true)
+    }
+
+    if (isSubmitted) {
+        return (
+            <div className="min-h-screen  relative flex items-center justify-center">
+                <div className="container relative z-10 px-4 mx-auto">
+                    <div
+                        className="max-w-md mx-auto text-center"
+                    >
+                        <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <CheckCircle className="h-10 w-10 text-green-400" />
+                        </div>
+                        <h1 className="text-3xl font-bold text-white mb-4">Message Sent!</h1>
+                        <p className="text-zinc-400 mb-8">Thank you for contacting us. We&apos;ll get back to you within 24 hours.</p>
+                        <Button
+                            onClick={() => setIsSubmitted(false)}
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                        >
+                            Send Another Message
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (

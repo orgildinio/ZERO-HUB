@@ -28,7 +28,7 @@ const ContactPage = () => {
                         </h1>
                         <p className="text-xl text-zinc-400 leading-relaxed">
                             Have questions? Need support? Want to discuss a custom solution?
-                            <span className="text-white font-medium"> We're here to help.</span>
+                            <span className="text-white font-medium"> We&apos;re here to help.</span>
                         </p>
                     </motion.div>
                 </div>
@@ -39,7 +39,7 @@ const ContactPage = () => {
                         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
                             <h2 className="text-3xl font-bold text-white mb-6">Send us a message</h2>
                             <p className="text-zinc-400 mb-8">
-                                Fill out the form below and we'll get back to you as soon as possible.
+                                Fill out the form below and we&apos;ll get back to you as soon as possible.
                             </p>
                             <ContactForm />
                         </motion.div>
@@ -52,7 +52,7 @@ const ContactPage = () => {
                             <p className="text-zinc-400 mb-8">Choose the best way to get help based on your needs.</p>
 
                             <div className="space-y-6 mb-12">
-                                {supportOptions.map((option, index) => (
+                                {supportOptions.map((option) => (
                                     <div
                                         key={option.title}
                                         className="bg-gradient-to-br from-zinc-900/60 to-zinc-900/30 border border-zinc-800/50 rounded-xl p-6 backdrop-blur-sm"
