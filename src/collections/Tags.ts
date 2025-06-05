@@ -13,7 +13,7 @@ export const Tags: CollectionConfig = {
         create: ({ req }) => {
             if (isSuperAdmin(req.user)) return true
             const tenant = req.user?.tenants?.[0].tenant as Tenant
-            return Boolean(tenant?.subscription.subscriptionDetailsSubmitted)
+            return Boolean(tenant?.subscription?.subscriptionDetailsSubmitted)
         }
     },
     fields: [

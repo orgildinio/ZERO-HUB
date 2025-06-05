@@ -10,7 +10,7 @@ export const Media: CollectionConfig = {
 
       if (req.user) {
         const tenant = req.user?.tenants?.[0].tenant as Tenant;
-        return Boolean(tenant?.subscription.subscriptionDetailsSubmitted);
+        return Boolean(tenant?.subscription?.subscriptionDetailsSubmitted);
       }
 
       return false;
