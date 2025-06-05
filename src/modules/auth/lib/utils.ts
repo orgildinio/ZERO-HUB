@@ -6,6 +6,13 @@ import ejs from 'ejs';
 
 import redis from "@/lib/redis"
 
+interface OtpEmailData {
+    name: string;
+    otp: string;
+}
+
+type EmailTemplateData = OtpEmailData;
+
 export const generateAuthCookie = async ({ value, prefix }: { value: string, prefix: string }) => {
     const cookies = await getCookies();
     cookies.set({
@@ -31,8 +38,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// @typescript-eslint/no-explicit-any
-const renderEmailTemplate = async (templateName: string, data: Record<string, any>): Promise<string> => {
+const renderEmailTemplate = async (templateName: string, data: EmailTemplateData): Promise<string> => {
     const templatePath = path.join(
         process.cwd(),
         "src",
@@ -45,8 +51,7 @@ const renderEmailTemplate = async (templateName: string, data: Record<string, an
     return ejs.renderFile(templatePath, data);
 };
 
-// @typescript-eslint/no-explicit-any
-export const sendEmail = async (to: string, subject: string, templateName: string, data: Record<string, any>) => {
+export const sendEmail = async (to: string, subject: string, templateName: string, data: EmailTemplateData) => {
     try {
         const html = await renderEmailTemplate(templateName, data);
         await transporter.sendMail({
@@ -69,8 +74,8 @@ export const checkOtpRestrictions = async (email: string) => {
 };
 
 export const trackOtpRequests = async (email: string) => {
-    let otpRequestKey = `otp_request_count:${email}`
-    let otpRequests = parseInt((await redis.get(otpRequestKey)) || "0");
+    const otpRequestKey = `otp_request_count:${email}`
+    const otpRequests = parseInt((await redis.get(otpRequestKey)) || "0");
     if (otpRequests >= 2) {
         await redis.set(`otp_spam_lock:${email}`, "locked", "EX", 3600);
         return new Error("Too many OTP requests! Please wait an hour before requesting again.")
