@@ -278,7 +278,7 @@ const Page = async ({ params }: Props) => {
                             <h2 className="text-2xl font-bold mb-6">Related Positions</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {relatedJobs.map((relatedJob) => (
-                                    <Link href={`/careers/${relatedJob.id}`} key={relatedJob.id}>
+                                    <Link href={`/career/${relatedJob.id}`} key={relatedJob.id}>
                                         <Card className="bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800/80 transition-all duration-200 h-full">
                                             <CardContent className="p-6">
                                                 <div className="flex items-center gap-2 mb-2">

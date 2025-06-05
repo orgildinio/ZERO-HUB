@@ -45,7 +45,8 @@ export default buildConfig({
       collections: {
         categories: {},
         products: {},
-        tags: {}
+        tags: {},
+        media: {}
       },
       tenantsArrayField: {
         includeDefaultField: false

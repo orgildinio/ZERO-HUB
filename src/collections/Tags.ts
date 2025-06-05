@@ -1,14 +1,31 @@
+import { isSuperAdmin } from '@/lib/access'
+import { Tenant } from '@/payload-types'
 import type { CollectionConfig } from 'payload'
 
 export const Tags: CollectionConfig = {
     slug: 'tags',
+    admin: {
+        useAsTitle: 'name',
+        group: 'Content Management',
+        description: 'Manage product tags and categories',
+    },
+    access: {
+        create: ({ req }) => {
+            if (isSuperAdmin(req.user)) return true
+            const tenant = req.user?.tenants?.[0].tenant as Tenant
+            return Boolean(tenant?.subscription.subscriptionDetailsSubmitted)
+        }
+    },
     fields: [
         {
             name: 'name',
             type: 'text',
             required: true,
             maxLength: 50,
-            index: true
+            index: true,
+            admin: {
+                description: 'Display name for the tag'
+            },
         },
         {
             name: 'slug',
@@ -59,7 +76,8 @@ export const Tags: CollectionConfig = {
             defaultValue: 'general',
             required: true,
             admin: {
-                description: "Category this tag belongs to"
+                description: "Category this tag belongs to",
+                position: 'sidebar'
             }
         },
         {
@@ -67,7 +85,8 @@ export const Tags: CollectionConfig = {
             type: 'checkbox',
             defaultValue: false,
             admin: {
-                description: "Show this tag in featured filters"
+                description: "Show this tag in featured filters",
+                position: 'sidebar'
             }
         },
         {
@@ -79,7 +98,10 @@ export const Tags: CollectionConfig = {
             ],
             defaultValue: 'active',
             required: true,
-            index: true
+            index: true,
+            admin: {
+                position: 'sidebar'
+            }
         },
         {
             name: "productCount",
@@ -91,6 +113,7 @@ export const Tags: CollectionConfig = {
             },
             access: {
                 read: () => true,
+                update: () => false
             },
             hooks: {
                 afterRead: [
@@ -102,7 +125,6 @@ export const Tags: CollectionConfig = {
                                 collection: "products",
                                 where: {
                                     tags: { in: [data.id] },
-                                    _status: { equals: "published" }
                                 },
                                 limit: 0
                             })
@@ -118,6 +140,9 @@ export const Tags: CollectionConfig = {
         {
             name: 'seo',
             type: 'group',
+            admin: {
+                description: 'Search engine optimization settings'
+            },
             fields: [
                 {
                     name: 'title',

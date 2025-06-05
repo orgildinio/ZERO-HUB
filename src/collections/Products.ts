@@ -9,19 +9,24 @@ export const Products: CollectionConfig = {
         create: ({ req }) => {
             if (isSuperAdmin(req.user)) return true
             const tenant = req.user?.tenants?.[0].tenant as Tenant
-            return Boolean(tenant?.subscriptionDetailsSubmitted)
+            return Boolean(tenant?.subscription.subscriptionDetailsSubmitted)
         }
     },
     admin: {
         useAsTitle: 'name',
-        description: "You must verify your account before creating product."
+        description: "You must verify your account before creating products.",
+        group: 'Commerce'
     },
     fields: [
         {
             name: "name",
             type: "text",
             required: true,
-            maxLength: 100
+            maxLength: 100,
+            admin: {
+                description: "Product name (max 100 characters)"
+            }
+
         },
         {
             name: "slug",
@@ -30,7 +35,11 @@ export const Products: CollectionConfig = {
             unique: true,
             index: true,
             admin: {
-                description: "URL-friendly version of the product name"
+                description: "URL-friendly version of the product name",
+                readOnly: true
+            },
+            access: {
+                update: ({ req }) => isSuperAdmin(req.user)
             },
             hooks: {
                 beforeValidate: [
@@ -39,9 +48,9 @@ export const Products: CollectionConfig = {
                             return data.name
                                 .toLowerCase()
                                 .replace(/[^a-z0-9]+/g, '-')
-                                .replace(/^-+|-+$/g, '')
+                                .replace(/^-+|-+$/g, '');
                         }
-                        return value
+                        return value;
                     }
                 ]
             }
@@ -49,7 +58,10 @@ export const Products: CollectionConfig = {
         {
             name: "description",
             type: "richText",
-            required: true
+            required: true,
+            admin: {
+                description: "Detailed product description"
+            }
         },
         {
             name: "shortDescription",
@@ -62,6 +74,9 @@ export const Products: CollectionConfig = {
         {
             name: "pricing",
             type: "group",
+            admin: {
+                description: "Product pricing information"
+            },
             fields: [
                 {
                     name: "price",
@@ -150,7 +165,7 @@ export const Products: CollectionConfig = {
             hasMany: false,
             required: true,
             admin: {
-                description: "Primary product categories"
+                description: "Primary product category"
             }
         },
         {
@@ -168,6 +183,9 @@ export const Products: CollectionConfig = {
             required: true,
             minRows: 1,
             maxRows: 10,
+            admin: {
+                description: "Product images (1-10 images required)"
+            },
             fields: [
                 {
                     name: "image",
@@ -375,7 +393,10 @@ export const Products: CollectionConfig = {
                 { label: "No Refunds", value: "no-refunds" }
             ],
             defaultValue: "30-day",
-            required: true
+            required: true,
+            admin: {
+                description: "Product return/refund policy"
+            }
         },
         {
             name: "status",
@@ -387,7 +408,10 @@ export const Products: CollectionConfig = {
             ],
             defaultValue: "draft",
             required: true,
-            index: true
+            index: true,
+            admin: {
+                description: "Product publication status"
+            }
         },
         {
             name: "visibility",
@@ -397,13 +421,20 @@ export const Products: CollectionConfig = {
                 { label: "Private", value: "private" },
             ],
             defaultValue: "public",
-            required: true
+            required: true,
+            admin: {
+                description: "Product visibility setting"
+            }
         },
         {
             name: "analytics",
             type: "group",
             admin: {
-                readOnly: true
+                readOnly: true,
+                description: "Product analytics (read-only)",
+            },
+            access: {
+                update: () => false
             },
             fields: [
                 {
@@ -411,7 +442,8 @@ export const Products: CollectionConfig = {
                     type: "number",
                     defaultValue: 0,
                     admin: {
-                        readOnly: true
+                        readOnly: true,
+                        description: "Total product views"
                     }
                 },
                 {
@@ -419,7 +451,8 @@ export const Products: CollectionConfig = {
                     type: "number",
                     defaultValue: 0,
                     admin: {
-                        readOnly: true
+                        readOnly: true,
+                        description: "Total units sold"
                     }
                 },
                 {
@@ -428,7 +461,8 @@ export const Products: CollectionConfig = {
                     defaultValue: 0,
                     admin: {
                         readOnly: true,
-                        step: 0.01
+                        step: 0.01,
+                        description: "Total revenue generated"
                     }
                 }
             ]

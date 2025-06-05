@@ -157,50 +157,81 @@ export interface User {
  */
 export interface Tenant {
   id: number;
-  /**
-   * This is the name of the store (e.g. Ashish's Store).
-   */
   name: string;
   /**
-   * This is the subdomain of the store (e.g. [slug].hub.com).
+   * This is the subdomain of the store (e.g. [slug].zerohub.site).
    */
   slug: string;
   /**
-   * Store logo
+   * Store logo (recommended: 200x200px PNG/JPG)
    */
   image?: (number | null) | Media;
+  /**
+   * Primary contact phone number
+   */
   phone: string;
+  /**
+   * This is the name of the store (e.g. Ashish's Store).
+   */
   store: string;
   /**
-   * Payment AccountId associated with your shop.
+   * Subscription and billing information
    */
-  subscriptionId?: string | null;
+  subscription?: {
+    /**
+     * Payment AccountId associated with your shop.
+     */
+    subscriptionId?: string | null;
+    /**
+     * You cannot create products until you submit your payment details.
+     */
+    subscriptionDetailsSubmitted?: boolean | null;
+    /**
+     * You cannot create products until your subscription is active.
+     */
+    subscriptionStatus?: ('active' | 'paused' | 'cancelled' | 'expired' | 'none' | 'trial' | 'suspended') | null;
+    /**
+     * Tenant's subscription start date.
+     */
+    subscriptionStartDate?: string | null;
+    /**
+     * Store will be unavailable after this date if subscription not renewed.
+     */
+    subscriptionEndDate?: string | null;
+  };
   /**
-   * You cannot create products until you submit your payment details.
+   * Maximum number of products allowed for this tenant
    */
-  subscriptionDetailsSubmitted?: boolean | null;
+  maxProducts?: number | null;
   /**
-   * You cannot create products until you subscriptions is active.
+   * Usage analytics and metrics
    */
-  subscriptionStatus?: ('active' | 'paused' | 'cancelled' | 'expired' | 'none') | null;
-  /**
-   * Tenant's Subscription start data.
-   */
-  subscriptionStartDate?: string | null;
-  /**
-   * Store will be unavailable after this date if subscription not renewed.
-   */
-  subscriptionEndDate?: string | null;
+  analytics?: {
+    /**
+     * Current number of products
+     */
+    totalProducts?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Upload and manage media files. Supported formats: images, videos, documents.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  tenant?: (number | null) | Tenant;
+  /**
+   * Alternative text for accessibility and SEO. Describe what the image shows.
+   */
   alt: string;
+  /**
+   * Categorize your media for better organization
+   */
+  category?: ('product' | 'category' | 'marketing' | 'blog' | 'user' | 'system' | 'other') | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -214,7 +245,7 @@ export interface Media {
   focalY?: number | null;
 }
 /**
- * You must verify your account before creating category.
+ * Manage product categories. You must verify your account before creating categories.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
@@ -222,35 +253,61 @@ export interface Media {
 export interface Category {
   id: number;
   tenant?: (number | null) | Tenant;
+  /**
+   * The display name of your category
+   */
   name: string;
   /**
-   * This is the path of the category on store (e.g. [slug].zerohub.site/[slug]).
+   * This is the URL path of the category (e.g. [store_slug].zerohub.site/[slug]).
    */
   slug: string;
+  /**
+   * Brief description of this category (optional)
+   */
   description?: string | null;
+  /**
+   * Active categories are visible to customers
+   */
   status: 'active' | 'inactive' | 'draft';
   /**
    * Display this category prominently on the homepage
    */
   featured?: boolean | null;
   /**
-   * Lower numbers appear first
+   * Lower numbers appear first in category lists
    */
   sortOrder?: number | null;
+  /**
+   * Select a parent category to create a subcategory
+   */
   parent?: (number | null) | Category;
+  /**
+   * Subcategories under this category
+   */
   subcategories?: {
     docs?: (number | Category)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  image?: (number | null) | Media;
   /**
-   * Banner image for category pages
+   * Category images for better visual presentation
    */
-  banner?: (number | null) | Media;
+  images?: {
+    /**
+     * Small image for category cards (recommended: 300x300px)
+     */
+    thumbnail?: (number | null) | Media;
+    /**
+     * Banner image for category pages (recommended: 1200x400px)
+     */
+    banner?: (number | null) | Media;
+  };
+  /**
+   * Search engine optimization settings
+   */
   seo?: {
     /**
-     * SEO title
+     * SEO title (recommended: 50-60 characters)
      */
     title?: string | null;
     /**
@@ -258,19 +315,36 @@ export interface Category {
      */
     description?: string | null;
     /**
-     * Comma-separated keywords
+     * Comma-separated keywords for this category
      */
     keywords?: string | null;
+    /**
+     * Image for social media sharing (recommended: 1200x630px)
+     */
+    ogImage?: (number | null) | Media;
   };
   /**
-   * Number of products in this category
+   * Category statistics and analytics
    */
-  productCount?: number | null;
+  stats?: {
+    /**
+     * Number of products in this category
+     */
+    productCount?: number | null;
+    /**
+     * Number of times this category page has been viewed
+     */
+    viewCount?: number | null;
+    /**
+     * Last time this category page was viewed
+     */
+    lastViewed?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
 /**
- * You must verify your account before creating product.
+ * You must verify your account before creating products.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
@@ -278,11 +352,17 @@ export interface Category {
 export interface Product {
   id: number;
   tenant?: (number | null) | Tenant;
+  /**
+   * Product name (max 100 characters)
+   */
   name: string;
   /**
    * URL-friendly version of the product name
    */
   slug: string;
+  /**
+   * Detailed product description
+   */
   description: {
     root: {
       type: string;
@@ -302,6 +382,9 @@ export interface Product {
    * Brief description for product listings
    */
   shortDescription?: string | null;
+  /**
+   * Product pricing information
+   */
   pricing: {
     /**
      * Regular price in your store currency
@@ -339,13 +422,16 @@ export interface Product {
     allowBackorders?: boolean | null;
   };
   /**
-   * Primary product categories
+   * Primary product category
    */
   categories: number | Category;
   /**
    * Tags for filtering and search
    */
   tags?: (number | Tag)[] | null;
+  /**
+   * Product images (1-10 images required)
+   */
   images: {
     image: number | Media;
     /**
@@ -442,12 +528,33 @@ export interface Product {
     requiresShipping?: boolean | null;
     freeShipping?: boolean | null;
   };
+  /**
+   * Product return/refund policy
+   */
   refundPolicy: '30-day' | '14-day' | '7-day' | '3-day' | '1-day' | 'no-refunds';
+  /**
+   * Product publication status
+   */
   status: 'active' | 'draft' | 'archived';
+  /**
+   * Product visibility setting
+   */
   visibility: 'public' | 'private';
+  /**
+   * Product analytics (read-only)
+   */
   analytics?: {
+    /**
+     * Total product views
+     */
     views?: number | null;
+    /**
+     * Total units sold
+     */
     sales?: number | null;
+    /**
+     * Total revenue generated
+     */
     revenue?: number | null;
   };
   /**
@@ -462,12 +569,17 @@ export interface Product {
   createdAt: string;
 }
 /**
+ * Manage product tags and categories
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tags".
  */
 export interface Tag {
   id: number;
   tenant?: (number | null) | Tenant;
+  /**
+   * Display name for the tag
+   */
   name: string;
   /**
    * URL-friendly version of the tag name
@@ -500,6 +612,9 @@ export interface Tag {
    * Number of products using this tag
    */
   productCount?: number | null;
+  /**
+   * Search engine optimization settings
+   */
   seo?: {
     /**
      * SEO title for tag page
@@ -615,7 +730,9 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  tenant?: T;
   alt?: T;
+  category?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -638,11 +755,21 @@ export interface TenantsSelect<T extends boolean = true> {
   image?: T;
   phone?: T;
   store?: T;
-  subscriptionId?: T;
-  subscriptionDetailsSubmitted?: T;
-  subscriptionStatus?: T;
-  subscriptionStartDate?: T;
-  subscriptionEndDate?: T;
+  subscription?:
+    | T
+    | {
+        subscriptionId?: T;
+        subscriptionDetailsSubmitted?: T;
+        subscriptionStatus?: T;
+        subscriptionStartDate?: T;
+        subscriptionEndDate?: T;
+      };
+  maxProducts?: T;
+  analytics?:
+    | T
+    | {
+        totalProducts?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -660,16 +787,27 @@ export interface CategoriesSelect<T extends boolean = true> {
   sortOrder?: T;
   parent?: T;
   subcategories?: T;
-  image?: T;
-  banner?: T;
+  images?:
+    | T
+    | {
+        thumbnail?: T;
+        banner?: T;
+      };
   seo?:
     | T
     | {
         title?: T;
         description?: T;
         keywords?: T;
+        ogImage?: T;
       };
-  productCount?: T;
+  stats?:
+    | T
+    | {
+        productCount?: T;
+        viewCount?: T;
+        lastViewed?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
