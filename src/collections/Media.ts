@@ -20,7 +20,6 @@ export const Media: CollectionConfig = {
   },
   admin: {
     description: "Upload and manage media files. Supported formats: images, videos, documents.",
-    group: 'Content Management',
     useAsTitle: 'filename',
   },
   fields: [

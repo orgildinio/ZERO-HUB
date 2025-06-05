@@ -6,7 +6,6 @@ export const Tags: CollectionConfig = {
     slug: 'tags',
     admin: {
         useAsTitle: 'name',
-        group: 'Content Management',
         description: 'Manage product tags and categories',
     },
     access: {

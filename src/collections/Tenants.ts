@@ -24,7 +24,6 @@ export const Tenants: CollectionConfig = {
     admin: {
         useAsTitle: "slug",
         hidden: ({ user }) => !isSuperAdmin(user),
-        group: 'System Management',
         preview: (doc) => {
             return `https://${doc.slug}.zerohub.site`
         }
@@ -34,7 +33,7 @@ export const Tenants: CollectionConfig = {
             name: "name",
             type: "text",
             required: true,
-            label: "Tenant name",
+            label: "Tenant name.",
         },
         {
             name: "slug",
