@@ -1,0 +1,455 @@
+import { CollectionConfig } from "payload";
+
+import { isSuperAdmin } from "@/lib/access";
+import { Tenant } from "@/payload-types";
+
+export const Products: CollectionConfig = {
+    slug: "products",
+    access: {
+        create: ({ req }) => {
+            if (isSuperAdmin(req.user)) return true
+            const tenant = req.user?.tenants?.[0].tenant as Tenant
+            return Boolean(tenant?.subscriptionDetailsSubmitted)
+        }
+    },
+    admin: {
+        useAsTitle: 'name',
+        description: "You must verify your account before creating product."
+    },
+    fields: [
+        {
+            name: "name",
+            type: "text",
+            required: true,
+            maxLength: 100
+        },
+        {
+            name: "slug",
+            type: "text",
+            required: true,
+            unique: true,
+            index: true,
+            admin: {
+                description: "URL-friendly version of the product name"
+            },
+            hooks: {
+                beforeValidate: [
+                    ({ value, data }) => {
+                        if (!value && data?.name) {
+                            return data.name
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]+/g, '-')
+                                .replace(/^-+|-+$/g, '')
+                        }
+                        return value
+                    }
+                ]
+            }
+        },
+        {
+            name: "description",
+            type: "richText",
+            required: true
+        },
+        {
+            name: "shortDescription",
+            type: "textarea",
+            maxLength: 200,
+            admin: {
+                description: "Brief description for product listings"
+            }
+        },
+        {
+            name: "pricing",
+            type: "group",
+            fields: [
+                {
+                    name: "price",
+                    type: "number",
+                    required: true,
+                    min: 0,
+                    admin: {
+                        step: 0.01,
+                        description: "Regular price in your store currency"
+                    }
+                },
+                {
+                    name: "compareAtPrice",
+                    type: "number",
+                    min: 0,
+                    admin: {
+                        step: 0.01,
+                        description: "Original price (for showing discounts)"
+                    }
+                },
+                {
+                    name: "costPrice",
+                    type: "number",
+                    min: 0,
+                    admin: {
+                        step: 0.01,
+                        description: "Your cost (for profit calculations)"
+                    }
+                },
+                {
+                    name: "taxable",
+                    type: "checkbox",
+                    defaultValue: true,
+                    admin: {
+                        description: "Whether this product is subject to taxes"
+                    }
+                }
+            ]
+        },
+        {
+            name: "inventory",
+            type: "group",
+            fields: [
+                {
+                    name: "trackQuantity",
+                    type: "checkbox",
+                    defaultValue: true,
+                    admin: {
+                        description: "Track inventory levels for this product"
+                    }
+                },
+                {
+                    name: "quantity",
+                    type: "number",
+                    defaultValue: 0,
+                    min: 0,
+                    admin: {
+                        condition: (data) => data?.inventory?.trackQuantity,
+                        description: "Current stock quantity"
+                    }
+                },
+                {
+                    name: "lowStockThreshold",
+                    type: "number",
+                    defaultValue: 5,
+                    min: 0,
+                    admin: {
+                        condition: (data) => data?.inventory?.trackQuantity,
+                        description: "Alert when stock reaches this level"
+                    }
+                },
+                {
+                    name: "allowBackorders",
+                    type: "checkbox",
+                    defaultValue: false,
+                    admin: {
+                        description: "Allow purchases when out of stock"
+                    }
+                }
+            ]
+        },
+        {
+            name: "categories",
+            type: "relationship",
+            relationTo: "categories",
+            hasMany: false,
+            required: true,
+            admin: {
+                description: "Primary product categories"
+            }
+        },
+        {
+            name: "tags",
+            type: "relationship",
+            relationTo: "tags",
+            hasMany: true,
+            admin: {
+                description: "Tags for filtering and search"
+            }
+        },
+        {
+            name: "images",
+            type: "array",
+            required: true,
+            minRows: 1,
+            maxRows: 10,
+            fields: [
+                {
+                    name: "image",
+                    type: "upload",
+                    relationTo: "media",
+                    required: true
+                },
+                {
+                    name: "alt",
+                    type: "text",
+                    required: true,
+                    admin: {
+                        description: "Alt text for accessibility"
+                    }
+                },
+                {
+                    name: "isPrimary",
+                    type: "checkbox",
+                    defaultValue: false,
+                    admin: {
+                        description: "Use as main product image"
+                    }
+                }
+            ]
+        },
+        {
+            name: "specifications",
+            type: "array",
+            admin: {
+                description: "Product specifications and features"
+            },
+            fields: [
+                {
+                    name: "name",
+                    type: "text",
+                    required: true
+                },
+                {
+                    name: "value",
+                    type: "text",
+                    required: true
+                }
+            ]
+        },
+        {
+            name: "variants",
+            type: "array",
+            admin: {
+                description: "Product variations (size, color, etc.)"
+            },
+            fields: [
+                {
+                    name: "name",
+                    type: "text",
+                    required: true,
+                    admin: {
+                        description: "Variant name (e.g., 'Size', 'Color')"
+                    }
+                },
+                {
+                    name: "options",
+                    type: "array",
+                    required: true,
+                    fields: [
+                        {
+                            name: "label",
+                            type: "text",
+                            required: true
+                        },
+                        {
+                            name: "value",
+                            type: "text",
+                            required: true
+                        },
+                        {
+                            name: "priceAdjustment",
+                            type: "number",
+                            defaultValue: 0,
+                            admin: {
+                                step: 0.01,
+                                description: "Price adjustment for this option"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            name: "seo",
+            type: "group",
+            fields: [
+                {
+                    name: "title",
+                    type: "text",
+                    maxLength: 60,
+                    admin: {
+                        description: "SEO title (recommended: 50-60 characters)"
+                    }
+                },
+                {
+                    name: "description",
+                    type: "textarea",
+                    maxLength: 160,
+                    admin: {
+                        description: "Meta description (recommended: 150-160 characters)"
+                    }
+                },
+                {
+                    name: "keywords",
+                    type: "text",
+                    admin: {
+                        description: "Comma-separated keywords"
+                    }
+                }
+            ]
+        },
+        {
+            name: "featured",
+            type: "checkbox",
+            defaultValue: false,
+            admin: {
+                description: "Feature this product on homepage"
+            }
+        },
+        {
+            name: "badge",
+            type: "select",
+            options: [
+                { label: "None", value: "" },
+                { label: "New", value: "new" },
+                { label: "Sale", value: "sale" },
+                { label: "Best Seller", value: "bestseller" },
+                { label: "Limited Edition", value: "limited" }
+            ],
+            admin: {
+                description: "Display badge on product"
+            }
+        },
+        {
+            name: "content",
+            type: "richText",
+            admin: {
+                condition: (data) => data?.productType === "digital",
+                description: "Product documentation, guides, and bonus materials"
+            }
+        },
+        {
+            name: "shipping",
+            type: "group",
+            fields: [
+                {
+                    name: "weight",
+                    type: "number",
+                    min: 0,
+                    admin: {
+                        step: 0.01,
+                        description: "Weight in kg"
+                    }
+                },
+                {
+                    name: "dimensions",
+                    type: "group",
+                    fields: [
+                        {
+                            name: "length",
+                            type: "number",
+                            min: 0,
+                            admin: { step: 0.01 }
+                        },
+                        {
+                            name: "width",
+                            type: "number",
+                            min: 0,
+                            admin: { step: 0.01 }
+                        },
+                        {
+                            name: "height",
+                            type: "number",
+                            min: 0,
+                            admin: { step: 0.01 }
+                        }
+                    ]
+                },
+                {
+                    name: "requiresShipping",
+                    type: "checkbox",
+                    defaultValue: true
+                },
+                {
+                    name: "freeShipping",
+                    type: "checkbox",
+                    defaultValue: false
+                }
+            ]
+        },
+        {
+            name: "refundPolicy",
+            type: "select",
+            options: [
+                { label: "30 Days", value: "30-day" },
+                { label: "14 Days", value: "14-day" },
+                { label: "7 Days", value: "7-day" },
+                { label: "3 Days", value: "3-day" },
+                { label: "1 Day", value: "1-day" },
+                { label: "No Refunds", value: "no-refunds" }
+            ],
+            defaultValue: "30-day",
+            required: true
+        },
+        {
+            name: "status",
+            type: "select",
+            options: [
+                { label: "Active", value: "active" },
+                { label: "Draft", value: "draft" },
+                { label: "Archived", value: "archived" }
+            ],
+            defaultValue: "draft",
+            required: true,
+            index: true
+        },
+        {
+            name: "visibility",
+            type: "select",
+            options: [
+                { label: "Public", value: "public" },
+                { label: "Private", value: "private" },
+            ],
+            defaultValue: "public",
+            required: true
+        },
+        {
+            name: "analytics",
+            type: "group",
+            admin: {
+                readOnly: true
+            },
+            fields: [
+                {
+                    name: "views",
+                    type: "number",
+                    defaultValue: 0,
+                    admin: {
+                        readOnly: true
+                    }
+                },
+                {
+                    name: "sales",
+                    type: "number",
+                    defaultValue: 0,
+                    admin: {
+                        readOnly: true
+                    }
+                },
+                {
+                    name: "revenue",
+                    type: "number",
+                    defaultValue: 0,
+                    admin: {
+                        readOnly: true,
+                        step: 0.01
+                    }
+                }
+            ]
+        },
+        {
+            name: "isPrivate",
+            label: "Private",
+            defaultValue: false,
+            type: "checkbox",
+            admin: {
+                description: "If checked this product will not be shown on public storefront."
+            }
+        },
+        {
+            name: "isArchived",
+            label: "Archive",
+            defaultValue: false,
+            type: "checkbox",
+            admin: {
+                description: "If checked this product will be archived."
+            }
+        },
+    ]
+}

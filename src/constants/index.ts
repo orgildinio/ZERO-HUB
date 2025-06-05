@@ -1,4 +1,6 @@
-import { BarChart, BookOpen, Calendar, Code, Database, DollarSign, FileText, Github, Globe, Headphones, HelpCircle, LineChart, Linkedin, Lock, Mail, MapPin, MessageSquare, Newspaper, Paintbrush, Phone, Server, Settings, Shield, Sparkles, Twitter, Users, Zap } from "lucide-react";
+import { BarChart, BookOpen, Calendar, Code, Database, DollarSign, FileText, Github, Globe, Headphones, HelpCircle, LineChart, Linkedin, Lock, Mail, MapPin, MessageSquare, Paintbrush, Phone, Server, Settings, Shield, Sparkles, Twitter, Users, Zap } from "lucide-react";
+
+export const DEFAULT_LIMIT = 8
 
 export const featureItems = [
     {

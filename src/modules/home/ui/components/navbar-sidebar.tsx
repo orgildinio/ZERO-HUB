@@ -47,7 +47,7 @@ const AuthSection = memo<{ onClose: () => void }>(({ onClose }) => (
             className="w-full border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white"
             asChild
         >
-            <Link href="/sign-in" prefetch onClick={onClose}>
+            <Link href="/login" prefetch onClick={onClose}>
                 Login
             </Link>
         </Button>

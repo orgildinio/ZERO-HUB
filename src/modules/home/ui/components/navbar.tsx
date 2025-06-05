@@ -62,7 +62,7 @@ const AuthButtons = memo(() => (
             className="text-zinc-400 hover:text-white hover:bg-zinc-800 border border-transparent hover:border-zinc-700 transition-all duration-200"
             asChild
         >
-            <Link href="/sign-in" prefetch>
+            <Link href="/login" prefetch>
                 Login
             </Link>
         </Button>

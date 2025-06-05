@@ -6,7 +6,7 @@ import React, { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
-interface DocsSidebarNavProps extends React.HTMLAttributes<HTMLDivElement> { }
+type DocsSidebarNavProps = React.HTMLAttributes<HTMLDivElement>
 
 export const DocsSidebar = ({ className, ...props }: DocsSidebarNavProps) => {
     return (
