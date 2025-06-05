@@ -26,6 +26,15 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    meta: {
+      titleSuffix: " - ZERO | HUB",
+    },
+    components: {
+      graphics: {
+        Logo: '@/components/payload/login',
+      },
+      beforeNavLinks: ['@/components/payload/razorpay-verify#SubscriptionVerifyButton']
+    }
   },
   collections: [Users, Media, Tenants, Categories, Products, Tags],
   editor: lexicalEditor(),
@@ -37,6 +46,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    idType: 'uuid'
   }),
   sharp,
   plugins: [
