@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Search, FileText, Hash, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface DocsSearchProps {
     open: boolean
@@ -56,7 +57,6 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
     const [selectedIndex, setSelectedIndex] = useState(0)
     const router = useRouter()
 
-    // Filter results based on query
     useEffect(() => {
         if (!query.trim()) {
             setResults(searchResults)
@@ -73,7 +73,6 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
         setSelectedIndex(0)
     }, [query])
 
-    // Handle keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!open) return
@@ -114,7 +113,7 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl p-0 bg-zinc-900 border-zinc-800">
+            <DialogContent className="container mx-auto px-2 md:px-6 p-0 bg-zinc-900 border-zinc-800">
                 <DialogHeader className="p-4 pb-0">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
@@ -135,7 +134,7 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
                             <p>No results found for &quot;{query}&quot;</p>
                         </div>
                     ) : (
-                        <div className="space-y-1">
+                        <ScrollArea className="space-y-1">
                             {results.map((result, index) => (
                                 <button
                                     key={result.href}
@@ -159,7 +158,7 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
                                     <ArrowRight className="h-4 w-4 text-zinc-500 flex-shrink-0" />
                                 </button>
                             ))}
-                        </div>
+                        </ScrollArea>
                     )}
                 </div>
 

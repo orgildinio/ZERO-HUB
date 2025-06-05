@@ -40,12 +40,12 @@ export const resourceItems = [
         description: "Rich templates for your business.",
         href: "/templates",
     },
-    {
-        icon: Newspaper,
-        label: "Blog",
-        description: "Latest news and updates",
-        href: "/blog",
-    },
+    // {
+    //     icon: Newspaper,
+    //     label: "Blog",
+    //     description: "Latest news and updates",
+    //     href: "/blog",
+    // },
     {
         icon: Code,
         label: "API Reference",

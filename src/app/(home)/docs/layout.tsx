@@ -7,6 +7,7 @@ import { DocsBreadcrumb } from '@/modules/docs/ui/components/docs-breadcrumb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DocsSearch } from '@/modules/docs/ui/components/docs-search'
+import { DocsSidebar } from '@/modules/docs/ui/components/docs-sidebar'
 
 const DocsLayout = ({ children }: { children: React.ReactNode }) => {
 
@@ -76,7 +77,7 @@ const DocsLayout = ({ children }: { children: React.ReactNode }) => {
                         }`}
                 >
                     <div className="p-6">
-                        {/* <DocsSidebar /> */}
+                        <DocsSidebar className='mt-16 md:mt-0' />
                     </div>
                 </aside>
                 <main className="relative mx-auto">

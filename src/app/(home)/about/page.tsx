@@ -16,7 +16,7 @@ const AboutPage = () => {
 
     return (
         <div className='min-h-screen'>
-            <section className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-950 to-black">
+            <section className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.1),transparent_50%)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.1),transparent_50%)]" />
                 <div className="container relative py-24 lg:py-32 mx-auto px-2 md:px-6">
