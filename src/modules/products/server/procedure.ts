@@ -1,5 +1,6 @@
 import { Category, Media, Tenant } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
+import type{ Where } from "payload";
 import { z } from "zod";
 
 export const productsRouter = createTRPCRouter({
