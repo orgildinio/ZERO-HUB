@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { Tenant } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
+import redis from "@/lib/redis";
 
 export const tenantsRouter = createTRPCRouter({
     getOne: baseProcedure
@@ -11,6 +11,11 @@ export const tenantsRouter = createTRPCRouter({
             })
         )
         .query(async ({ ctx, input }) => {
+
+            const cacheKey = `tenant:${input.slug}`;
+            const cached = await redis.get(cacheKey);
+            if (cached) return cached;
+
             const tenant = await ctx.db.find({
                 collection: "tenants",
                 depth: 0,
@@ -22,9 +27,9 @@ export const tenantsRouter = createTRPCRouter({
                     }
                 }
             });
-            const data = tenant.docs?.[0]
+            const data = tenant.docs[0].store
             if (!data) return null;
 
-            return data as Tenant;
+            return data;
         })
 })

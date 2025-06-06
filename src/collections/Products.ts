@@ -479,6 +479,7 @@ export const Products: CollectionConfig = {
             name: "isArchived",
             label: "Archive",
             defaultValue: false,
+            index: true,
             type: "checkbox",
             admin: {
                 description: "If checked this product will be archived."
