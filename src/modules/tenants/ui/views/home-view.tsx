@@ -104,7 +104,7 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                             <CategoryCard
                                 key={category.id}
                                 name={category.name}
-                                image={category.thumbnail.thumbnailURL!}
+                                image={category.thumbnail.url!}
                                 itemCount={category.stats?.productCount}
                                 href={`${tenantUrl}/categories/${category.slug}`}
                                 description={category.description}
