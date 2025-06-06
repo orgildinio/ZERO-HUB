@@ -1,17 +1,17 @@
 "use client"
 
-import React, { memo, useMemo } from 'react'
+import React, { memo, Suspense, useMemo } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Leaf, Sparkles } from 'lucide-react'
+import { ArrowRight, Award, Leaf, Sparkles } from 'lucide-react'
 import { Background } from '../components/background'
 import Image from 'next/image'
 import Newsletter from '../components/news-letter'
-// import { CategoryCard } from '../components/products/category-card'
-// import { ProductCard, ProductCardSkeleton } from '../components/products/product-card'
+import { CategoryCard } from '../components/products/category-card'
+import { ProductCard, ProductCardSkeleton } from '../components/products/product-card'
 
 import { Button } from '@/components/ui/button'
-// import { useTRPC } from '@/trpc/client'
-// import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useTRPC } from '@/trpc/client'
+import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { generateTenantUrl } from '@/lib/utils'
 
 const HERO_STATS = [
@@ -21,29 +21,29 @@ const HERO_STATS = [
 ] as const
 
 export const HomeView = memo(({ slug }: { slug: string }) => {
-    // const trpc = useTRPC()
+    const trpc = useTRPC()
 
-    // const categoriesQuery = useMemo(() =>
-    //     trpc.categories.getMany.queryOptions({ tenantSlug: slug }),
-    //     [trpc.categories.getMany, slug]
-    // )
+    const categoriesQuery = useMemo(() =>
+        trpc.categories.getMany.queryOptions({ tenantSlug: slug }),
+        [trpc.categories.getMany, slug]
+    )
 
-    // const productsQuery = useMemo(() =>
-    //     trpc.products.getMany.infiniteQueryOptions(
-    //         { tenantSlug: slug },
-    //         { getNextPageParam: (lastpage) => lastpage.docs.length > 0 ? lastpage.nextPage : undefined }
-    //     ),
-    //     [trpc.products.getMany, slug]
-    // )
+    const productsQuery = useMemo(() =>
+        trpc.products.getMany.infiniteQueryOptions(
+            { tenantSlug: slug },
+            { getNextPageParam: (lastpage) => lastpage.docs.length > 0 ? lastpage.nextPage : undefined }
+        ),
+        [trpc.products.getMany, slug]
+    )
 
-    // const { data: categories } = useSuspenseQuery(categoriesQuery)
-    // const { data: products } = useSuspenseInfiniteQuery(productsQuery)
+    const { data: categories } = useSuspenseQuery(categoriesQuery)
+    const { data: products } = useSuspenseInfiniteQuery(productsQuery)
 
-    // const featuredCategories = useMemo(() => categories.slice(0, 4), [categories])
-    // const featuredProducts = useMemo(() =>
-    //     products?.pages.flatMap((page) => page.docs).slice(0, 4) || [],
-    //     [products]
-    // )
+    const featuredCategories = useMemo(() => categories.slice(0, 4), [categories])
+    const featuredProducts = useMemo(() =>
+        products?.pages.flatMap((page) => page.docs).slice(0, 4) || [],
+        [products]
+    )
 
     const tenantUrl = useMemo(() => generateTenantUrl(slug), [slug])
 
@@ -91,7 +91,7 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                 </div>
             </section>
 
-            {/* <section className="py-20 bg-white">
+            <section className="py-20 bg-white">
                 <div className="container px-2 mx-auto md:px-6">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold tracking-tight text-stone-900 mb-4">Shop by Lifestyle</h2>
@@ -150,7 +150,7 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                         </Button>
                     </div>
                 </div>
-            </section> */}
+            </section>
 
             <section className="py-20 bg-stone-900 text-white overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900" />
