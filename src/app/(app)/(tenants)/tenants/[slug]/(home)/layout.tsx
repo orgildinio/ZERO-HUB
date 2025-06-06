@@ -18,7 +18,7 @@ const TenantLayout = ({ children }: Props) => {
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             {/* <HydrationBoundary state={dehydrate(queryClient)}> */}
             {/* <Suspense fallback={<HeaderSkeleton />}> */}
-            <Header slug={'Cactus'} />
+            <Header slug={'cactus'} />
             {/* </Suspense> */}
             {/* </HydrationBoundary> */}
             <main className='min-h-screen'>
