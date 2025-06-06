@@ -1,11 +1,10 @@
 "use client"
 
-import React, { memo, Suspense, useMemo } from 'react'
+import React, { lazy, memo, Suspense, useMemo } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Award, Leaf, Sparkles } from 'lucide-react'
 import { Background } from '../components/background'
 import Image from 'next/image'
-import Newsletter from '../components/news-letter'
 import { CategoryCard } from '../components/products/category-card'
 import { ProductCard, ProductCardSkeleton } from '../components/products/product-card'
 
@@ -14,11 +13,60 @@ import { useTRPC } from '@/trpc/client'
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { generateTenantUrl } from '@/lib/utils'
 
+const Newsletter = lazy(() => import('../components/news-letter'))
+
 const HERO_STATS = [
     { value: "10K+", label: "Happy Customers" },
     { value: "500+", label: "Unique Products" },
     { value: "50+", label: "Countries Served" }
 ] as const
+
+const HeroSection = memo(({ slug }: { slug: string }) => (
+    <section className="relative min-h-[90vh] w-full overflow-hidden bg-gradient-to-br from-stone-50 via-amber-50 to-orange-50">
+        <Background />
+        <div className="relative flex min-h-[90vh] flex-col items-center justify-center px-4 text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm px-4 py-2 text-sm font-medium text-stone-700 shadow-lg">
+                <Sparkles className="h-4 w-4 text-amber-500" />
+                New Collection Available
+            </div>
+
+            <h1 className="mb-6 max-w-4xl text-5xl font-bold tracking-tight text-stone-900 md:text-6xl lg:text-7xl">
+                Product That
+                <span className="block bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                    Speaks to You
+                </span>
+            </h1>
+
+            <p className="mb-8 text-xl text-stone-600 leading-relaxed">
+                Thoughtfully crafted pieces that transform your space into a sanctuary of style and comfort
+            </p>
+
+            <div className="flex flex-col gap-4 sm:flex-row">
+                <Button size="lg" className="bg-stone-900 hover:bg-stone-800 text-white px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105" asChild>
+                    <Link href={`${slug}/products`} className="flex items-center gap-2">
+                        Explore Collection
+                        <ArrowRight className="h-5 w-5" />
+                    </Link>
+                </Button>
+                <Button variant="outline" size="lg" className="border-2 border-stone-300 hover:border-stone-900 px-8 py-4 text-lg rounded-full transition-all duration-300" asChild>
+                    <Link href={`${slug}/about`}>Our Story</Link>
+                </Button>
+            </div>
+
+            <div className="mt-16 grid grid-cols-3 gap-8 text-center">
+                {HERO_STATS.map(({ value, label }) => (
+                    <div key={label} className="flex flex-col items-center">
+                        <div className="mb-2 text-2xl font-bold text-stone-900">{value}</div>
+                        <div className="text-sm text-stone-600">{label}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+))
+
+HeroSection.displayName = 'HeroSection'
+
 
 export const HomeView = memo(({ slug }: { slug: string }) => {
     const trpc = useTRPC()
@@ -49,47 +97,8 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
 
     return (
         <div className="flex flex-col">
-            <section className="relative min-h-[90vh] w-full overflow-hidden bg-gradient-to-br from-stone-50 via-amber-50 to-orange-50">
-                <Background />
-                <div className="relative flex min-h-[90vh] flex-col items-center justify-center px-4 text-center">
-                    <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm px-4 py-2 text-sm font-medium text-stone-700 shadow-lg">
-                        <Sparkles className="h-4 w-4 text-amber-500" />
-                        New Collection Available
-                    </div>
-
-                    <h1 className="mb-6 max-w-4xl text-5xl font-bold tracking-tight text-stone-900 md:text-6xl lg:text-7xl">
-                        Product That
-                        <span className="block bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                            Speaks to You
-                        </span>
-                    </h1>
-
-                    <p className="mb-8 max-w-2xl text-xl text-stone-600 leading-relaxed">
-                        Thoughtfully crafted pieces that transform your space into a sanctuary of style and comfort
-                    </p>
-
-                    <div className="flex flex-col gap-4 sm:flex-row">
-                        <Button size="lg" className="bg-stone-900 hover:bg-stone-800 text-white px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105" asChild>
-                            <Link href={`${tenantUrl}/products`} className="flex items-center gap-2">
-                                Explore Collection
-                                <ArrowRight className="h-5 w-5" />
-                            </Link>
-                        </Button>
-                        <Button variant="outline" size="lg" className="border-2 border-stone-300 hover:border-stone-900 px-8 py-4 text-lg rounded-full transition-all duration-300" asChild>
-                            <Link href={`${tenantUrl}/about`}>Our Story</Link>
-                        </Button>
-                    </div>
-
-                    <div className="mt-16 grid grid-cols-3 gap-8 text-center">
-                        {HERO_STATS.map(({ value, label }) => (
-                            <div key={label} className="flex flex-col items-center">
-                                <div className="mb-2 text-2xl font-bold text-stone-900">{value}</div>
-                                <div className="text-sm text-stone-600">{label}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+            
+            <HeroSection slug={slug} />
 
             <section className="py-20 bg-white">
                 <div className="container px-2 mx-auto md:px-6">
@@ -212,7 +221,9 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                     </div>
                 </div>
             </section>
-            <Newsletter />
+            <Suspense fallback={<div className="h-32 bg-stone-50" />}>
+                <Newsletter />
+            </Suspense>
         </div>
     )
 })
