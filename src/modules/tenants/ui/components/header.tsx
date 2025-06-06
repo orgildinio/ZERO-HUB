@@ -7,6 +7,8 @@ import { memo, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { useTRPC } from "@/trpc/client"
 import { generateTenantUrl } from "@/lib/utils"
 
 export const HeaderSkeleton = memo(() => (
@@ -128,6 +130,8 @@ const ActionButtons = memo(() => (
 ActionButtons.displayName = "ActionButtons"
 
 export const Header = memo(({ slug }: { slug: string }) => {
+    const trpc = useTRPC()
+    const { data } = useSuspenseQuery(trpc.tenants.getOne.queryOptions({ slug }))
 
     const navigation = useMemo(() => [
         { name: "Home", href: generateTenantUrl(slug) },
@@ -148,7 +152,7 @@ export const Header = memo(({ slug }: { slug: string }) => {
                         <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </div>
                     <span className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent truncate max-w-[120px] sm:max-w-none">
-                        {'Cactus'}
+                        {data}
                     </span>
                 </Link>
 
