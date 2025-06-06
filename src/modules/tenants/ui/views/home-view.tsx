@@ -6,7 +6,7 @@ import { ArrowRight, Award, Leaf, Sparkles } from 'lucide-react'
 import { Background } from '../components/background'
 import Image from 'next/image'
 import Newsletter from '../components/news-letter'
-import { CategoryCard, CategoryCardSkeleton } from '../components/products/category-card'
+import { CategoryCard } from '../components/products/category-card'
 import { ProductCard, ProductCardSkeleton } from '../components/products/product-card'
 
 import { Button } from '@/components/ui/button'
@@ -101,15 +101,14 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                     </div>
                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                         {featuredCategories.map((category) => (
-                            <Suspense fallback={<CategoryCardSkeleton />} key={category.id}>
-                                <CategoryCard
-                                    name={category.name}
-                                    image={category.thumbnail.thumbnailURL!}
-                                    itemCount={category.stats?.productCount}
-                                    href={`${tenantUrl}/categories/${category.slug}`}
-                                    description={category.description}
-                                />
-                            </Suspense>
+                            <CategoryCard
+                                key={category.id}
+                                name={category.name}
+                                image={category.thumbnail.thumbnailURL!}
+                                itemCount={category.stats?.productCount}
+                                href={`${tenantUrl}/categories/${category.slug}`}
+                                description={category.description}
+                            />
                         ))}
                     </div>
                 </div>

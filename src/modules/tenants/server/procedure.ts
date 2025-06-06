@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
-import redis from "@/lib/redis";
 
 export const tenantsRouter = createTRPCRouter({
     getOne: baseProcedure
@@ -11,10 +10,6 @@ export const tenantsRouter = createTRPCRouter({
             })
         )
         .query(async ({ ctx, input }) => {
-
-            const cacheKey = `tenant:${input.slug}`;
-            const cached = await redis.get(cacheKey);
-            if (cached) return cached;
 
             const tenant = await ctx.db.find({
                 collection: "tenants",
