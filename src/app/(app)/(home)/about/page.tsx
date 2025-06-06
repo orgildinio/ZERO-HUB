@@ -2,17 +2,15 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Github, Linkedin, Mail, Twitter } from 'lucide-react'
 
 import { stats, team } from '@/constants'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 const AboutPage = () => {
-
-    const router = useRouter();
 
     return (
         <div className='min-h-screen'>
@@ -212,9 +210,11 @@ const AboutPage = () => {
                                 <Button
                                     size="lg"
                                     className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
-                                    onClick={() => router.push('/career')}
+                                    asChild
                                 >
-                                    View Open Positions
+                                    <Link href={'/career'}>
+                                        View Open Positions
+                                    </Link>
                                 </Button>
                             </motion.div>
 
@@ -223,9 +223,11 @@ const AboutPage = () => {
                                     size="lg"
                                     variant="outline"
                                     className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                                    onClick={() => router.push('/contact')}
+                                    asChild
                                 >
-                                    Contact Us
+                                    <Link href={'/contact'}>
+                                        Contact Us
+                                    </Link>
                                 </Button>
                             </motion.div>
                         </div>

@@ -94,7 +94,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
   globalsSelect: {};
@@ -130,13 +130,13 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   username: string;
   phone: string;
   roles?: ('super-admin' | 'user')[] | null;
   tenants?:
     | {
-        tenant: number | Tenant;
+        tenant: string | Tenant;
         id?: string | null;
       }[]
     | null;
@@ -156,7 +156,7 @@ export interface User {
  * via the `definition` "tenants".
  */
 export interface Tenant {
-  id: number;
+  id: string;
   name: string;
   /**
    * This is the subdomain of the store (e.g. [slug].zerohub.site).
@@ -165,7 +165,7 @@ export interface Tenant {
   /**
    * Store logo (recommended: 200x200px PNG/JPG)
    */
-  image?: (number | null) | Media;
+  image?: (string | null) | Media;
   /**
    * Primary contact phone number
    */
@@ -222,8 +222,8 @@ export interface Tenant {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * Alternative text for accessibility and SEO. Describe what the image shows.
    */
@@ -251,8 +251,8 @@ export interface Media {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * The display name of your category
    */
@@ -280,12 +280,12 @@ export interface Category {
   /**
    * Select a parent category to create a subcategory
    */
-  parent?: (number | null) | Category;
+  parent?: (string | null) | Category;
   /**
    * Subcategories under this category
    */
   subcategories?: {
-    docs?: (number | Category)[];
+    docs?: (string | Category)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -296,11 +296,11 @@ export interface Category {
     /**
      * Small image for category cards (recommended: 300x300px)
      */
-    thumbnail?: (number | null) | Media;
+    thumbnail?: (string | null) | Media;
     /**
      * Banner image for category pages (recommended: 1200x400px)
      */
-    banner?: (number | null) | Media;
+    banner?: (string | null) | Media;
   };
   /**
    * Search engine optimization settings
@@ -321,7 +321,7 @@ export interface Category {
     /**
      * Image for social media sharing (recommended: 1200x630px)
      */
-    ogImage?: (number | null) | Media;
+    ogImage?: (string | null) | Media;
   };
   /**
    * Category statistics and analytics
@@ -350,8 +350,8 @@ export interface Category {
  * via the `definition` "products".
  */
 export interface Product {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * Product name (max 100 characters)
    */
@@ -424,16 +424,16 @@ export interface Product {
   /**
    * Primary product category
    */
-  categories: number | Category;
+  categories: string | Category;
   /**
    * Tags for filtering and search
    */
-  tags?: (number | Tag)[] | null;
+  tags?: (string | Tag)[] | null;
   /**
    * Product images (1-10 images required)
    */
   images: {
-    image: number | Media;
+    image: string | Media;
     /**
      * Alt text for accessibility
      */
@@ -575,8 +575,8 @@ export interface Product {
  * via the `definition` "tags".
  */
 export interface Tag {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * Display name for the tag
    */
@@ -633,36 +633,36 @@ export interface Tag {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'tenants';
-        value: number | Tenant;
+        value: string | Tenant;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'products';
-        value: number | Product;
+        value: string | Product;
       } | null)
     | ({
         relationTo: 'tags';
-        value: number | Tag;
+        value: string | Tag;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -672,10 +672,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -695,7 +695,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

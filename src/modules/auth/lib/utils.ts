@@ -1,4 +1,5 @@
-import { cookies as getCookies } from 'next/headers'
+"use server"
+
 import crypto from 'crypto';
 import path from 'path';
 import nodemailer from 'nodemailer';
@@ -6,27 +7,6 @@ import ejs from 'ejs';
 
 import redis from "@/lib/redis"
 
-interface OtpEmailData {
-    name: string;
-    otp: string;
-}
-
-type EmailTemplateData = OtpEmailData;
-
-export const generateAuthCookie = async ({ value, prefix }: { value: string, prefix: string }) => {
-    const cookies = await getCookies();
-    cookies.set({
-        name: `${prefix}-token`,
-        value: value,
-        httpOnly: true,
-        path: "/",
-        ...(process.env.NODE_ENV !== "development" && {
-            sameSite: "none",
-            domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
-            secure: true,
-        })
-    });
-};
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -37,8 +17,8 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS,
     },
 });
-
-const renderEmailTemplate = async (templateName: string, data: EmailTemplateData): Promise<string> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const renderEmailTemplate = async (templateName: string, data: any): Promise<string> => {
     const templatePath = path.join(
         process.cwd(),
         "src",
@@ -50,8 +30,8 @@ const renderEmailTemplate = async (templateName: string, data: EmailTemplateData
     )
     return ejs.renderFile(templatePath, data);
 };
-
-export const sendEmail = async (to: string, subject: string, templateName: string, data: EmailTemplateData) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sendEmail = async (to: string, subject: string, templateName: string, data: any) => {
     try {
         const html = await renderEmailTemplate(templateName, data);
         await transporter.sendMail({

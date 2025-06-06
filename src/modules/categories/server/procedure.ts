@@ -1,7 +1,7 @@
 import type { Where } from "payload";
 import { z } from "zod";
 
-import { Category } from "@/payload-types";
+import { Category, Media } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 
 export const categoriesRouter = createTRPCRouter({
@@ -39,6 +39,8 @@ export const categoriesRouter = createTRPCRouter({
                 subcategories: (doc.subcategories?.docs ?? []).map((subdoc) => ({
                     ...(subdoc as Category),
                 })),
+                banner: doc.images?.banner as Media,
+                thumbnail: doc.images?.thumbnail as Media
             }));
             return data;
         })

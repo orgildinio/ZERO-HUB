@@ -1,8 +1,10 @@
 import React, { Suspense } from 'react'
+import "./style.css";
 
 import { getQueryClient, trpc } from '@/trpc/server';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { Header, HeaderSkeleton } from '@/modules/tenants/ui/components/header';
+import { ThemeProvider } from '@/providers/theme-provider';
 
 interface Props {
     children: React.ReactNode;
@@ -17,7 +19,7 @@ const TenantLayout = async ({ children, params }: Props) => {
         slug: slug
     }));
     return (
-        <div>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             <HydrationBoundary state={dehydrate(queryClient)}>
                 <Suspense fallback={<HeaderSkeleton />}>
                     <Header slug={slug} />
@@ -26,7 +28,7 @@ const TenantLayout = async ({ children, params }: Props) => {
             <main className='min-h-screen'>
                 {children}
             </main>
-        </div>
+        </ThemeProvider >
     )
 }
 

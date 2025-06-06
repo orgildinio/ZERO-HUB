@@ -20,56 +20,6 @@ const HERO_STATS = [
     { value: "50+", label: "Countries Served" }
 ] as const
 
-interface Testimonial {
-    image: string
-    quote: string
-    author: string
-    role: string
-}
-
-const TESTIMONIALS: Testimonial[] = [
-    {
-        image: "/placeholder.png",
-        quote: "These pieces completely transformed my living space. The quality is exceptional!",
-        author: "Sarah Chen",
-        role: "Interior Designer",
-    },
-    {
-        image: "/placeholder.png",
-        quote: "Finally found furniture that matches my minimalist aesthetic perfectly.",
-        author: "Marcus Rodriguez",
-        role: "Architect",
-    },
-    {
-        image: "/placeholder.png",
-        quote: "Sustainable, beautiful, and built to last. Everything I was looking for.",
-        author: "Emma Thompson",
-        role: "Homeowner",
-    },
-]
-
-const TestimonialCard = memo(({ testimonial, index }: { testimonial: Testimonial, index: number }) => (
-    <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-        <div className="aspect-square rounded-xl overflow-hidden mb-6 bg-gradient-to-br from-stone-100 to-stone-200">
-            <Image
-                src={testimonial.image}
-                alt={`${testimonial.author}'s space`}
-                width={400}
-                height={400}
-                className="w-full h-full object-cover"
-                loading={index < 2 ? "eager" : "lazy"}
-            />
-        </div>
-        <blockquote className="text-lg text-stone-700 mb-4 italic">&qout;{testimonial.quote}&qout;</blockquote>
-        <div>
-            <div className="font-semibold text-stone-900">{testimonial.author}</div>
-            <div className="text-stone-600">{testimonial.role}</div>
-        </div>
-    </div>
-))
-
-TestimonialCard.displayName = 'TestimonialCard'
-
 export const HomeView = memo(({ slug }: { slug: string }) => {
     const trpc = useTRPC()
 
@@ -154,7 +104,7 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                             <Suspense fallback={<CategoryCardSkeleton />} key={category.id}>
                                 <CategoryCard
                                     name={category.name}
-                                    image="/placeholder.png"
+                                    image={category.thumbnail.thumbnailURL!}
                                     itemCount={category.stats?.productCount}
                                     href={`${tenantUrl}/${category.slug}`}
                                     description={category.description}
@@ -239,7 +189,7 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                                 </div>
                             </div>
 
-                            <Button variant="outline" size="lg" className="border-2 border-white/30 hover:border-white text-white hover:bg-white hover:text-stone-900 px-8 py-4 text-lg rounded-full transition-all duration-300" asChild>
+                            <Button variant="outline" size="lg" className="border-2 border-white/30 hover:border-white text-white hover:bg-white hover:text-stone-900 px-8 py-4 text-lg rounded-full transition-all duration-300 bg-transparent" asChild>
                                 <Link href="/about">Learn Our Story</Link>
                             </Button>
                         </div>
@@ -263,22 +213,6 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                     </div>
                 </div>
             </section>
-
-            <section className="py-20 bg-amber-50">
-                <div className="container px-2 md:px-6 mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl font-bold tracking-tight text-stone-900 mb-4">Loved by Design Enthusiasts</h2>
-                        <p className="text-xl text-stone-600">See how our pieces transform real homes</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {TESTIMONIALS.map((testimonial, index) => (
-                            <TestimonialCard key={testimonial.author} testimonial={testimonial} index={index} />
-                        ))}
-                    </div>
-                </div>
-            </section>
-
             <Newsletter />
         </div>
     )

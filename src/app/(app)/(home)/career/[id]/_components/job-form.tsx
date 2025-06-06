@@ -3,18 +3,20 @@
 import { useForm } from "react-hook-form"
 import { z } from 'zod';
 import { jobApplicationSchema } from "./schema";
-import { FileText, Upload, X } from "lucide-react";
+import toast from "react-hot-toast";
+import { FileText, Loader, Upload, X } from "lucide-react";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
 export const JobForm = () => {
 
+    const [isLoading, setIsLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const form = useForm<z.infer<typeof jobApplicationSchema>>({
@@ -29,8 +31,19 @@ export const JobForm = () => {
         }
     });
 
-    const onSubmit = (data: z.infer<typeof jobApplicationSchema>) => {
-        // TODO: Add submit functionality
+    const onSubmit = async (data: z.infer<typeof jobApplicationSchema>) => {
+        try {
+            setIsLoading(true)
+            // await sendEmail('zero.business.hub@gmail.com', 'Job Application', 'job-application', data)
+            // await sendEmail('zero.business.hub@gmail.com', 'Application Received', 'job-application-confirmation', data)
+            toast.success('Application submitted successfully')
+            setIsLoading(false)
+        } catch {
+            toast.error('Error sending resposne! Please try again.')
+            setIsLoading(false)
+        } finally {
+            setIsLoading(false)
+        }
         console.log(data)
     };
 
@@ -166,8 +179,15 @@ export const JobForm = () => {
                     )}
                 />
                 <div>
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700" type="submit">
-                        Submit Application
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white" type="submit" disabled={isLoading}>
+                        {isLoading ? (
+                            <div className='flex items-center'>
+                                Submitting...
+                                <Loader className="ml-2 w-4 h-4 animate-spin" />
+                            </div>
+                        ) : (
+                            <p>Submit Application</p>
+                        )}
                     </Button>
                 </div>
             </form>

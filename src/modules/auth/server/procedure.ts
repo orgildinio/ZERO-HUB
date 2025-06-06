@@ -1,6 +1,7 @@
 import { headers as getHeaders } from 'next/headers';
 import { loginSchema, registerSchema, verifySchema } from '../schema';
-import { checkOtpRestrictions, generateAuthCookie, sendOtp, trackOtpRequests, verifyOtp } from '../lib/utils';
+import { checkOtpRestrictions, sendOtp, trackOtpRequests, verifyOtp } from '../lib/utils';
+import { generateAuthCookie } from '../lib/cookie';
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from '@trpc/server';
@@ -99,7 +100,7 @@ export const authRouter = createTRPCRouter({
                     name: input.username,
                     slug: input.username,
                     phone: input.phone,
-                    store:input.store
+                    store: input.store
                 }
             })
             await ctx.db.create({
