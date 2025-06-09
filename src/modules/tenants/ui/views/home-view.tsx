@@ -97,7 +97,7 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
 
     return (
         <div className="flex flex-col">
-            
+
             <HeroSection slug={slug} />
 
             <section className="py-20 bg-white">
@@ -113,7 +113,7 @@ export const HomeView = memo(({ slug }: { slug: string }) => {
                             <CategoryCard
                                 key={category.id}
                                 name={category.name}
-                                image={category.thumbnail.url!}
+                                image={category.images.thumbnail.url!}
                                 itemCount={category.stats?.productCount}
                                 href={`${tenantUrl}/categories/${category.slug}`}
                                 description={category.description}

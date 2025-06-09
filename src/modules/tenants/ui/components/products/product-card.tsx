@@ -10,9 +10,9 @@ import { memo, useMemo } from "react"
 interface ProductCardProps {
     name: string
     slug: string
-    price: number
+    price?: number | null
     originalPrice?: number | null
-    image: string
+    image?: string | null
     category?: string | null
     badge?: string | null
     rating?: number

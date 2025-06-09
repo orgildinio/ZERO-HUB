@@ -34,10 +34,10 @@ export const Products: CollectionConfig = {
             unique: true,
             index: true,
             admin: {
-                description: "URL-friendly version of the product name",
-                readOnly: true
+                description: "URL-friendly version of the product name. e.g. [your_site]/zerohub.site/products/[slug]",
             },
             access: {
+                create: () => true,
                 update: ({ req }) => isSuperAdmin(req.user)
             },
             hooks: {

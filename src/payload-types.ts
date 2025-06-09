@@ -357,7 +357,7 @@ export interface Product {
    */
   name: string;
   /**
-   * URL-friendly version of the product name
+   * URL-friendly version of the product name. e.g. [your_site]/zerohub.site/products/[slug]
    */
   slug: string;
   /**
