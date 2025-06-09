@@ -5,6 +5,7 @@ import { Grid3X3, List, SlidersHorizontal } from "lucide-react";
 import { CategoryHero } from "../components/products/categoro-hero";
 import { ProductListView } from "./products-list-view";
 import { ProductCard } from "../components/products/product-card";
+import Image from "next/image";
 
 import { useTRPC } from "@/trpc/client"
 import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
@@ -23,7 +24,6 @@ import {
     TabsList,
     TabsTrigger
 } from "@/components/ui/tabs"
-import Image from "next/image";
 
 export const CategoryView = ({ category, slug }: { category: string; slug: string }) => {
 

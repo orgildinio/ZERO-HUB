@@ -31,7 +31,7 @@ export const CategoriesView = ({ slug }: { slug: string }) => {
                         >
                             <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
                                 <Image
-                                    src={category.thumbnail.url || "/placeholder.png"}
+                                    src={category.images.thumbnail.url || "/placeholder.png"}
                                     alt={category.name}
                                     fill
                                     className="object-cover transition-transform duration-300 group-hover:scale-105"

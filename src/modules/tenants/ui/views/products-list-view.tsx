@@ -1,9 +1,10 @@
+import { memo, useMemo } from "react"
+import Image from "next/image"
+import { Heart, ShoppingBag, Star } from "lucide-react"
+import Link from "next/link"
+
 import { Button } from "@/components/ui/button"
 import { generateTenantUrl } from "@/lib/utils"
-import { Heart, ShoppingBag, Star } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { memo, useMemo } from "react"
 
 interface Props {
     name: string
@@ -110,3 +111,5 @@ export const ProductListView = memo(({ name, slug, price, tenantSlug, originalPr
         </div>
     )
 })
+
+ProductListView.displayName = 'ProductListView'
