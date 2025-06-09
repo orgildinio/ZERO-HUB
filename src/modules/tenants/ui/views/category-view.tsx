@@ -138,6 +138,7 @@ export const CategoryView = ({ category, slug }: { category: string; slug: strin
                                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                                         {productsData?.pages.flatMap((page) => page.docs).map((product) => (
                                             <ProductCard
+                                                key={product.slug}
                                                 name={product.name}
                                                 price={product.pricing.compareAtPrice!}
                                                 originalPrice={product.pricing.price}
