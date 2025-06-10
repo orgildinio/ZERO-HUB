@@ -1,4 +1,4 @@
-import { Category } from "@/payload-types";
+import { Category, Media } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import type { Where } from "payload";
 import { z } from "zod";
@@ -96,6 +96,17 @@ export const productsRouter = createTRPCRouter({
                 }
             });
 
-            return data
+            const transformedDocs = data.docs.map(doc => ({
+                ...doc,
+                images: doc.images?.map(imageItem => ({
+                    ...imageItem,
+                    image: imageItem.image as Media,
+                })) || []
+            }));
+            
+            return {
+                ...data,
+                docs: transformedDocs
+            }
         })
 })
