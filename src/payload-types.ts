@@ -424,7 +424,7 @@ export interface Product {
   /**
    * Primary product category
    */
-  categories: string | Category;
+  category: string | Category;
   /**
    * Tags for filtering and search
    */
@@ -533,10 +533,6 @@ export interface Product {
    */
   status: 'active' | 'draft' | 'archived';
   /**
-   * Product visibility setting
-   */
-  visibility: 'public' | 'private';
-  /**
    * Product analytics (read-only)
    */
   analytics?: {
@@ -553,14 +549,6 @@ export interface Product {
      */
     revenue?: number | null;
   };
-  /**
-   * If checked this product will not be shown on public storefront.
-   */
-  isPrivate?: boolean | null;
-  /**
-   * If checked this product will be archived.
-   */
-  isArchived?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -833,7 +821,7 @@ export interface ProductsSelect<T extends boolean = true> {
         lowStockThreshold?: T;
         allowBackorders?: T;
       };
-  categories?: T;
+  category?: T;
   tags?: T;
   images?:
     | T
@@ -889,7 +877,6 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   refundPolicy?: T;
   status?: T;
-  visibility?: T;
   analytics?:
     | T
     | {
@@ -897,8 +884,6 @@ export interface ProductsSelect<T extends boolean = true> {
         sales?: T;
         revenue?: T;
       };
-  isPrivate?: T;
-  isArchived?: T;
   updatedAt?: T;
   createdAt?: T;
 }

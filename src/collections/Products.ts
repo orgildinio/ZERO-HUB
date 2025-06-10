@@ -158,10 +158,12 @@ export const Products: CollectionConfig = {
             ]
         },
         {
-            name: "categories",
+            name: "category",
+            index: true,
             type: "relationship",
             relationTo: "categories",
             hasMany: false,
+            maxDepth: 1,
             required: true,
             admin: {
                 description: "Primary product category"
@@ -172,6 +174,7 @@ export const Products: CollectionConfig = {
             type: "relationship",
             relationTo: "tags",
             hasMany: true,
+            index: true,
             admin: {
                 description: "Tags for filtering and search"
             }
@@ -405,19 +408,6 @@ export const Products: CollectionConfig = {
             }
         },
         {
-            name: "visibility",
-            type: "select",
-            options: [
-                { label: "Public", value: "public" },
-                { label: "Private", value: "private" },
-            ],
-            defaultValue: "public",
-            required: true,
-            admin: {
-                description: "Product visibility setting"
-            }
-        },
-        {
             name: "analytics",
             type: "group",
             admin: {
@@ -457,25 +447,6 @@ export const Products: CollectionConfig = {
                     }
                 }
             ]
-        },
-        {
-            name: "isPrivate",
-            label: "Private",
-            defaultValue: false,
-            type: "checkbox",
-            admin: {
-                description: "If checked this product will not be shown on public storefront."
-            }
-        },
-        {
-            name: "isArchived",
-            label: "Archive",
-            defaultValue: false,
-            index: true,
-            type: "checkbox",
-            admin: {
-                description: "If checked this product will be archived."
-            }
         },
     ]
 }

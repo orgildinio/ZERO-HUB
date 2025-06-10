@@ -18,11 +18,7 @@ export const productsRouter = createTRPCRouter({
             })
         )
         .query(async ({ ctx, input }) => {
-            const where: Where = {
-                isArchived: {
-                    not_equals: true,
-                }
-            };
+            const where: Where = {};
 
             if (input.tenantSlug) {
                 where["tenant.slug"] = {
@@ -82,7 +78,7 @@ export const productsRouter = createTRPCRouter({
 
             const data = await ctx.db.find({
                 collection: "products",
-                depth: 2,
+                depth: 1,
                 where,
                 page: input.cursor,
                 limit: input.limit,
@@ -93,17 +89,20 @@ export const productsRouter = createTRPCRouter({
                     pricing: true,
                     badge: true,
                     slug: true,
+                    featured: true,
+                    category: true
                 }
             });
-
+            console.log(data)
             const transformedDocs = data.docs.map(doc => ({
                 ...doc,
                 images: doc.images?.map(imageItem => ({
                     ...imageItem,
                     image: imageItem.image as Media,
-                })) || []
+                })) || [],
+                category: doc.category as Category
             }));
-            
+
             return {
                 ...data,
                 docs: transformedDocs
