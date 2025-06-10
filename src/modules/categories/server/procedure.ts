@@ -1,4 +1,3 @@
-import type { Where } from "payload";
 import { z } from "zod";
 
 import { Category, Media } from "@/payload-types";

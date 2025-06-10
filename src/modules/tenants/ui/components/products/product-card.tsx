@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { generateTenantUrl } from "@/lib/utils"
 import { Heart, ShoppingBag, Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -55,8 +56,7 @@ export const ProductCard = memo(({
         ))
     }, [rating])
 
-    // const productUrl = useMemo(() => `${generateTenantUrl(tenantSlug)}/products/${slug}`, [tenantSlug, slug])
-    // FIXME: Later add generateTenantUrl function to generate tenant url for now i am harcoding it
+    const productUrl = useMemo(() => `${generateTenantUrl(tenantSlug)}/products/${slug}`, [tenantSlug, slug])
 
     return (
         <div className="group relative">
@@ -69,7 +69,7 @@ export const ProductCard = memo(({
                     </div>
                 )}
 
-                <Link href={`cactus/products/${slug}`} className="block">
+                <Link href={productUrl} className="block">
                     <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100">
                         <Image
                             src={image || "/placeholder.png"}
@@ -98,7 +98,7 @@ export const ProductCard = memo(({
                         <p className="text-xs uppercase tracking-wider text-stone-500 font-medium mb-2">{category}</p>
                     )}
 
-                    <Link href={`cactus/products/${slug}`}>
+                    <Link href={productUrl}>
                         <h3 className="text-lg font-bold text-stone-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 leading-tight">
                             {name}
                         </h3>
