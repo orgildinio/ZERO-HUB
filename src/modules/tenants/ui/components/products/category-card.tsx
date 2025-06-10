@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 interface Props {
     name: string
     image: string
-    itemCount: number
+    itemCount?: number | null
     href: string
     description?: string
 }

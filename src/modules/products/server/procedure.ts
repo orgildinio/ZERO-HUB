@@ -93,7 +93,6 @@ export const productsRouter = createTRPCRouter({
                     category: true
                 }
             });
-            console.log(data)
             const transformedDocs = data.docs.map(doc => ({
                 ...doc,
                 images: doc.images?.map(imageItem => ({

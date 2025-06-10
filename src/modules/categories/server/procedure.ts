@@ -9,7 +9,6 @@ export const categoriesRouter = createTRPCRouter({
         .input(
             z.object({
                 tenantSlug: z.string().nullable().optional(),
-                limit: z.number().default(8),
             })
         )
         .query(async ({ ctx, input }) => {
@@ -17,7 +16,6 @@ export const categoriesRouter = createTRPCRouter({
             const categories = await ctx.db.find({
                 collection: "categories",
                 depth: 1,
-                limit: input.limit,
                 pagination: false,
                 where: {
                     "tenant.slug": {
@@ -29,6 +27,7 @@ export const categoriesRouter = createTRPCRouter({
                     slug: true,
                     subcategories: true,
                     images: true,
+                    "stats.productCount": true
                 },
                 sort: 'name'
             });

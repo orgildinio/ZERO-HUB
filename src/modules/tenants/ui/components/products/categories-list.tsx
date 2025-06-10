@@ -13,7 +13,6 @@ export const CategoriesList = ({ slug }: { slug: string }) => {
     const queryOptions = useMemo(() => {
         return trpc.categories.getMany.queryOptions({
             tenantSlug: slug,
-            limit: 4
         })
     }, [trpc.categories.getMany, slug])
 
@@ -23,12 +22,12 @@ export const CategoriesList = ({ slug }: { slug: string }) => {
 
     return (
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {data.map((category) => (
+            {data.slice(0, 4).map((category) => (
                 <CategoryCard
                     key={category.slug}
                     name={category.name}
                     image={category.images.thumbnail.url!}
-                    itemCount={42}
+                    itemCount={category.stats?.productCount}
                     href={`${generateTenantUrl(slug)}/categories/${category.slug}`}
                     description="Comfort meets elegance"
                 />
