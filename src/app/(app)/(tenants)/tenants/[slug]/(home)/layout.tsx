@@ -18,6 +18,7 @@ const TenantLayout = async ({ children, params }: Props) => {
     void queryClient.prefetchQuery(trpc.tenants.getOne.queryOptions({
         slug: slug
     }));
+    
     return (
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             <HydrationBoundary state={dehydrate(queryClient)}>

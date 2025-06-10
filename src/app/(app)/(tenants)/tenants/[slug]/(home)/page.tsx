@@ -14,12 +14,16 @@ const TenantsPage = async ({ params }: Props) => {
     const { slug } = await params;
 
     const queryClient = getQueryClient();
+
     await Promise.all([
-        queryClient.prefetchQuery(trpc.categories.getMany.queryOptions({ tenantSlug: slug })),
-        queryClient.prefetchInfiniteQuery(trpc.products.getMany.infiniteQueryOptions({
+        queryClient.prefetchQuery(trpc.categories.getMany.queryOptions({
             tenantSlug: slug,
             limit: 4
         })),
+        queryClient.prefetchInfiniteQuery(trpc.products.getMany.infiniteQueryOptions({
+            tenantSlug: slug,
+            limit: 4
+        }))
     ])
 
     return (

@@ -8,7 +8,7 @@ export const Products: CollectionConfig = {
     access: {
         create: ({ req }) => {
             if (isSuperAdmin(req.user)) return true
-            const tenant = req.user?.tenants?.[0].tenant as Tenant
+            const tenant = req.user?.tenants?.[0]?.tenant as Tenant
             return Boolean(tenant?.subscription?.subscriptionDetailsSubmitted)
         }
     },
@@ -191,14 +191,6 @@ export const Products: CollectionConfig = {
                     type: "upload",
                     relationTo: "media",
                     required: true
-                },
-                {
-                    name: "alt",
-                    type: "text",
-                    required: true,
-                    admin: {
-                        description: "Alt text for accessibility"
-                    }
                 },
                 {
                     name: "isPrimary",

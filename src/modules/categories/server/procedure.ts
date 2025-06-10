@@ -9,29 +9,28 @@ export const categoriesRouter = createTRPCRouter({
     getMany: baseProcedure
         .input(
             z.object({
-                tenantSlug: z.string().nullable().optional()
+                tenantSlug: z.string().nullable().optional(),
+                limit: z.number().default(8),
             })
         )
         .query(async ({ ctx, input }) => {
-            const where: Where = {
-                status: {
-                    not_equals: 'inactive',
-                }
-            };
-            if (input.tenantSlug) {
-                where["tenant.slug"] = {
-                    equals: input.tenantSlug,
-                }
-            } else {
-                where["status"] = {
-                    not_equals: 'inactive',
-                }
-            }
+
             const categories = await ctx.db.find({
                 collection: "categories",
                 depth: 1,
+                limit: input.limit,
                 pagination: false,
-                where: where,
+                where: {
+                    "tenant.slug": {
+                        equals: input.tenantSlug
+                    }
+                },
+                select: {
+                    name: true,
+                    slug: true,
+                    subcategories: true,
+                    images: true,
+                },
                 sort: 'name'
             });
 

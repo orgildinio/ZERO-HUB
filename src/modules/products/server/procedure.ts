@@ -1,6 +1,6 @@
 import { Category, Media, Tenant } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
-import type{ Where } from "payload";
+import type { Where } from "payload";
 import { z } from "zod";
 
 export const productsRouter = createTRPCRouter({
@@ -44,6 +44,10 @@ export const productsRouter = createTRPCRouter({
                         slug: {
                             equals: input.category
                         }
+                    },
+                    select: {
+                        subcategories: true,
+                        slug: true
                     }
                 });
 
@@ -83,29 +87,15 @@ export const productsRouter = createTRPCRouter({
                 page: input.cursor,
                 limit: input.limit,
                 select: {
-                    content: false,
+                    name: true,
+                    images: true,
+                    description: true,
+                    pricing: true,
+                    badge: true,
+                    slug: true,
                 }
             });
 
-            return {
-                ...data,
-                docs: data.docs.map((doc) => {
-                    const images = Array.isArray(doc.images)
-                        ? doc.images.map(imageItem => ({
-                            ...imageItem,
-                            image: imageItem.image as Media
-                        }))
-                        : [];
-                    const primaryImage = images.find(img => img.isPrimary)?.image || images[0]?.image || null;
-                    const category = (doc.categories as Category)?.name || null;
-                    return {
-                        ...doc,
-                        images,
-                        category,
-                        primaryImage,
-                        tenant: doc.tenant as Tenant & { image: Media | null }
-                    };
-                })
-            };
+            return data
         })
 })

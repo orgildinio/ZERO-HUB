@@ -1,25 +1,22 @@
+"use client"
+
 import Link from "next/link"
+import { useMemo } from "react"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
-import { memo, useMemo } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
 
-interface CategoryCardProps {
+interface Props {
     name: string
     image: string
-    itemCount?: number | null
+    itemCount: number
     href: string
-    description?: string | null
+    description?: string
 }
 
-export const CategoryCard = memo(({
-    name,
-    image,
-    itemCount,
-    href,
-    description
-}: CategoryCardProps) => {
+export const CategoryCard = ({ name, image, itemCount, href, description }: Props) => {
+
     const productCountText = useMemo(() =>
         itemCount ? `${itemCount} product${itemCount !== 1 ? 's' : ''}` : '0 products',
         [itemCount]
@@ -45,7 +42,6 @@ export const CategoryCard = memo(({
                         </div>
                     </div>
                 </div>
-
                 <div className="p-6">
                     <h3 className="text-xl font-bold text-stone-900 mb-2 group-hover:text-amber-600 transition-colors duration-300">
                         {name}
@@ -57,7 +53,7 @@ export const CategoryCard = memo(({
             </div>
         </Link>
     )
-})
+}
 
 CategoryCard.displayName = 'CategoryCard'
 

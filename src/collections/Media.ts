@@ -9,7 +9,7 @@ export const Media: CollectionConfig = {
       if (isSuperAdmin(req.user)) return true;
 
       if (req.user) {
-        const tenant = req.user?.tenants?.[0].tenant as Tenant;
+        const tenant = req.user?.tenants?.[0]?.tenant as Tenant;
         return Boolean(tenant?.subscription?.subscriptionDetailsSubmitted);
       }
 

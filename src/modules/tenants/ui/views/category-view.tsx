@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Grid3X3, List, SlidersHorizontal } from "lucide-react";
 import { CategoryHero } from "../components/products/categoro-hero";
 import { ProductListView } from "./products-list-view";
-import { ProductCard } from "../components/products/product-card";
+import { ProductCard, ProductCardSkeleton } from "../components/products/product-card";
 import Image from "next/image";
 
 import { useTRPC } from "@/trpc/client"
@@ -24,6 +24,8 @@ import {
     TabsList,
     TabsTrigger
 } from "@/components/ui/tabs"
+import { DEFAULT_LIMIT } from "@/constants";
+import { Suspense } from "react";
 
 export const CategoryView = ({ category, slug }: { category: string; slug: string }) => {
 
@@ -33,7 +35,8 @@ export const CategoryView = ({ category, slug }: { category: string; slug: strin
     const { data: productsData } = useSuspenseInfiniteQuery(trpc.products.getMany.infiniteQueryOptions(
         {
             category: categoryData.slug,
-            limit: 4
+            tenantSlug: slug,
+            limit: DEFAULT_LIMIT
         },
         {
             getNextPageParam: (lastpage) => {
@@ -137,18 +140,19 @@ export const CategoryView = ({ category, slug }: { category: string; slug: strin
                                 <TabsContent value="grid" className="mt-0">
                                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                                         {productsData?.pages.flatMap((page) => page.docs).map((product) => (
-                                            <ProductCard
-                                                key={product.slug}
-                                                name={product.name}
-                                                price={product.pricing.compareAtPrice!}
-                                                originalPrice={product.pricing.price}
-                                                image={product.primaryImage.url!}
-                                                category={product.category}
-                                                badge={product.badge}
-                                                featured={product.featured}
-                                                slug={product.slug}
-                                                tenantSlug={slug}
-                                            />
+                                            <Suspense fallback={<ProductCardSkeleton />} key={product.slug}>
+                                                <ProductCard
+                                                    name={product.name}
+                                                    price={product.pricing.compareAtPrice!}
+                                                    originalPrice={product.pricing.price}
+                                                    image={product.primaryImage.url!}
+                                                    category={product.category}
+                                                    badge={product.badge}
+                                                    featured={product.featured}
+                                                    slug={product.slug}
+                                                    tenantSlug={slug}
+                                                />
+                                            </Suspense>
                                         ))}
                                     </div>
                                 </TabsContent>
@@ -156,19 +160,20 @@ export const CategoryView = ({ category, slug }: { category: string; slug: strin
                                 <TabsContent value="list" className="mt-0">
                                     <div className="space-y-6">
                                         {productsData?.pages.flatMap((page) => page.docs).map((product) => (
-                                            <ProductListView
-                                                slug={product.slug}
-                                                tenantSlug={product.tenant.slug}
-                                                key={product.id}
-                                                name={product.name}
-                                                price={product.pricing.compareAtPrice}
-                                                originalPrice={product.pricing.price}
-                                                image={product.primaryImage.url}
-                                                category={product.category}
-                                                badge={product.badge}
-                                            // rating={product.rating}
-                                            // reviews={product.reviews}
-                                            />
+                                            <Suspense fallback={<ProductCardSkeleton />} key={product.slug}>
+                                                <ProductListView
+                                                    slug={product.slug}
+                                                    tenantSlug={product.tenant.slug}
+                                                    name={product.name}
+                                                    price={product.pricing.compareAtPrice}
+                                                    originalPrice={product.pricing.price}
+                                                    image={product.primaryImage.url}
+                                                    category={product.category}
+                                                    badge={product.badge}
+                                                // rating={product.rating}
+                                                // reviews={product.reviews}
+                                                />
+                                            </Suspense>
                                         ))}
                                     </div>
                                 </TabsContent>

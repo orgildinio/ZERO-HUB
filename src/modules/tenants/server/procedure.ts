@@ -27,6 +27,10 @@ export const tenantsRouter = createTRPCRouter({
                         slug: {
                             equals: input.slug
                         }
+                    },
+                    select: {
+                        store: true,
+                        slug: true,
                     }
                 });
                 const data = tenant.docs[0].store

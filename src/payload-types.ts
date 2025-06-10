@@ -435,10 +435,6 @@ export interface Product {
   images: {
     image: string | Media;
     /**
-     * Alt text for accessibility
-     */
-    alt: string;
-    /**
      * Use as main product image
      */
     isPrimary?: boolean | null;
@@ -843,7 +839,6 @@ export interface ProductsSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
-        alt?: T;
         isPrimary?: T;
         id?: T;
       };

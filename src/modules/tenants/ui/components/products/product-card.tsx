@@ -1,13 +1,11 @@
 import { Button } from "@/components/ui/button"
-import { generateTenantUrl } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
-
 import { Heart, ShoppingBag, Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo, useMemo } from "react"
 
-interface ProductCardProps {
+interface Props {
     name: string
     slug: string
     price?: number | null
@@ -42,10 +40,10 @@ export const ProductCard = memo(({
     reviews,
     featured,
     tenantSlug
-}: ProductCardProps) => {
-    const productUrl = useMemo(() => `${generateTenantUrl(tenantSlug)}/products/${slug}`, [tenantSlug, slug])
-    const badgeColor = useMemo(() => badge ? (BADGE_COLORS[badge as keyof typeof BADGE_COLORS] || BADGE_COLORS.default) : '', [badge])
-    const hasDiscount = useMemo(() => originalPrice && originalPrice !== price, [originalPrice, price])
+}: Props) => {
+
+    const badgeColor = useMemo(() => badge ? (BADGE_COLORS[badge as keyof typeof BADGE_COLORS] || BADGE_COLORS.default) : '', [badge]);
+    const hasDiscount = useMemo(() => originalPrice && originalPrice !== price, [originalPrice, price]);
 
     const starElements = useMemo(() => {
         if (!rating) return null
@@ -56,6 +54,9 @@ export const ProductCard = memo(({
             />
         ))
     }, [rating])
+
+    // const productUrl = useMemo(() => `${generateTenantUrl(tenantSlug)}/products/${slug}`, [tenantSlug, slug])
+    // FIXME: Later add generateTenantUrl function to generate tenant url for now i am harcoding it
 
     return (
         <div className="group relative">
@@ -68,7 +69,7 @@ export const ProductCard = memo(({
                     </div>
                 )}
 
-                <Link href={productUrl} className="block">
+                <Link href={`cactus/products/${slug}`} className="block">
                     <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100">
                         <Image
                             src={image || "/placeholder.png"}
@@ -97,7 +98,7 @@ export const ProductCard = memo(({
                         <p className="text-xs uppercase tracking-wider text-stone-500 font-medium mb-2">{category}</p>
                     )}
 
-                    <Link href={productUrl}>
+                    <Link href={`cactus/products/${slug}`}>
                         <h3 className="text-lg font-bold text-stone-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 leading-tight">
                             {name}
                         </h3>
