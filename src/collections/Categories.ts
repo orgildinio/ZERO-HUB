@@ -148,14 +148,6 @@ export const Categories: CollectionConfig = {
                         description: "Small image for category cards (recommended: 300x300px)"
                     }
                 },
-                {
-                    name: "banner",
-                    type: "upload",
-                    relationTo: "media",
-                    admin: {
-                        description: "Banner image for category pages (recommended: 1200x400px)"
-                    }
-                },
             ]
         },
         {

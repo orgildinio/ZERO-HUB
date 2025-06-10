@@ -38,7 +38,6 @@ export const categoriesRouter = createTRPCRouter({
                     ...(subdoc as Category),
                 })),
                 images: {
-                    banner: doc.images?.banner as Media,
                     thumbnail: doc.images?.thumbnail as Media
                 }
             }));
@@ -87,7 +86,6 @@ export const categoriesRouter = createTRPCRouter({
                     ...(subdoc as Category)
                 })),
                 images: {
-                    banner: data.images?.banner as Media,
                     thumbnail: data.images?.thumbnail as Media
                 }
             }

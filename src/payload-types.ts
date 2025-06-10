@@ -301,10 +301,6 @@ export interface Category {
      * Small image for category cards (recommended: 300x300px)
      */
     thumbnail?: (string | null) | Media;
-    /**
-     * Banner image for category pages (recommended: 1200x400px)
-     */
-    banner?: (string | null) | Media;
   };
   /**
    * Search engine optimization settings
@@ -844,7 +840,6 @@ export interface CategoriesSelect<T extends boolean = true> {
     | T
     | {
         thumbnail?: T;
-        banner?: T;
       };
   seo?:
     | T

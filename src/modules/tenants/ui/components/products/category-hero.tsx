@@ -69,7 +69,7 @@ export const CategoryHero = ({ category }: { category: string }) => {
                         <div className="relative">
                             <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200 shadow-2xl">
                                 <Image
-                                    src={data.images.banner.url!}
+                                    src={data.images.thumbnail.url!}
                                     alt={`collection`}
                                     fill
                                     priority
