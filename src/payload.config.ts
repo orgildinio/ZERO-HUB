@@ -16,6 +16,8 @@ import { isSuperAdmin } from './lib/access';
 import { Categories } from './collections/Categories';
 import { Products } from './collections/Products';
 import { Tags } from './collections/Tags';
+import { Subscriptions } from './collections/Subscriptions';
+import { SubscriptionPlans } from './collections/SubscriptionPlans';
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -36,7 +38,7 @@ export default buildConfig({
       beforeNavLinks: ['@/components/payload/razorpay-verify#SubscriptionVerifyButton']
     }
   },
-  collections: [Users, Media, Tenants, Categories, Products, Tags],
+  collections: [Users, Media, Tenants, Categories, Products, Tags, Subscriptions, SubscriptionPlans],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

@@ -2,7 +2,7 @@ import { Button, Link } from '@payloadcms/ui';
 
 export const SubscriptionVerifyButton = () => {
     return (
-        <Link href='/subscription-verify'>
+        <Link href='/verify'>
             <Button>
                 Verify Account
             </Button>

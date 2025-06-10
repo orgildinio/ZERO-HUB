@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-// import { handleSubscriptionActivated } from './_utils';
+import { handleSubscriptionActivated } from './_utils';
 
 const secret = process.env.RAZORPAY_WEBHOOK_SECRET as string;
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         }
         switch (payload.event) {
             case 'subscription.activated':
-                // await handleSubscriptionActivated(payload);
+                await handleSubscriptionActivated(payload);
                 break;
             default:
                 console.log('Unhandled webhook event:', payload.event);

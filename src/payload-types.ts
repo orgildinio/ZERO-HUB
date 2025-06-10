@@ -73,6 +73,8 @@ export interface Config {
     categories: Category;
     products: Product;
     tags: Tag;
+    subscriptions: Subscription;
+    'subscription-plans': SubscriptionPlan;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -89,6 +91,8 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    subscriptions: SubscriptionsSelect<false> | SubscriptionsSelect<true>;
+    'subscription-plans': SubscriptionPlansSelect<false> | SubscriptionPlansSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -614,6 +618,63 @@ export interface Tag {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscriptions".
+ */
+export interface Subscription {
+  id: string;
+  tenant: string | Tenant;
+  plan: string | SubscriptionPlan;
+  razorpaySubscriptionId: string;
+  status:
+    | 'created'
+    | 'pending'
+    | 'authenticated'
+    | 'active'
+    | 'paused'
+    | 'halted'
+    | 'cancelled'
+    | 'completed'
+    | 'expired';
+  startAt?: string | null;
+  endAt?: string | null;
+  currentStart?: string | null;
+  currentEnd?: string | null;
+  chargeAt?: string | null;
+  totalCount?: number | null;
+  paidCount?: number | null;
+  remainingCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscription-plans".
+ */
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description?: string | null;
+  /**
+   * Amount in paise (₹100 = 10000 paise)
+   */
+  amount: number;
+  currency?: string | null;
+  period: 'monthly' | 'yearly';
+  interval?: number | null;
+  razorpayPlanId?: string | null;
+  features?:
+    | {
+        feature: string;
+        id?: string | null;
+      }[]
+    | null;
+  isActive?: boolean | null;
+  popular?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -642,6 +703,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'subscriptions';
+        value: string | Subscription;
+      } | null)
+    | ({
+        relationTo: 'subscription-plans';
+        value: string | SubscriptionPlan;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -906,6 +975,49 @@ export interface TagsSelect<T extends boolean = true> {
         title?: T;
         description?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscriptions_select".
+ */
+export interface SubscriptionsSelect<T extends boolean = true> {
+  tenant?: T;
+  plan?: T;
+  razorpaySubscriptionId?: T;
+  status?: T;
+  startAt?: T;
+  endAt?: T;
+  currentStart?: T;
+  currentEnd?: T;
+  chargeAt?: T;
+  totalCount?: T;
+  paidCount?: T;
+  remainingCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscription-plans_select".
+ */
+export interface SubscriptionPlansSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  amount?: T;
+  currency?: T;
+  period?: T;
+  interval?: T;
+  razorpayPlanId?: T;
+  features?:
+    | T
+    | {
+        feature?: T;
+        id?: T;
+      };
+  isActive?: T;
+  popular?: T;
   updatedAt?: T;
   createdAt?: T;
 }
