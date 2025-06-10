@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Analytics } from "@vercel/analytics/next"
 
 import { Toaster } from 'react-hot-toast'
@@ -23,11 +24,13 @@ export default function RootLayout({
       <body
         className={`${inter.className} antialiased`}
       >
-        <TRPCReactProvider>
-          <Toaster />
-          {children}
-          <Analytics />
-        </TRPCReactProvider>
+        <NuqsAdapter>
+          <TRPCReactProvider>
+            <Toaster />
+            {children}
+            <Analytics />
+          </TRPCReactProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );
