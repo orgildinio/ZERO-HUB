@@ -5,6 +5,7 @@ import { getQueryClient, trpc } from '@/trpc/server';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import { Header, HeaderSkeleton } from '@/modules/tenants/ui/components/header';
 import { ThemeProvider } from '@/providers/theme-provider';
+import { Footer, FooterSkeleton } from "@/modules/tenants/ui/components/footer";
 
 interface Props {
     children: React.ReactNode;
@@ -18,7 +19,7 @@ const TenantLayout = async ({ children, params }: Props) => {
     void queryClient.prefetchQuery(trpc.tenants.getOne.queryOptions({
         slug: slug
     }));
-    
+
     return (
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             <HydrationBoundary state={dehydrate(queryClient)}>
@@ -29,6 +30,11 @@ const TenantLayout = async ({ children, params }: Props) => {
             <main className='min-h-screen'>
                 {children}
             </main>
+            <HydrationBoundary state={dehydrate(queryClient)}>
+                <Suspense fallback={<FooterSkeleton />}>
+                    <Footer slug={slug} />
+                </Suspense>
+            </HydrationBoundary>
         </ThemeProvider >
     )
 }
