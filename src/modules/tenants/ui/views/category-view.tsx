@@ -22,7 +22,7 @@ export const CategoryView = ({ slug, category }: { slug: string; category: strin
                     </nav>
                 </div>
             </div>
-            <CategoryHero slug={slug} category={category} />
+            <CategoryHero category={category} />
             <section className="py-16 bg-stone-50">
                 <div className="container px-4 md:px-6 mx-auto">
                     <div className="text-center mb-12">
