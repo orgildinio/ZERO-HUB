@@ -18,7 +18,7 @@ const plans = [
   {
     id: "starter",
     name: "Starter",
-    description: "Perfect for developers getting started",
+    description: "Launch your first storefront with essential tools.",
     monthlyPrice: 5,
     yearlyPrice: 50,
     popular: false,
@@ -30,36 +30,37 @@ const plans = [
     selectedBg: "bg-emerald-950/20",
     iconBg: "bg-emerald-900/50",
     features: [
-      "5 active projects",
-      "50GB storage & bandwidth",
-      "Basic deployment automation",
-      "Community support",
-      "Standard templates",
-      "Basic monitoring dashboard",
-      "Git integration",
-      "SSL certificates included"
+      "1 storefront",
+      "Up to 100 products",
+      "500MB media storage",
+      "2 basic templates",
+      "Standard payment integration (Stripe, Razorpay)",
+      "Basic content editor",
+      "SEO meta & sitemap support",
+      "Basic analytics (views, clicks)",
+      "1 admin user",
+      "Free SSL certificate",
+      "Email support"
     ],
     limits: {
-      projects: 5,
-      storage: "50GB",
-      users: 1,
-      deployments: "10/month",
-      bandwidth: "100GB/month",
-      customDomains: 2,
+      storage: "200MB",
+      products: 100,
+      bandwidth: "300MB/month",
+      customDomains: 1
     },
     features_detailed: {
-      analytics: "Basic project metrics and deployment logs",
-      support: "Community forum support and documentation",
-      integrations: "GitHub, GitLab, and 5 third-party services",
-      backups: "Weekly automated backups with 30-day retention",
-    },
+      analytics: "Product views, traffic overview, top categories",
+      support: "Email support (48-hour response time)",
+      integrations: "Razorpay, Stripe, WhatsApp Business",
+      backups: "Weekly automated backups (15-day retention)"
+    }
   },
   {
     id: "pro",
     name: "Professional",
-    description: "For growing teams and serious projects",
-    monthlyPrice: 10,
-    yearlyPrice: 100,
+    description: "Scale your store with powerful tools and more flexibility.",
+    monthlyPrice: 15,
+    yearlyPrice: 150,
     popular: true,
     icon: Crown,
     accentColor: "text-purple-400",
@@ -69,38 +70,37 @@ const plans = [
     selectedBg: "bg-purple-950/20",
     iconBg: "bg-purple-900/50",
     features: [
-      "25 active projects",
-      "200GB storage & bandwidth",
-      "Advanced CI/CD pipelines",
-      "Priority email support",
-      "Team collaboration tools",
-      "Advanced monitoring & alerts",
-      "Custom environments",
-      "API access & webhooks",
-      "Advanced security features",
-      "Performance optimization"
+      "1 storefront",
+      "Up to 500 products",
+      "10GB media storage",
+      "10 modern templates",
+      "Advanced CMS with reusable blocks",
+      "Custom domain & branding",
+      "SEO tools & social meta previews",
+      "Advanced analytics (sales, devices, referrers)",
+      "Up to 5 team members",
+      "Marketing tools (banners, discounts)",
+      "Priority email + chat support"
     ],
     limits: {
-      projects: 25,
-      storage: "200GB",
-      users: 5,
-      deployments: "100/month",
-      bandwidth: "500GB/month",
-      customDomains: 10,
+      storage: "600MB",
+      products: 500,
+      bandwidth: "1GB/month",
+      customDomains: 3
     },
     features_detailed: {
-      analytics: "Advanced analytics with performance insights and real-time monitoring",
-      support: "Priority email support with 24-hour response time",
-      integrations: "20+ integrations including Docker, AWS, and custom APIs",
-      backups: "Daily automated backups with 90-day retention and instant recovery",
-    },
+      analytics: "Real-time dashboard with conversions, traffic sources, device breakdown",
+      support: "Priority email + live chat (12-hour SLA)",
+      integrations: "20+ tools including Mailchimp, Shiprocket, GA4",
+      backups: "Daily backups with 30-day retention and 1-click restore"
+    }
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    description: "For large teams with enterprise needs",
-    monthlyPrice: 20,
-    yearlyPrice: 200,
+    description: "Premium features, scalability, and dedicated support.",
+    monthlyPrice: 40,
+    yearlyPrice: 400,
     popular: false,
     icon: Sparkles,
     accentColor: "text-blue-400",
@@ -110,33 +110,32 @@ const plans = [
     selectedBg: "bg-blue-950/20",
     iconBg: "bg-blue-900/50",
     features: [
-      "Unlimited projects",
-      "1TB storage & bandwidth",
-      "Enterprise CI/CD with advanced workflows",
-      "24/7 priority support",
-      "Advanced team management",
-      "Custom branding & white-label",
-      "Advanced security & compliance",
-      "Dedicated infrastructure",
-      "Custom integrations",
-      "SLA guarantees",
-      "Audit logs & reporting"
+      "1 storefront",
+      "Unlimited products",
+      "1TB media storage",
+      "All templates + custom design options",
+      "White-label branding & theme override",
+      "Enterprise CMS (custom layouts, dynamic sections)",
+      "Full SEO suite (schema, JSON-LD, structured data)",
+      "Enterprise analytics dashboard",
+      "Unlimited team members",
+      "Custom domain support with CDN",
+      "24/7 premium support",
+      "Dedicated account manager"
     ],
     limits: {
-      projects: "Unlimited",
-      storage: "1TB",
-      users: "Unlimited",
-      deployments: "Unlimited",
-      bandwidth: "2TB/month",
-      customDomains: "Unlimited",
+      storage: "10GB",
+      products: "Unlimited",
+      bandwidth: "10GB/month",
+      customDomains: 10
     },
     features_detailed: {
-      analytics: "Enterprise analytics dashboard with custom reports and data export",
-      support: "24/7 dedicated support with phone, chat, and dedicated success manager",
-      integrations: "Unlimited integrations with custom API development and enterprise connectors",
-      backups: "Real-time backups with instant recovery, geo-redundancy, and compliance features",
-    },
-  },
+      analytics: "Custom reporting, exportable insights, KPI builder",
+      support: "24/7 priority support via phone, email & chat",
+      integrations: "Unlimited integrations, API access, custom middleware",
+      backups: "Real-time backups, geo-redundant, 90-day retention, compliance-ready"
+    }
+  }
 ]
 
 const faqs = [
@@ -383,20 +382,20 @@ const VerifyPage = () => {
                             </h4>
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div className="flex justify-between items-center p-2 bg-zinc-800/30 rounded text-xs">
-                                <span className="text-zinc-500">Projects</span>
-                                <span className={`font-semibold ${plan.accentColor}`}>{plan.limits.projects}</span>
+                                <span className="text-zinc-500">Products</span>
+                                <span className={`font-semibold ${plan.accentColor}`}>{plan.limits.products}</span>
                               </div>
                               <div className="flex justify-between items-center p-2 bg-zinc-800/30 rounded text-xs">
                                 <span className="text-zinc-500">Storage</span>
                                 <span className={`font-semibold ${plan.accentColor}`}>{plan.limits.storage}</span>
                               </div>
                               <div className="flex justify-between items-center p-2 bg-zinc-800/30 rounded text-xs">
-                                <span className="text-zinc-500">Team</span>
-                                <span className={`font-semibold ${plan.accentColor}`}>{plan.limits.users}</span>
+                                <span className="text-zinc-500">Bandwidth</span>
+                                <span className={`font-semibold ${plan.accentColor}`}>{plan.limits.bandwidth}</span>
                               </div>
                               <div className="flex justify-between items-center p-2 bg-zinc-800/30 rounded text-xs">
-                                <span className="text-zinc-500">Deploys</span>
-                                <span className={`font-semibold ${plan.accentColor}`}>{plan.limits.deployments}</span>
+                                <span className="text-zinc-500">Domains</span>
+                                <span className={`font-semibold ${plan.accentColor}`}>{plan.limits.customDomains}</span>
                               </div>
                             </div>
                           </div>
@@ -471,7 +470,7 @@ const VerifyPage = () => {
                         <div className="space-y-2 text-xs text-zinc-300">
                           <div className="flex items-center p-1.5 bg-zinc-800/20 rounded">
                             <CheckCircle2 className="h-3 w-3 text-green-400 mr-2" />
-                            <span>{selectedPlanData.limits.projects} active projects</span>
+                            <span>{selectedPlanData.limits.products} active products</span>
                           </div>
                           <div className="flex items-center p-1.5 bg-zinc-800/20 rounded">
                             <CheckCircle2 className="h-3 w-3 text-green-400 mr-2" />
@@ -479,19 +478,15 @@ const VerifyPage = () => {
                           </div>
                           <div className="flex items-center p-1.5 bg-zinc-800/20 rounded">
                             <CheckCircle2 className="h-3 w-3 text-green-400 mr-2" />
-                            <span>{selectedPlanData.limits.users} team members</span>
+                            <span>{selectedPlanData.limits.bandwidth}Bandwidth</span>
                           </div>
                           <div className="flex items-center p-1.5 bg-zinc-800/20 rounded">
                             <CheckCircle2 className="h-3 w-3 text-green-400 mr-2" />
-                            <span>{selectedPlanData.limits.deployments} deployments</span>
+                            <span>{selectedPlanData.limits.customDomains} domains</span>
                           </div>
                           <div className="flex items-center p-1.5 bg-zinc-800/20 rounded">
                             <CheckCircle2 className="h-3 w-3 text-green-400 mr-2" />
                             <span>{selectedPlanData.limits.bandwidth} bandwidth</span>
-                          </div>
-                          <div className="flex items-center p-1.5 bg-zinc-800/20 rounded">
-                            <CheckCircle2 className="h-3 w-3 text-green-400 mr-2" />
-                            <span>{selectedPlanData.limits.customDomains} custom domains</span>
                           </div>
                         </div>
                       </div>
