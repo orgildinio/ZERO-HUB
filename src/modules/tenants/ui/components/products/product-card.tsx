@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { generateTenantUrl } from "@/lib/utils"
+import { useCart } from "@/modules/checkout/hooks/use-cart"
 import { Heart, ShoppingBag, Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo, useMemo } from "react"
+import toast from "react-hot-toast"
 
 interface Props {
+    id: string
     name: string
     slug: string
     price?: number | null
@@ -30,6 +33,7 @@ const BADGE_COLORS = {
 } as const
 
 export const ProductCard = memo(({
+    id,
     name,
     slug,
     price,
@@ -56,7 +60,16 @@ export const ProductCard = memo(({
         ))
     }, [rating])
 
-    const productUrl = useMemo(() => `${generateTenantUrl(tenantSlug)}/products/${slug}`, [tenantSlug, slug])
+    const productUrl = useMemo(() => `${generateTenantUrl(tenantSlug)}/products/${slug}`, [tenantSlug, slug]);
+
+    const { addProduct, isProductInCart } = useCart(tenantSlug);
+
+    const alreadyInCart = isProductInCart(id)
+
+    const addToCart = (productId: string) => {
+        addProduct(productId)
+        toast.success("Product added to cart!")
+    }
 
     return (
         <div className="group relative">
@@ -133,9 +146,17 @@ export const ProductCard = memo(({
                     <Button
                         className="w-full bg-stone-900 hover:bg-amber-600 text-white rounded-full transition-all duration-300 transform hover:scale-105"
                         size="sm"
+                        onClick={() => addToCart(id)}
+                        disabled={alreadyInCart}
                     >
-                        <ShoppingBag className="h-4 w-4 mr-2" />
-                        Add to Cart
+                        {alreadyInCart ? (
+                            <p>Added</p>
+                        ) : (
+                            <div className="items-center flex">
+                                <ShoppingBag className="h-4 w-4 mr-2" />
+                                Add to Cart
+                            </div>
+                        )}
                     </Button>
                 </div>
             </div>

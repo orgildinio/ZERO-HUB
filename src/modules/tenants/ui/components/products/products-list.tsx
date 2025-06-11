@@ -44,6 +44,7 @@ export const ProductsList = ({ slug }: { slug: string; }) => {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {data?.pages.flatMap((page) => page.docs).map((product) => (
                 <ProductCard
+                    id={product.id}
                     key={product.slug}
                     name={product.name}
                     price={product.pricing.compareAtPrice}

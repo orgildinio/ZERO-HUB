@@ -6,6 +6,7 @@ import { categoriesRouter } from "@/modules/categories/server/procedure";
 import { productsRouter } from "@/modules/products/server/procedure";
 import { subscriptionRouter } from "@/modules/subscriptions/server/procedure";
 import { reviewsRouter } from "@/modules/reviews/server/procedure";
+import { checkoutRouter } from "@/modules/checkout/server/procedure";
 
 export const appRouter = createTRPCRouter({
     auth: authRouter,
@@ -13,7 +14,8 @@ export const appRouter = createTRPCRouter({
     categories: categoriesRouter,
     products: productsRouter,
     subscriptions: subscriptionRouter,
-    reviews: reviewsRouter
+    reviews: reviewsRouter,
+    checkout: checkoutRouter
 })
 
 export type AppRouter = typeof appRouter;

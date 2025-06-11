@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useTRPC } from "@/trpc/client"
 import { generateTenantUrl } from "@/lib/utils"
+import { useCart } from "@/modules/checkout/hooks/use-cart"
 
 export const HeaderSkeleton = memo(() => (
     <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-stone-200/50 shadow-sm">
@@ -94,7 +95,7 @@ const MobileNavigation = memo(({ navigation }: { navigation: Array<{ name: strin
 
 MobileNavigation.displayName = "MobileNavigation"
 
-const ActionButtons = memo(() => (
+const ActionButtons = memo(({ items, slug }: { items: number, slug: string }) => (
     <div className="ml-auto flex items-center gap-1 sm:gap-2">
 
         <Button
@@ -117,10 +118,10 @@ const ActionButtons = memo(() => (
             className="hover:bg-stone-100 relative"
             asChild
         >
-            <Link href="/cart" aria-label="Shopping cart (2 items)">
+            <Link href={`${generateTenantUrl(slug)}/cart`} aria-label="Shopping cart">
                 <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="absolute -right-0.5 -top-0.5 sm:-right-1 sm:-top-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-amber-500 text-[9px] sm:text-[10px] text-white font-medium animate-pulse">
-                    2
+                    {items}
                 </span>
             </Link>
         </Button>
@@ -131,7 +132,9 @@ ActionButtons.displayName = "ActionButtons"
 
 export const Header = memo(({ slug }: { slug: string }) => {
     const trpc = useTRPC()
-    const { data } = useSuspenseQuery(trpc.tenants.getOne.queryOptions({ slug }))
+    const { data } = useSuspenseQuery(trpc.tenants.getOne.queryOptions({ slug }));
+
+    const { totalItems } = useCart(slug);
 
     const navigation = useMemo(() => [
         { name: "Home", href: generateTenantUrl(slug) },
@@ -156,7 +159,7 @@ export const Header = memo(({ slug }: { slug: string }) => {
                 </Link>
 
                 <Navigation navigation={navigation} />
-                <ActionButtons />
+                <ActionButtons items={totalItems} slug={slug} />
                 <MobileNavigation navigation={navigation} />
             </div>
         </header>

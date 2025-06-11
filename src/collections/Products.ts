@@ -366,7 +366,50 @@ export const Products: CollectionConfig = {
                 {
                     name: "freeShipping",
                     type: "checkbox",
-                    defaultValue: false
+                    defaultValue: false,
+                    admin: {
+                        description: "Offer free shipping for this product"
+                    }
+                },
+                {
+                    name: "shippingCost",
+                    type: "number",
+                    min: 0,
+                    admin: {
+                        step: 0.01,
+                        condition: (data) => data?.shipping?.requiresShipping && !data?.shipping?.freeShipping,
+                        description: "Shipping cost for this product (leave empty to use store default)"
+                    }
+                },
+                {
+                    name: "estimatedDeliveryDays",
+                    type: "group",
+                    admin: {
+                        condition: (data) => data?.shipping?.requiresShipping,
+                        description: "Expected delivery timeframes"
+                    },
+                    fields: [
+                        {
+                            name: "min",
+                            type: "number",
+                            min: 1,
+                            max: 365,
+                            defaultValue: 3,
+                            admin: {
+                                description: "Minimum delivery days"
+                            }
+                        },
+                        {
+                            name: "max",
+                            type: "number",
+                            min: 1,
+                            max: 365,
+                            defaultValue: 7,
+                            admin: {
+                                description: "Maximum delivery days"
+                            }
+                        }
+                    ]
                 }
             ]
         },

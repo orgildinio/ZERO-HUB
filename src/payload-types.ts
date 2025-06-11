@@ -523,7 +523,27 @@ export interface Product {
       height?: number | null;
     };
     requiresShipping?: boolean | null;
+    /**
+     * Offer free shipping for this product
+     */
     freeShipping?: boolean | null;
+    /**
+     * Shipping cost for this product (leave empty to use store default)
+     */
+    shippingCost?: number | null;
+    /**
+     * Expected delivery timeframes
+     */
+    estimatedDeliveryDays?: {
+      /**
+       * Minimum delivery days
+       */
+      min?: number | null;
+      /**
+       * Maximum delivery days
+       */
+      max?: number | null;
+    };
   };
   /**
    * Product return/refund policy
@@ -957,6 +977,13 @@ export interface ProductsSelect<T extends boolean = true> {
             };
         requiresShipping?: T;
         freeShipping?: T;
+        shippingCost?: T;
+        estimatedDeliveryDays?:
+          | T
+          | {
+              min?: T;
+              max?: T;
+            };
       };
   refundPolicy?: T;
   status?: T;

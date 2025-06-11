@@ -13,6 +13,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ProductReview } from "./product-review";
+import { useCart } from "@/modules/checkout/hooks/use-cart";
 
 type ProductImage = {
     image: Media;
@@ -35,7 +36,7 @@ const getProductImage = (images: ProductImage[] | undefined): string | null => {
     return null;
 }
 
-export const ProductHero = ({ product }: { slug: string, product: string }) => {
+export const ProductHero = ({ product, slug }: { slug: string, product: string }) => {
     const trpc = useTRPC();
     const { data } = useSuspenseQuery(trpc.products.getOne.queryOptions({ product: product }))
 
@@ -70,6 +71,8 @@ export const ProductHero = ({ product }: { slug: string, product: string }) => {
             [variantName]: optionLabel
         }));
     };
+
+    const { addProduct } = useCart(slug)
 
     return (
         <>
@@ -153,7 +156,7 @@ export const ProductHero = ({ product }: { slug: string, product: string }) => {
                     )}
 
                     <div className="flex flex-col gap-4 sm:flex-row">
-                        <Button size="lg" className="flex-1">
+                        <Button size="lg" className="flex-1" onClick={() => addProduct}>
                             Add to Cart
                         </Button>
                         <Button variant="outline" size="lg">
