@@ -29,7 +29,7 @@ export const CategoriesList = ({ slug }: { slug: string }) => {
                     image={category.images.thumbnail.url!}
                     itemCount={category.stats?.productCount}
                     href={`${generateTenantUrl(slug)}/categories/${category.slug}`}
-                    description="Comfort meets elegance"
+                    description={category.description}
                 />
             ))}
         </div>

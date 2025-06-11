@@ -8,6 +8,7 @@ import { useTRPC } from "@/trpc/client"
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { Media } from "@/payload-types";
 import { Button } from "@/components/ui/button";
+import { useProductFilters } from "@/modules/products/hooks/use-product-filter";
 
 type ProductImage = {
     image: Media;
@@ -34,10 +35,12 @@ export const ProductsGrid = ({ slug }: { slug: string }) => {
 
     const [sortBy, setSortBy] = useState("featured")
 
+    const [filters] = useProductFilters();
     const trpc = useTRPC();
     const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(trpc.products.getMany.infiniteQueryOptions(
         {
-            tenantSlug: slug
+            tenantSlug: slug,
+            ...filters
         },
         {
             getNextPageParam: (lastPage) => lastPage.docs.length > 0 ? lastPage.nextPage : undefined

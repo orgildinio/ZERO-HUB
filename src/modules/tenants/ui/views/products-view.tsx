@@ -1,5 +1,7 @@
+import { Suspense } from "react"
 import { ProductFilters } from "../components/products/product-filters"
 import { ProductsGrid } from "../components/products/products-grid"
+import { ProductCardSkeleton } from "../components/products/product-card"
 
 export const ProductsView = ({ slug }: { slug: string }) => {
     return (
@@ -10,7 +12,15 @@ export const ProductsView = ({ slug }: { slug: string }) => {
             </div>
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
                 <ProductFilters slug={slug} />
-                <ProductsGrid slug={slug} />
+                <Suspense fallback={
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <ProductCardSkeleton key={i} />
+                        ))}
+                    </div>
+                }>
+                    <ProductsGrid slug={slug} />
+                </Suspense>
             </div>
         </div>
     )

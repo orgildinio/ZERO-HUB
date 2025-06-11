@@ -26,6 +26,7 @@ export const categoriesRouter = createTRPCRouter({
                     name: true,
                     slug: true,
                     subcategories: true,
+                    description: true,
                     images: true,
                     "stats.productCount": true
                 },

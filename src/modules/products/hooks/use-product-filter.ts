@@ -26,7 +26,7 @@ const params = {
             clearOnDefault: true,
         }).
         withDefault([]),
-    categories: parseAsArrayOf(parseAsString)
+    category: parseAsArrayOf(parseAsString)
         .withOptions({
             clearOnDefault: true,
         }).

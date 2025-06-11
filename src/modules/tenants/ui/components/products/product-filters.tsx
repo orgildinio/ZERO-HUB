@@ -11,6 +11,7 @@ import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useProductFilters } from "@/modules/products/hooks/use-product-filter"
+import { useDebounce } from "@/modules/products/hooks/use-debounce"
 
 export const ProductFilters = ({ slug }: { slug: string }) => {
 
@@ -20,27 +21,29 @@ export const ProductFilters = ({ slug }: { slug: string }) => {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])
     const [selectedRating, setSelectedRating] = useState<number | null>(null)
 
+    const debouncedPriceRange = useDebounce(priceRange, 300)
+
     const trpc = useTRPC();
     const { data: categories } = useSuspenseQuery(trpc.categories.getMany.queryOptions({ tenantSlug: slug }))
 
     useEffect(() => {
         setFilters(prevFilters => ({
             ...prevFilters,
-            minPrice: priceRange[0] > 0 ? priceRange[0].toString() : "",
-            maxPrice: priceRange[1] < 2000 ? priceRange[1].toString() : "",
-            categories: selectedCategories
+            minPrice: debouncedPriceRange[0] > 0 ? debouncedPriceRange[0].toString() : "",
+            maxPrice: debouncedPriceRange[1] < 2000 ? debouncedPriceRange[1].toString() : "",
+            category: selectedCategories
         }));
-    }, [priceRange, selectedCategories, setFilters]);
+    }, [debouncedPriceRange, selectedCategories, setFilters]);
 
     const handleSliderChange = (value: number[]) => {
         setPriceRange(value);
     };
 
-    const handleCategoryChange = (categoryId: string, checked: boolean) => {
+    const handleCategoryChange = (categorySlug: string, checked: boolean) => {
         if (checked) {
-            setSelectedCategories([...selectedCategories, categoryId])
+            setSelectedCategories([...selectedCategories, categorySlug])
         } else {
-            setSelectedCategories(selectedCategories.filter((id) => id !== categoryId))
+            setSelectedCategories(selectedCategories.filter((slug) => slug !== categorySlug))
         }
     }
 
@@ -56,7 +59,7 @@ export const ProductFilters = ({ slug }: { slug: string }) => {
         setFilters({
             minPrice: "",
             maxPrice: "",
-            categories: [],
+            category: [],
             tags: []
         })
     }
@@ -115,14 +118,14 @@ export const ProductFilters = ({ slug }: { slug: string }) => {
                 <h3 className="font-medium text-stone-900">Categories</h3>
                 <div className="space-y-3">
                     {categories.map((category) => (
-                        <div key={category.id} className="flex items-center space-x-3">
+                        <div key={category.slug} className="flex items-center space-x-3">
                             <Checkbox
-                                id={category.id}
-                                checked={selectedCategories.includes(category.id)}
-                                onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
+                                id={category.slug}
+                                checked={selectedCategories.includes(category.slug)}
+                                onCheckedChange={(checked) => handleCategoryChange(category.slug, checked as boolean)}
                             />
                             <label
-                                htmlFor={category.id}
+                                htmlFor={category.slug}
                                 className="flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
                                 {category.name}

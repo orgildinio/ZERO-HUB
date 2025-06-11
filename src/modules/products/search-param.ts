@@ -25,7 +25,12 @@ export const params = {
         .withOptions({
             clearOnDefault: true,
         }).
-        withDefault([])
+        withDefault([]),
+    category: parseAsArrayOf(parseAsString)
+        .withOptions({
+            clearOnDefault: true,
+        }).
+        withDefault([]),
 }
 
 export const loadProductFilters = createLoader(params);

@@ -12,7 +12,7 @@ interface Props {
     image: string
     itemCount?: number | null
     href: string
-    description?: string
+    description?: string | null
 }
 
 export const CategoryCard = ({ name, image, itemCount, href, description }: Props) => {
@@ -47,7 +47,7 @@ export const CategoryCard = ({ name, image, itemCount, href, description }: Prop
                         {name}
                     </h3>
                     {description && (
-                        <p className="text-stone-600 text-sm">{description}</p>
+                        <p className="text-stone-600 text-sm truncate">{description}</p>
                     )}
                 </div>
             </div>
