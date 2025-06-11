@@ -15,7 +15,7 @@ export default function ContactPage() {
         <div className="container px-2 py-8 md:px-6 md:py-12 mx-auto">
             <div className="mb-8 flex flex-col gap-2">
                 <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Contact Us</h1>
-                <p className="text-gray-500">We'd love to hear from you</p>
+                <p className="text-gray-500">We&apos;d love to hear from you</p>
             </div>
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
