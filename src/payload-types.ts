@@ -461,7 +461,6 @@ export interface Product {
         name: string;
         options: {
           label: string;
-          value: string;
           /**
            * Price adjustment for this option
            */
@@ -909,7 +908,6 @@ export interface ProductsSelect<T extends boolean = true> {
           | T
           | {
               label?: T;
-              value?: T;
               priceAdjustment?: T;
               id?: T;
             };

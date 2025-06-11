@@ -60,7 +60,7 @@ const getCategoryWithSubcategories = async (db: any, categories: string[]) => {
     });
 
     const allCategorySlugs: string[] = [];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     categoriesData.docs.forEach((doc: any) => {
         allCategorySlugs.push(doc.slug);
 
@@ -206,7 +206,7 @@ export const productsRouter = createTRPCRouter({
             const product = await ctx.db.find({
                 collection: "products",
                 limit: 1,
-                depth: 1,
+                depth: 2,
                 pagination: false,
                 where: {
                     slug: {
@@ -222,6 +222,8 @@ export const productsRouter = createTRPCRouter({
                     category: true,
                     specifications: true,
                     variants: true,
+                    shipping: true,
+                    refundPolicy: true,
                 }
             })
             const data = product.docs[0]

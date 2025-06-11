@@ -250,11 +250,6 @@ export const Products: CollectionConfig = {
                             required: true
                         },
                         {
-                            name: "value",
-                            type: "text",
-                            required: true
-                        },
-                        {
                             name: "priceAdjustment",
                             type: "number",
                             defaultValue: 0,
