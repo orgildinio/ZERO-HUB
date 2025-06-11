@@ -87,6 +87,8 @@ export const Footer = memo(({ slug }: Props) => {
     )
 })
 
+Footer.displayName = "Footer"
+
 export function FooterSkeleton() {
     return (
         <footer className="border-t bg-white">
@@ -112,3 +114,5 @@ export function FooterSkeleton() {
         </footer>
     )
 }
+
+FooterSkeleton.displayName = "FooterSkeleton"

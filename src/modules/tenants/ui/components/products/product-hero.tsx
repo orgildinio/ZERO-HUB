@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Media } from "@/payload-types";
-import { ShieldCheck, StarIcon, Truck } from "lucide-react";
+import { ShieldCheck, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RichText } from '@payloadcms/richtext-lexical/react'

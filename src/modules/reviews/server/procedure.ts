@@ -34,11 +34,4 @@ export const reviewsRouter = createTRPCRouter({
             });
             return review
         }),
-    getMany: baseProcedure
-        .input(
-            z.object({
-                product: z.string(),
-            })
-        )
-        .query(async ({ ctx, input }) => { })
 })
