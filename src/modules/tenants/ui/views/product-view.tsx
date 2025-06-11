@@ -1,6 +1,9 @@
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { ProductHero } from "../components/products/product-hero"
+import { ProductsList } from "../components/products/products-list"
+import { Suspense } from "react"
+import { ProductCardSkeleton } from "../components/products/product-card"
 
 import { generateTenantUrl } from "@/lib/utils"
 
@@ -12,6 +15,18 @@ export const ProductView = ({ slug, product }: { slug: string; product: string }
                 Back to Products
             </Link>
             <ProductHero slug={slug} product={product} />
+            <div className="mt-16">
+                <h2 className="mb-6 text-2xl font-bold">Related Products</h2>
+                <Suspense fallback={
+                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <ProductCardSkeleton key={i} />
+                        ))}
+                    </div>
+                }>
+                    <ProductsList slug={slug} key={`categories-${slug}`} />
+                </Suspense>
+            </div>
         </div>
     )
 }

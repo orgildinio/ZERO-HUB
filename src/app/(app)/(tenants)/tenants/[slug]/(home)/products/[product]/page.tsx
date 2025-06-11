@@ -20,6 +20,7 @@ const ProductPage = async ({ params }: Props) => {
 
     const queryClient = getQueryClient();
     void queryClient.prefetchQuery(trpc.products.getOne.queryOptions({ product: product }))
+    void queryClient.prefetchInfiniteQuery(trpc.products.getMany.infiniteQueryOptions({ tenantSlug: slug }))
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>

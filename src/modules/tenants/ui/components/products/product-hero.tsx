@@ -18,16 +18,6 @@ type ProductImage = {
     isPrimary?: boolean | null;
 };
 
-type VariantOption = {
-    label: string;
-    priceAdjustment?: number;
-};
-
-type Variant = {
-    name: string;
-    options: VariantOption[];
-};
-
 const getProductImage = (images: ProductImage[] | undefined): string | null => {
     if (!images || images.length === 0) return null
 
@@ -47,7 +37,7 @@ const getProductImage = (images: ProductImage[] | undefined): string | null => {
 export const ProductHero = ({ product }: { slug: string, product: string }) => {
     const trpc = useTRPC();
     const { data } = useSuspenseQuery(trpc.products.getOne.queryOptions({ product: product }))
-    
+
     // State to track selected variant options
     const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>(() => {
         // Initialize with first option of each variant
@@ -60,11 +50,10 @@ export const ProductHero = ({ product }: { slug: string, product: string }) => {
         return initial;
     });
 
-    // Calculate total price with variant adjustments
     const calculateTotalPrice = () => {
-        let basePrice = data.pricing.price || 0;
+        const basePrice = data.pricing.price || 0;
         let totalAdjustment = 0;
-        
+
         data.variants?.forEach((variant) => {
             const selectedLabel = selectedVariants[variant.name];
             const selectedOption = variant.options?.find(option => option.label === selectedLabel);
@@ -72,8 +61,7 @@ export const ProductHero = ({ product }: { slug: string, product: string }) => {
                 totalAdjustment += selectedOption.priceAdjustment;
             }
         });
-        
-        // If there are any price adjustments, replace the base price
+
         return totalAdjustment !== 0 ? totalAdjustment : basePrice;
     };
 
@@ -214,7 +202,7 @@ export const ProductHero = ({ product }: { slug: string, product: string }) => {
                     <TabsContent value="specifications" className="mt-6">
                         <div className="rounded-lg border">
                             {data.specifications && data.specifications.length > 0 ? (
-                                data.specifications.map((spec, index) => (
+                                data.specifications.map((spec) => (
                                     <div key={spec.name} className={cn("border-b last:border-b-0")}>
                                         <div className="grid grid-cols-2 gap-4 px-4 py-3">
                                             <div className="font-medium">{spec.name}</div>
