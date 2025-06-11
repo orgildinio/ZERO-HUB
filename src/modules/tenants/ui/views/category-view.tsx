@@ -1,8 +1,9 @@
 import Link from "next/link"
 import { CategoryListView } from "./categories-list-view";
-import { CategoryHero } from "../components/products/category-hero";
+import { CategoryHero, CategoryHeroSkeleton } from "../components/products/category-hero";
 
 import { generateTenantUrl } from "@/lib/utils";
+import { Suspense } from "react";
 
 export const CategoryView = ({ slug, category }: { slug: string; category: string }) => {
     return (
@@ -22,7 +23,9 @@ export const CategoryView = ({ slug, category }: { slug: string; category: strin
                     </nav>
                 </div>
             </div>
-            <CategoryHero category={category} />
+            <Suspense fallback={<CategoryHeroSkeleton />}>
+                <CategoryHero category={category} />
+            </Suspense>
             <section className="py-16 bg-stone-50">
                 <div className="container px-4 md:px-6 mx-auto">
                     <div className="text-center mb-12">

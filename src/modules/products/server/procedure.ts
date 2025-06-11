@@ -8,8 +8,8 @@ import { Sort } from "payload";
 const buildSort = (sortOption: string | null | undefined): Sort => {
     const sortMap: Record<string, Sort> = {
         newest: "-createdAt",
-        low_to_high: "-pricing.compareAtPrice",
-        high_to_low: "+pricing.compareAtPrice",
+        low_to_high: "+pricing.compareAtPrice",
+        high_to_low: "-pricing.compareAtPrice",
         featured: "featured"
     }
     return sortOption && sortMap[sortOption] ? sortMap[sortOption] : "-createdAt";
@@ -225,15 +225,52 @@ export const productsRouter = createTRPCRouter({
                     shipping: true,
                     refundPolicy: true,
                 }
-            })
+            });
             const data = product.docs[0]
+
+            const review = await ctx.db.find({
+                collection: "reviews",
+                pagination: false,
+                where: {
+                    product: {
+                        equals: data.id
+                    }
+                }
+            })
+            const reviewRating = review.docs.length > 0 ? review.docs.reduce((acc, review) => acc + review.rating, 0) / review.totalDocs : 0;
+            const ratingDistribution: Record<number, number> = {
+                5: 0,
+                4: 0,
+                3: 0,
+                2: 0,
+                1: 0,
+            };
+
+            if (review.totalDocs > 0) {
+                review.docs.forEach((review) => {
+                    const rating = review.rating
+                    if (rating >= 1 && rating <= 5) ratingDistribution[rating] = (ratingDistribution[rating] || 0) + 1;
+                });
+                Object.keys(ratingDistribution).forEach((key) => {
+                    const rating = Number(key);
+                    const count = ratingDistribution[rating] || 0;
+                    ratingDistribution[rating] = Math.round(
+                        (count / review.totalDocs) * 100,
+                    )
+                })
+            }
+
             return {
                 ...data,
                 images: data.images?.map(imageItem => ({
                     ...imageItem,
                     image: imageItem.image as Media,
                 })) || [],
-                category: data.category as Category
+                category: data.category as Category,
+                reviewRating,
+                reviewCount: review.totalDocs,
+                reviews: review.docs,
+                ratingDistribution,
             }
         })
 })

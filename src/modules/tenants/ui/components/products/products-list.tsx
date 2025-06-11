@@ -27,7 +27,7 @@ const getProductImage = (images: ProductImage[] | undefined): string | null => {
     return null;
 }
 
-export const ProductsList = ({ slug }: { slug: string }) => {
+export const ProductsList = ({ slug }: { slug: string; }) => {
     const trpc = useTRPC();
 
     const { data } = useSuspenseInfiniteQuery(trpc.products.getMany.infiniteQueryOptions(

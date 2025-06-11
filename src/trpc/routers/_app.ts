@@ -5,13 +5,15 @@ import { tenantsRouter } from "@/modules/tenants/server/procedure";
 import { categoriesRouter } from "@/modules/categories/server/procedure";
 import { productsRouter } from "@/modules/products/server/procedure";
 import { subscriptionRouter } from "@/modules/subscriptions/server/procedure";
+import { reviewsRouter } from "@/modules/reviews/server/procedure";
 
 export const appRouter = createTRPCRouter({
     auth: authRouter,
     tenants: tenantsRouter,
     categories: categoriesRouter,
     products: productsRouter,
-    subscriptions: subscriptionRouter
+    subscriptions: subscriptionRouter,
+    reviews: reviewsRouter
 })
 
 export type AppRouter = typeof appRouter;

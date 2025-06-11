@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const CategoryHero = ({ category }: { category: string }) => {
 
@@ -107,5 +108,76 @@ export const CategoryHero = ({ category }: { category: string }) => {
                 </div>
             </section>
         </>
+    )
+}
+
+export const CategoryHeroSkeleton = () => {
+    return (
+        <section className="relative overflow-hidden bg-gradient-to-br from-stone-50 via-amber-50 to-orange-50">
+            <div className="container px-4 py-16 md:px-6 md:py-24">
+                <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+                    <div className="relative z-10">
+                        {/* Badge skeleton */}
+                        <div className="flex items-center gap-4 mb-6">
+                            <Skeleton className="h-8 w-40 rounded-full" />
+                        </div>
+
+                        {/* Title skeleton */}
+                        <div className="mb-6">
+                            <Skeleton className="h-12 w-full mb-2 md:h-16 lg:h-20" />
+                            <Skeleton className="h-8 w-32 md:h-10 lg:h-12" />
+                        </div>
+
+                        {/* Description skeleton */}
+                        <div className="mb-8">
+                            <Skeleton className="h-5 w-full mb-2" />
+                            <Skeleton className="h-5 w-4/5 mb-2" />
+                            <Skeleton className="h-5 w-3/5" />
+                        </div>
+
+                        {/* Rating and users skeleton */}
+                        <div className="flex flex-wrap gap-6 mb-8">
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Skeleton key={i} className="h-4 w-4 rounded-sm" />
+                                    ))}
+                                </div>
+                                <Skeleton className="h-4 w-24" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="h-4 w-4" />
+                                <Skeleton className="h-4 w-20" />
+                            </div>
+                        </div>
+
+                        {/* Stats skeleton */}
+                        <div className="grid grid-cols-3 gap-6 text-center">
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className="p-4 rounded-lg bg-white/60 backdrop-blur-sm">
+                                    <Skeleton className="h-8 w-12 mx-auto mb-1" />
+                                    <Skeleton className="h-4 w-16 mx-auto" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Image skeleton */}
+                    <div className="relative">
+                        <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200">
+                            <Skeleton className="h-full w-full" />
+                        </div>
+
+                        {/* Floating elements skeleton */}
+                        <div className="absolute -top-6 -right-6">
+                            <Skeleton className="h-16 w-16 rounded-xl" />
+                        </div>
+                        <div className="absolute -bottom-6 -left-6">
+                            <Skeleton className="h-16 w-16 rounded-xl" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     )
 }

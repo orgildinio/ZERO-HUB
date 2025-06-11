@@ -22,7 +22,7 @@ export const HeaderSkeleton = memo(() => (
             </div>
 
             <nav className="hidden lg:flex lg:gap-6 xl:gap-8">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(4)].map((_, i) => (
                     <Skeleton key={i} className="h-4 w-12 sm:w-16" />
                 ))}
             </nav>
@@ -137,7 +137,6 @@ export const Header = memo(({ slug }: { slug: string }) => {
         { name: "Home", href: generateTenantUrl(slug) },
         { name: "Shop", href: `${generateTenantUrl(slug)}/products` },
         { name: "Categories", href: `${generateTenantUrl(slug)}/categories` },
-        { name: "About", href: `${generateTenantUrl(slug)}/about` },
         { name: "Contact", href: `${generateTenantUrl(slug)}/contact` },
     ], [slug])
 

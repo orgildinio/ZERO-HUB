@@ -39,9 +39,6 @@ const HeroSection = memo(({ slug }: { slug: string }) => (
                         <ArrowRight className="h-5 w-5" />
                     </Link>
                 </Button>
-                <Button variant="outline" size="lg" className="border-2 border-stone-300 hover:border-stone-900 px-8 py-4 text-lg rounded-full transition-all duration-300" asChild>
-                    <Link href={`${slug}/about`}>Our Story</Link>
-                </Button>
             </div>
 
             <div className="mt-16 grid grid-cols-3 gap-8 text-center">

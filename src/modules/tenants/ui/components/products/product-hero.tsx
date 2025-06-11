@@ -6,12 +6,13 @@ import { useState } from "react"
 import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Media } from "@/payload-types";
-import { ShieldCheck, Truck } from "lucide-react";
+import { ShieldCheck, StarIcon, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { ProductReview } from "./product-review";
 
 type ProductImage = {
     image: Media;
@@ -38,9 +39,7 @@ export const ProductHero = ({ product }: { slug: string, product: string }) => {
     const trpc = useTRPC();
     const { data } = useSuspenseQuery(trpc.products.getOne.queryOptions({ product: product }))
 
-    // State to track selected variant options
     const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>(() => {
-        // Initialize with first option of each variant
         const initial: Record<string, string> = {};
         data.variants?.forEach((variant) => {
             if (variant.options && variant.options.length > 0) {
@@ -119,7 +118,6 @@ export const ProductHero = ({ product }: { slug: string, product: string }) => {
                         )}
                     </div>
 
-                    {/* Variants Section */}
                     {data.variants && data.variants.length > 0 && (
                         <div className="space-y-4">
                             {data.variants.map((variant) => (
@@ -218,12 +216,16 @@ export const ProductHero = ({ product }: { slug: string, product: string }) => {
                         </div>
                     </TabsContent>
                     <TabsContent value="reviews" className="mt-6">
-                        <div className="rounded-lg border px-4 py-8 text-center text-gray-500">
-                            Reviews coming soon
-                        </div>
+                        <ProductReview
+                            ratingDistribution={data.ratingDistribution}
+                            reviewCount={data.reviewCount}
+                            reviewRating={data.reviewRating}
+                            reviews={data.reviews}
+                            product={product}
+                        />
                     </TabsContent>
                 </Tabs>
-            </div>
+            </div >
         </>
     )
 }
