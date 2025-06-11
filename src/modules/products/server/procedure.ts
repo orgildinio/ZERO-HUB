@@ -1,4 +1,4 @@
-import { Category, Media, Product } from "@/payload-types";
+import { Category, Media } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import type { Where } from "payload";
 import { z } from "zod";
@@ -17,7 +17,7 @@ const buildSort = (sortOption: string | null | undefined): Sort => {
 
 const buildPriceFilter = (minPrice?: string | null, maxPrice?: string | null) => {
     if (!minPrice && !maxPrice) return {};
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const priceFilter: any = {};
 
     if (minPrice && maxPrice) {
@@ -44,7 +44,7 @@ const buildTenantFilter = (tenantSlug?: string | null) => {
     }
     return { "isPrivate": { not_equals: true } };
 };
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getCategoryWithSubcategories = async (db: any, categories: string[]) => {
     const categoriesData = await db.find({
         collection: "categories",
@@ -60,7 +60,7 @@ const getCategoryWithSubcategories = async (db: any, categories: string[]) => {
     });
 
     const allCategorySlugs: string[] = [];
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     categoriesData.docs.forEach((doc: any) => {
         allCategorySlugs.push(doc.slug);
 
@@ -72,7 +72,7 @@ const getCategoryWithSubcategories = async (db: any, categories: string[]) => {
 
     return [...new Set(allCategorySlugs)];
 };
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const buildWhereClause = async (input: any, db: any): Promise<Where> => {
     const where: Where = {
         ...buildPriceFilter(input.minPrice, input.maxPrice),

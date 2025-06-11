@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Media } from "@/payload-types";
-import { ShieldCheck, Star, Truck } from "lucide-react";
+import { ShieldCheck, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RichText } from '@payloadcms/richtext-lexical/react'
@@ -31,7 +31,7 @@ const getProductImage = (images: ProductImage[] | undefined): string | null => {
     return null;
 }
 
-export const ProductHero = ({ slug, product }: { slug: string, product: string }) => {
+export const ProductHero = ({ product }: { slug: string, product: string }) => {
 
     const trpc = useTRPC();
     const { data } = useSuspenseQuery(trpc.products.getOne.queryOptions({ product: product }))
@@ -82,7 +82,7 @@ export const ProductHero = ({ slug, product }: { slug: string, product: string }
 
                     <div className="text-2xl font-bold">${data.pricing.compareAtPrice}</div>
 
-                    
+
 
                     <div className="flex flex-col gap-4 sm:flex-row">
                         <Button size="lg" className="flex-1">
@@ -114,10 +114,10 @@ export const ProductHero = ({ slug, product }: { slug: string, product: string }
                     <div>
                         <h3 className="mb-2 font-medium">Description</h3>
                         {data.description ? (
-                                <RichText data={data.description} />
-                            ) : (
-                                <p className="text-gray-600">No description provided.</p>
-                            )}
+                            <RichText data={data.description} />
+                        ) : (
+                            <p className="text-gray-600">No description provided.</p>
+                        )}
                     </div>
 
                     <div>
