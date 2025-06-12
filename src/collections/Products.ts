@@ -381,36 +381,6 @@ export const Products: CollectionConfig = {
                         description: "Shipping cost for this product (leave empty to use store default)"
                     }
                 },
-                {
-                    name: "estimatedDeliveryDays",
-                    type: "group",
-                    admin: {
-                        condition: (data) => data?.shipping?.requiresShipping,
-                        description: "Expected delivery timeframes"
-                    },
-                    fields: [
-                        {
-                            name: "min",
-                            type: "number",
-                            min: 1,
-                            max: 365,
-                            defaultValue: 3,
-                            admin: {
-                                description: "Minimum delivery days"
-                            }
-                        },
-                        {
-                            name: "max",
-                            type: "number",
-                            min: 1,
-                            max: 365,
-                            defaultValue: 7,
-                            admin: {
-                                description: "Maximum delivery days"
-                            }
-                        }
-                    ]
-                }
             ]
         },
         {

@@ -67,7 +67,6 @@ export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, r
         };
         reviewMutation.mutate(sanitized);
     }
-    console.log(reviews)
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

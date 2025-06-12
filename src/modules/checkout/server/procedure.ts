@@ -12,7 +12,6 @@ export const checkoutRouter = createTRPCRouter({
             })
         )
         .query(async ({ ctx, input }) => {
-            console.log(input.productIds)
             const data = await ctx.db.find({
                 collection: "products",
                 depth: 2,

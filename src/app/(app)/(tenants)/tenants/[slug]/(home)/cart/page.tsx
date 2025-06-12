@@ -1,4 +1,6 @@
-import { CartView } from "@/modules/checkout/ui/views/cart-view"
+import { Suspense } from "react";
+
+import { CartLoading, CartView } from "@/modules/checkout/ui/views/cart-view"
 
 interface Props {
     params: Promise<{ slug: string }>
@@ -8,7 +10,11 @@ const CartPage = async ({ params }: Props) => {
 
     const { slug } = await params;
 
-    return <CartView slug={slug} />
+    return (
+        <Suspense fallback={<CartLoading />}>
+            <CartView slug={slug} />
+        </Suspense>
+    )
 
 }
 
