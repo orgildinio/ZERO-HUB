@@ -5,6 +5,8 @@ import { Tenant } from "@/payload-types";
 import { SubscriptionView } from "@/modules/subscriptions/ui/views/subscription-view";
 import { AlreadySubscribed } from "@/modules/subscriptions/ui/components/already-subscribed";
 
+export const dynamic = "force-dynamic"
+
 const SubscriptionPage = async () => {
 
   const session = await caller.auth.session();

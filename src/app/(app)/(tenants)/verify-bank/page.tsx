@@ -6,6 +6,8 @@ import { ThemeProvider } from '@/providers/theme-provider'
 import { Header } from '@/modules/auth/ui/components/header'
 import { caller } from '@/trpc/server'
 
+export const dynamic = "force-dynamic"
+
 const VerifyBank = async () => {
 
     const session = await caller.auth.session();
