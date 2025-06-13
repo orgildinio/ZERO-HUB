@@ -22,6 +22,7 @@ import { bankFormSchema } from "../../schema"
 import { useEffect, useMemo, useState } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
+import ConfirmationModal from "./confirmation-modal"
 
 import {
     Form,
@@ -60,6 +61,8 @@ export const BankForm = ({ email, phone }: { email: string; phone: string }) => 
     const router = useRouter();
     const [ifscStatus, setIfscStatus] = useState<"idle" | "checking" | "valid" | "invalid">("idle")
     const [currentStep, setCurrentStep] = useState<"business" | "contact" | "bank">("business")
+    const [showConfirmation, setShowConfirmation] = useState(false)
+    const [formData, setFormData] = useState<z.infer<typeof bankFormSchema> | null>(null)
 
     const form = useForm<z.infer<typeof bankFormSchema>>({
         resolver: zodResolver(bankFormSchema),
@@ -148,6 +151,11 @@ export const BankForm = ({ email, phone }: { email: string; phone: string }) => 
     }))
 
     const onSubmit = (data: z.infer<typeof bankFormSchema>) => {
+        setFormData(data)
+        setShowConfirmation(true)
+    }
+
+    const handleConfirm = (data: z.infer<typeof bankFormSchema>) => {
         verifyMutation.mutate(data)
     }
 
@@ -920,6 +928,15 @@ export const BankForm = ({ email, phone }: { email: string; phone: string }) => 
                     )}
                 </form>
             </Form>
+            {showConfirmation && formData && (
+                <ConfirmationModal
+                    data={formData}
+                    isOpen={showConfirmation}
+                    isLoading={verifyMutation.isPending}
+                    onClose={() => setShowConfirmation(false)}
+                    onConfirm={handleConfirm}
+                />
+            )}
         </>
     )
 }
