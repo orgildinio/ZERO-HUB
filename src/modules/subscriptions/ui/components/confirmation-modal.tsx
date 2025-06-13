@@ -203,7 +203,7 @@ export default function ConfirmationModal({ data, isOpen, isLoading, onClose, on
                     <div className="bg-zinc-800/50 rounded-lg p-4 mt-6 flex items-center gap-3">
                         <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                         <p className="text-sm text-zinc-300">
-                            By clicking "Confirm & Submit", you certify that all information provided is accurate and complete.
+                            By clicking &qout;Confirm & Submit&qout;, you certify that all information provided is accurate and complete.
                         </p>
                     </div>
                 </div>
