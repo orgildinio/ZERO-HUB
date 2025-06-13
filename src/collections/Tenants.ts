@@ -193,6 +193,185 @@ export const Tenants: CollectionConfig = {
             ]
         },
         {
+            name: "bankDetails",
+            type: "group",
+            admin: {
+                description: "Banking and payout information for payment processing"
+            },
+            access: {
+                read: ({ req }) => isSuperAdmin(req.user),
+                update: ({ req }) => isSuperAdmin(req.user)
+            },
+            fields: [
+                {
+                    name: "accountHolderName",
+                    type: "text",
+                    required: false,
+                    admin: {
+                        description: "Full name as per bank account records"
+                    },
+                    validate: (value?: string | null) => {
+                        if (value && value.trim().length < 2) {
+                            return 'Account holder name must be at least 2 characters';
+                        }
+                        if (value && value.length > 100) {
+                            return 'Account holder name must be less than 100 characters';
+                        }
+                        return true;
+                    }
+                },
+                {
+                    name: "accountNumber",
+                    type: "text",
+                    required: false,
+                    admin: {
+                        description: "Bank account number for payouts"
+                    },
+                    validate: (value?: string | null) => {
+                        if (value && !/^\d{9,18}$/.test(value)) {
+                            return 'Account number must be 9-18 digits';
+                        }
+                        return true;
+                    }
+                },
+                {
+                    name: "ifscCode",
+                    type: "text",
+                    required: false,
+                    admin: {
+                        description: "IFSC code of the bank branch (e.g. SBIN0001234)"
+                    },
+                    validate: (value?: string | null) => {
+                        if (value && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(value)) {
+                            return 'Please enter a valid IFSC code (e.g. SBIN0001234)';
+                        }
+                        return true;
+                    }
+                },
+                {
+                    name: "bankDetailsSubmitted",
+                    type: "checkbox",
+                    defaultValue: false,
+                    admin: {
+                        description: "You cannot create products until you verify your bank details."
+                    },
+                    access: {
+                        read: () => true,
+                        update: ({ req }) => isSuperAdmin(req.user)
+                    }
+                },
+                {
+                    name: "email",
+                    type: "email",
+                    required: false,
+                    admin: {
+                        description: "Email address for banking communications and notifications"
+                    }
+                },
+                {
+                    name: "phone",
+                    type: "text",
+                    required: false,
+                    admin: {
+                        description: "Phone number registered with bank account"
+                    },
+                    validate: (value?: string | null) => {
+                        if (value && !/^\+?[\d\s\-\(\)]{10,}$/.test(value)) {
+                            return 'Please enter a valid phone number';
+                        }
+                        return true;
+                    }
+                },
+                {
+                    name: "accountType",
+                    type: "select",
+                    options: [
+                        { label: 'Vendor', value: 'vendor' },
+                        { label: 'Super Vendor', value: 'super-vendor' },
+                    ],
+                    defaultValue: 'vendor',
+                    admin: {
+                        description: "Type of bank account"
+                    }
+                },
+                {
+                    name: "razorpayLinkedAccountId",
+                    type: "text",
+                    admin: {
+                        description: "Razorpay linked account ID for payout processing",
+                        readOnly: true
+                    }
+                },
+                {
+                    name: "razorpayFundAccountId",
+                    type: "text",
+                    admin: {
+                        description: "Razorpay fund account ID for automated payouts",
+                        readOnly: true
+                    }
+                },
+                {
+                    name: "status",
+                    type: "select",
+                    options: [
+                        { label: 'Pending Verification', value: 'pending' },
+                        { label: 'Verified', value: 'verified' },
+                        { label: 'Rejected', value: 'rejected' },
+                        { label: 'Suspended', value: 'suspended' },
+                        { label: 'Not Submitted', value: 'not_submitted' }
+                    ],
+                    defaultValue: 'not_submitted',
+                    admin: {
+                        description: "Current verification status of bank details"
+                    }
+                },
+                {
+                    name: "commissionFee",
+                    type: "number",
+                    defaultValue: 2.5,
+                    min: 0,
+                    max: 100,
+                    admin: {
+                        description: "Commission percentage fee charged on transactions (0-100%)",
+                        step: 0.01
+                    }
+                },
+                {
+                    name: "flatFee",
+                    type: "number",
+                    defaultValue: 0,
+                    min: 0,
+                    admin: {
+                        description: "Fixed flat fee charged per transaction (in INR)",
+                        step: 0.01
+                    }
+                },
+                {
+                    name: "panCardNumber",
+                    type: "text",
+                    required: false,
+                    admin: {
+                        description: "PAN card number for tax identification (e.g. ABCDE1234F)"
+                    },
+                    validate: (value?: string | null) => {
+                        if (value && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value)) {
+                            return 'Please enter a valid PAN card number (e.g. ABCDE1234F)';
+                        }
+                        return true;
+                    }
+                },
+                {
+                    name: "panCardPhoto",
+                    relationTo: "media",
+                    type: "upload",
+                    required: false,
+                    admin: {
+                        description: "Upload clear photo of PAN card (front side only, recommended: JPG/PNG format)"
+                    }
+                }
+            ]
+        },
+        {
             name: "maxProducts",
             type: "number",
             defaultValue: 100,
@@ -214,7 +393,7 @@ export const Tenants: CollectionConfig = {
             },
             access: {
                 read: ({ req }) => isSuperAdmin(req.user),
-                update: () => false // Read-only, updated by system
+                update: () => false
             },
             fields: [
                 {

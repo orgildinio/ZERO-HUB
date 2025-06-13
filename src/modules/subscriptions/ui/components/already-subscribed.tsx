@@ -1,7 +1,6 @@
 "use client"
 
-import Link from "next/link"
-import { CheckCircle, ArrowRight, Calendar, CreditCard, Settings, Download, BarChart } from "lucide-react"
+import { CheckCircle, ArrowRight, Calendar, Settings, Download, BarChart } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,7 +24,7 @@ export const AlreadySubscribed = ({ subscriptionId }: { subscriptionId: string }
                 <div className="bg-emerald-900/20 border border-emerald-700/50 rounded-lg p-4 mb-8 flex items-start gap-3">
                     <CheckCircle className="h-6 w-6 text-emerald-500 mt-0.5 flex-shrink-0" />
                     <div>
-                        <h3 className="font-medium text-emerald-400 mb-1">You're already subscribed!</h3>
+                        <h3 className="font-medium text-emerald-400 mb-1">You&apos;re already subscribed!</h3>
                         <p className="text-emerald-200/80">
                             You currently have an active {data.plan.name} plan. You can manage your subscription or view your billing
                             history below.

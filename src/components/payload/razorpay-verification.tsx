@@ -1,10 +1,10 @@
 import { Button, Link } from '@payloadcms/ui';
 
-export const SubscriptionVerifyButton = () => {
+export const TenantBankVerifyButton = () => {
     return (
-        <Link href='/verify'>
+        <Link href='/verify-bank'>
             <Button>
-                Verify Account
+                Verify your Bank
             </Button>
         </Link>
     )

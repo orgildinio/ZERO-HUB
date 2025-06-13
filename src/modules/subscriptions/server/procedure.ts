@@ -1,8 +1,9 @@
-import { verifySchema } from "../schema";
-
-import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { TRPCError } from "@trpc/server";
+import { bankFormSchema, getSubscription, subscribeSchema } from "../schema";
 import { razorpay } from "../lib/utils";
+
+import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { TRPCError } from "@trpc/server";
+import { SubscriptionPlan } from "@/payload-types";
 
 const planId: Record<string, string> = {
     starter: process.env.STARTER_PLAN_ID as string,
@@ -11,8 +12,8 @@ const planId: Record<string, string> = {
 }
 
 export const subscriptionRouter = createTRPCRouter({
-    verify: protectedProcedure
-        .input(verifySchema)
+    subscribe: protectedProcedure
+        .input(subscribeSchema)
         .mutation(async ({ ctx, input }) => {
             try {
                 const user = await ctx.db.findByID({
@@ -95,6 +96,113 @@ export const subscriptionRouter = createTRPCRouter({
                     subscription: razorpaySubscription,
                     payloadSubscription: subscription,
                 };
+            } catch (error) {
+                console.log(error)
+            }
+        }),
+    getOne: baseProcedure
+        .input(getSubscription)
+        .query(async ({ ctx, input }) => {
+            const subscription = await ctx.db.find({
+                collection: "subscriptions",
+                limit: 1,
+                depth: 1,
+                pagination: false,
+                where: {
+                    razorpaySubscriptionId: {
+                        equals: input.subscriptionId
+                    }
+                },
+                select: {
+                    startAt: true,
+                    currentEnd: true,
+                    status: true,
+                    plan: true,
+                }
+            })
+            if (!subscription.docs[0]) throw new TRPCError({ code: "NOT_FOUND", message: "Subscription not found" })
+
+            const data = subscription.docs[0]
+            return {
+                ...data,
+                plan: data.plan as SubscriptionPlan
+            }
+        }),
+    verify: protectedProcedure
+        .input(bankFormSchema)
+        .mutation(async ({ ctx, input }) => {
+            try {
+                const tenant = await ctx.db.update({
+                    collection: "tenants",
+                    where: {
+                        phone: {
+                            equals: input.phone,
+                        }
+                    },
+                    data: {
+
+                    }
+                });
+                if (!tenant.docs[0]) throw new TRPCError({ code: "NOT_FOUND", message: 'Tenant does not exist.' })
+
+                const account = await razorpay.accounts.create({
+                    email: input.email,
+                    phone: input.phone,
+                    legal_business_name: input.legalBusinessName,
+                    business_type: "individual",
+                    legal_info: {
+                        pan: input.panCardNumber,
+                    },
+                    contact_name: input.accountHolderName,
+                    contact_info: {
+                        chargeback: {
+                            email: input.email
+                        },
+                        refund: {
+                            email: input.email
+                        },
+                        support: {
+                            email: input.email,
+                            phone: input.phone,
+                        }
+                    },
+                    profile: {
+                        category: 'ecommerce',
+                        subcategory: input.businessSubcategory,
+                        addresses: {
+                            registered: {
+                                street1: input.streetAddress,
+                                street2: input.addressLine2,
+                                city: input.city,
+                                state: input.state,
+                                postal_code: input.postalCode,
+                                country: input.country
+                            }
+                        }
+                    },
+                });
+                if (!account) throw new TRPCError({ code: 'BAD_REQUEST', message: "Failed to create razorpay account." })
+                const updatedTenant = await ctx.db.update({
+                    collection: "tenants",
+                    where: {
+                        id: {
+                            equals: tenant.docs[0].id
+                        }
+                    },
+                    data: {
+                        bankDetails: {
+                            accountHolderName: input.accountHolderName,
+                            accountNumber: input.accountNumber,
+                            ifscCode: input.ifscCode,
+                            email: input.email,
+                            status: 'pending',
+                            razorpayLinkedAccountId: account.id,
+                            panCardNumber: input.panCardNumber
+                        }
+                    }
+                })
+
+                return updatedTenant
             } catch (error) {
                 console.log(error)
             }

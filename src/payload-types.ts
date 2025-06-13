@@ -206,6 +206,67 @@ export interface Tenant {
     subscriptionEndDate?: string | null;
   };
   /**
+   * Banking and payout information for payment processing
+   */
+  bankDetails?: {
+    /**
+     * Full name as per bank account records
+     */
+    accountHolderName?: string | null;
+    /**
+     * Bank account number for payouts
+     */
+    accountNumber?: string | null;
+    /**
+     * IFSC code of the bank branch (e.g. SBIN0001234)
+     */
+    ifscCode?: string | null;
+    /**
+     * You cannot create products until you verify your bank details.
+     */
+    bankDetailsSubmitted?: boolean | null;
+    /**
+     * Email address for banking communications and notifications
+     */
+    email?: string | null;
+    /**
+     * Phone number registered with bank account
+     */
+    phone?: string | null;
+    /**
+     * Type of bank account
+     */
+    accountType?: ('vendor' | 'super-vendor') | null;
+    /**
+     * Razorpay linked account ID for payout processing
+     */
+    razorpayLinkedAccountId?: string | null;
+    /**
+     * Razorpay fund account ID for automated payouts
+     */
+    razorpayFundAccountId?: string | null;
+    /**
+     * Current verification status of bank details
+     */
+    status?: ('pending' | 'verified' | 'rejected' | 'suspended' | 'not_submitted') | null;
+    /**
+     * Commission percentage fee charged on transactions (0-100%)
+     */
+    commissionFee?: number | null;
+    /**
+     * Fixed flat fee charged per transaction (in INR)
+     */
+    flatFee?: number | null;
+    /**
+     * PAN card number for tax identification (e.g. ABCDE1234F)
+     */
+    panCardNumber?: string | null;
+    /**
+     * Upload clear photo of PAN card (front side only, recommended: JPG/PNG format)
+     */
+    panCardPhoto?: (string | null) | Media;
+  };
+  /**
    * Maximum number of products allowed for this tenant
    */
   maxProducts?: number | null;
@@ -839,6 +900,24 @@ export interface TenantsSelect<T extends boolean = true> {
         subscriptionStatus?: T;
         subscriptionStartDate?: T;
         subscriptionEndDate?: T;
+      };
+  bankDetails?:
+    | T
+    | {
+        accountHolderName?: T;
+        accountNumber?: T;
+        ifscCode?: T;
+        bankDetailsSubmitted?: T;
+        email?: T;
+        phone?: T;
+        accountType?: T;
+        razorpayLinkedAccountId?: T;
+        razorpayFundAccountId?: T;
+        status?: T;
+        commissionFee?: T;
+        flatFee?: T;
+        panCardNumber?: T;
+        panCardPhoto?: T;
       };
   maxProducts?: T;
   analytics?:

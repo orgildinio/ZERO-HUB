@@ -36,7 +36,10 @@ export default buildConfig({
       graphics: {
         Logo: '@/components/payload/login',
       },
-      beforeNavLinks: ['@/components/payload/razorpay-verify#SubscriptionVerifyButton']
+      beforeNavLinks: [
+        '@/components/payload/razorpay-subscription#SubscriptionVerifyButton',
+        '@/components/payload/razorpay-verification#TenantBankVerifyButton'
+      ]
     }
   },
   collections: [Users, Media, Tenants, Categories, Products, Tags, Subscriptions, SubscriptionPlans, Reviews],
