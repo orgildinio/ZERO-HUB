@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -6,6 +6,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { NavbarDropdown } from "./navbar-dropdown";
 import { featureItems, resourceItems } from "@/constants";
+import { User } from "@/payload-types";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface NavbarItem {
     href: string;
@@ -27,12 +30,12 @@ interface Props {
 const NavLink = memo<{
     href: string;
     children: React.ReactNode;
-    onClick: () => void;
-}>(({ href, children, onClick }) => (
+    onNavigate: () => void;
+}>(({ href, children, onNavigate }) => (
     <Link
         href={href}
         className="w-full text-left p-3 font-medium flex items-center text-base hover:bg-zinc-800/50 transition-colors"
-        onClick={onClick}
+        onClick={onNavigate}
     >
         {children}
     </Link>
@@ -40,28 +43,36 @@ const NavLink = memo<{
 
 NavLink.displayName = "NavLink";
 
-const AuthSection = memo<{ onClose: () => void }>(({ onClose }) => (
-    <div className="pt-4 border-t border-zinc-800 space-y-4 px-4">
-        <Button
-            variant="outline"
-            className="w-full border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white"
-            asChild
-        >
-            <Link href="/login" prefetch onClick={onClose}>
-                Login
-            </Link>
-        </Button>
+const AuthSection = memo<{ onClose: () => void; user?: User | null }>(({ onClose, user }) => {
+    const authButtonProps = useMemo(() => ({
+        loginHref: user ? '/logout' : '/login',
+        loginText: user ? 'Logout' : 'Login',
+        dashboardHref: user ? '/admin' : '/sign-up',
+        dashboardText: user ? 'Dashboard' : 'Start Selling'
+    }), [user]);
+    return (
+        <div className="pt-4 border-t border-zinc-800 space-y-4 px-4">
+            <Button
+                variant="outline"
+                className="w-full border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                asChild
+            >
+                <Link href={authButtonProps.loginHref} prefetch onClick={onClose}>
+                    {authButtonProps.loginText}
+                </Link>
+            </Button>
 
-        <Button
-            className="w-full bg-zinc-100 text-black hover:bg-zinc-200"
-            asChild
-        >
-            <Link href="/sign-up" prefetch onClick={onClose}>
-                Start Selling
-            </Link>
-        </Button>
-    </div>
-));
+            <Button
+                className="w-full bg-zinc-100 text-black hover:bg-zinc-200"
+                asChild
+            >
+                <Link href={authButtonProps.dashboardHref} prefetch onClick={onClose}>
+                    {authButtonProps.dashboardText}
+                </Link>
+            </Button>
+        </div>
+    );
+});
 
 AuthSection.displayName = "AuthSection";
 
@@ -79,6 +90,48 @@ export const NavbarSidebar = memo<Props>(({
     const pathname = usePathname();
     const handleClose = useCallback(() => onOpenChange(false), [onOpenChange]);
 
+    const trpc = useTRPC();
+    const sessionQueryOptions = useMemo(() =>
+        trpc.auth.session.queryOptions(),
+        [trpc]
+    );
+    const session = useQuery(sessionQueryOptions);
+
+    const featuresDropdownProps = useMemo(() => ({
+        title: "Features",
+        subtitle: "Explore Features",
+        active: pathname,
+        containerRef: featuresContainerRef,
+        dropdownRef: featuresDropdownRef,
+        items: featureItems,
+        overflow: featuresOverflow,
+        mobile: true
+    }), [pathname, featuresContainerRef, featuresDropdownRef, featuresOverflow]);
+
+    const resourcesDropdownProps = useMemo(() => ({
+        title: "Resources",
+        subtitle: "Explore Resources",
+        active: pathname,
+        containerRef: resourcesContainerRef,
+        dropdownRef: resourcesDropdownRef,
+        items: resourceItems,
+        overflow: resourcesOverflow,
+        mobile: true
+    }), [pathname, resourcesContainerRef, resourcesDropdownRef, resourcesOverflow]);
+
+    const navigationItems = useMemo(() =>
+        items.map((item) => (
+            <NavLink
+                key={item.href}
+                href={item.href}
+                onNavigate={handleClose}
+            >
+                {item.children}
+            </NavLink>
+        )),
+        [items, handleClose]
+    );
+
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
@@ -91,37 +144,10 @@ export const NavbarSidebar = memo<Props>(({
                 </SheetHeader>
 
                 <ScrollArea className="flex flex-col overflow-auto h-full pb-2">
-                    <NavbarDropdown
-                        title="Features"
-                        subtitle="Explore Features"
-                        active={pathname}
-                        containerRef={featuresContainerRef}
-                        dropdownRef={featuresDropdownRef}
-                        items={featureItems}
-                        overflow={featuresOverflow}
-                        mobile
-                    />
-                    <NavbarDropdown
-                        title="Resources"
-                        subtitle="Explore Resources"
-                        active={pathname}
-                        containerRef={resourcesContainerRef}
-                        dropdownRef={resourcesDropdownRef}
-                        items={resourceItems}
-                        overflow={resourcesOverflow}
-                        mobile
-                    />
-                    {items.map((item) => (
-                        <NavLink
-                            key={item.href}
-                            href={item.href}
-                            onClick={handleClose}
-                        >
-                            {item.children}
-                        </NavLink>
-                    ))}
-
-                    <AuthSection onClose={handleClose} />
+                    <NavbarDropdown {...featuresDropdownProps} />
+                    <NavbarDropdown {...resourcesDropdownProps} />
+                    {navigationItems}
+                    <AuthSection onClose={handleClose} user={session.data?.user} />
                 </ScrollArea>
             </SheetContent>
         </Sheet>

@@ -5,10 +5,13 @@ import Link from "next/link"
 import { NavbarDropdown } from "./navbar-dropdown"
 import { usePathname } from "next/navigation"
 import { NavbarSidebar } from "./navbar-sidebar"
-import { useState, useCallback, memo, useRef, useLayoutEffect, useMemo } from "react"
+import { useState, useCallback, memo, useRef, useLayoutEffect, useMemo, startTransition } from "react"
 
 import { Button } from "@/components/ui/button"
 import { resourceItems } from "@/constants"
+import { useTRPC } from "@/trpc/client"
+import { useQuery } from "@tanstack/react-query"
+import { User } from "@/payload-types"
 
 interface NavItem {
     href: string;
@@ -55,23 +58,33 @@ const Logo = memo(() => (
 
 Logo.displayName = "Logo"
 
-const AuthButtons = memo(() => (
+const AuthButtonsSkeleton = memo(() => (
+    <div className="hidden md:flex items-center gap-3">
+        <div className="h-9 w-16 bg-zinc-800/50 rounded-md animate-pulse" />
+        <div className="h-9 w-24 bg-zinc-800/50 rounded-md animate-pulse" />
+    </div>
+))
+
+AuthButtonsSkeleton.displayName = "AuthButtonsSkeleton"
+
+const AuthButtons = memo(({ user }: { user?: User | null }) => (
+
     <div className="hidden md:flex items-center gap-3">
         <Button
             variant="ghost"
             className="text-zinc-400 hover:text-white hover:bg-zinc-800 border border-transparent hover:border-zinc-700 transition-all duration-200"
             asChild
         >
-            <Link href="/login" prefetch>
-                Login
+            <Link href={user ? '/logout' : '/login'} prefetch>
+                {user ? 'Logout' : 'Login'}
             </Link>
         </Button>
 
         <Button
             className="bg-zinc-100 text-black hover:bg-zinc-200 transition-all relative overflow-hidden group"
         >
-            <Link href="/sign-up" prefetch className="relative z-30">
-                Start Selling
+            <Link href={user ? '/admin' : '/sign-up'} prefetch className="relative z-30">
+                {user ? 'Dashboard' : 'Start Selling'}
             </Link>
             <span className="absolute inset-0 bg-zinc-300 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out" />
         </Button>
@@ -157,8 +170,17 @@ export const Navbar = memo(() => {
 
     const overflowData = useOverflowDetection()
     const handleSidebarToggle = useCallback(() => {
-        setIsSidebarOpen(prev => !prev)
+        startTransition(() => {
+            setIsSidebarOpen(prev => !prev)
+        })
     }, [])
+
+    const activeRoutes = useMemo(() => ({
+        home: pathname === '/',
+        docs: pathname === '/docs',
+        about: pathname === '/about',
+        contact: pathname === '/contact'
+    }), [pathname])
 
     const sidebarProps = useMemo(() => ({
         onOpenChange: setIsSidebarOpen,
@@ -166,6 +188,13 @@ export const Navbar = memo(() => {
         items: navbarItems,
         ...overflowData
     }), [isSidebarOpen, overflowData])
+
+    const trpc = useTRPC();
+    const sessionQueryOptions = useMemo(() =>
+        trpc.auth.session.queryOptions(),
+        [trpc]
+    )
+    const session = useQuery(sessionQueryOptions)
 
     return (
         <header className="h-16 border-b border-zinc-800/50 w-full bg-zinc-950/90 backdrop-blur-md sticky top-0 z-40 shadow-sm">
@@ -186,7 +215,7 @@ export const Navbar = memo(() => {
                     /> */}
                     <NavLink
                         href="/"
-                        active={pathname === '/'}
+                        active={activeRoutes.home}
                     >
                         Home
                     </NavLink>
@@ -210,7 +239,11 @@ export const Navbar = memo(() => {
                     ))}
                 </nav>
 
-                <AuthButtons />
+                {session.isLoading ? (
+                    <AuthButtonsSkeleton />
+                ) : (
+                    <AuthButtons user={session.data?.user} />
+                )}
 
                 <MobileMenuButton
                     isSidebarOpen={isSidebarOpen}
