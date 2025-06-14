@@ -51,7 +51,6 @@ export const bankFormSchema = z
         }),
         bankName: z.string().min(2, { message: "Bank name is required" }),
         branchName: z.string().min(2, { message: "Branch name is required" }),
-        accountType: z.string().min(1, { message: "Please select account type" }),
         panCardNumber: z
             .string()
             .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, {
@@ -69,4 +68,8 @@ export const bankFormSchema = z
 
 export const getSubscription = z.object({
     subscriptionId: z.string()
+})
+
+export const getBankDetails = z.object({
+    accountNumber: z.string()
 })

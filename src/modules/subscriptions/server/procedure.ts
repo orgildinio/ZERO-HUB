@@ -1,4 +1,4 @@
-import { bankFormSchema, getSubscription, subscribeSchema } from "../schema";
+import { bankFormSchema, getBankDetails, getSubscription, subscribeSchema } from "../schema";
 import { razorpay } from "../lib/utils";
 
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
@@ -100,7 +100,7 @@ export const subscriptionRouter = createTRPCRouter({
                 console.log(error)
             }
         }),
-    getOne: baseProcedure
+    getTenantSubscription: baseProcedure
         .input(getSubscription)
         .query(async ({ ctx, input }) => {
             const subscription = await ctx.db.find({
@@ -128,20 +128,41 @@ export const subscriptionRouter = createTRPCRouter({
                 plan: data.plan as SubscriptionPlan
             }
         }),
+    getTenantBankDetails: baseProcedure
+        .input(getBankDetails)
+        .query(async ({ ctx, input }) => {
+            const tenant = await ctx.db.find({
+                collection: "tenants",
+                pagination: false,
+                limit: 1,
+                depth: 0,
+                where: {
+                    "bankDetails.accountNumber": {
+                        equals: input.accountNumber,
+                    }
+                },
+                select:{
+                    bankDetails:true
+                }
+            });
+            if (!tenant.docs[0]) throw new TRPCError({ code: "NOT_FOUND", message: 'Tenant does not exist.' })
+            const data = tenant.docs[0].bankDetails
+            return data
+        }),
     verify: protectedProcedure
         .input(bankFormSchema)
         .mutation(async ({ ctx, input }) => {
             try {
-                const tenant = await ctx.db.update({
+                const tenant = await ctx.db.find({
                     collection: "tenants",
+                    pagination: false,
+                    limit: 1,
+                    depth: 0,
                     where: {
                         phone: {
                             equals: input.phone,
                         }
                     },
-                    data: {
-
-                    }
                 });
                 if (!tenant.docs[0]) throw new TRPCError({ code: "NOT_FOUND", message: 'Tenant does not exist.' })
 

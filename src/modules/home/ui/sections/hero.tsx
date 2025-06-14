@@ -255,7 +255,7 @@ export const HeroSection = () => {
     `, []);
 
     return (
-        <section className="relative min-h-screen py-16 md:py-20 lg:py-24 overflow-hidden">
+        <section className="relative py-16 md:py-20 lg:py-24 overflow-hidden">
             <div className="container md:px-6 px-2 mx-auto">
                 <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 xl:gap-20">
                     <div className="w-full lg:w-1/2 text-center lg:text-left z-10">
