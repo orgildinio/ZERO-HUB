@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { generateTenantUrl } from "@/lib/utils";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { ProductCard } from "../components/products/product-card";
-import { Media } from "@/payload-types";
+import { ProductCard, ProductCardSkeleton } from "../components/products/product-card";
 import { useCart } from "@/modules/checkout/hooks/use-cart";
+import { Skeleton } from "@/components/ui/skeleton"
 import toast from "react-hot-toast";
 
 export const WishlistView = ({ slug }: { slug: string }) => {
@@ -114,6 +114,41 @@ export const WishlistView = ({ slug }: { slug: string }) => {
                     </>
                 )}
             </div>
+        </div>
+    )
+}
+
+
+
+export default function WishlistLoading() {
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
+            <main>
+                <section className="relative py-16 md:py-20 overflow-hidden">
+                    <div className="container relative px-4 md:px-6 mx-auto">
+                        <div className="mx-auto max-w-3xl text-center">
+                            <Skeleton className="inline-block mb-6 h-8 w-32 rounded-full" />
+                            <Skeleton className="h-12 w-64 mx-auto mb-6 md:h-16" />
+                            <div className="mb-8">
+                                <Skeleton className="h-6 w-full mb-2" />
+                                <Skeleton className="h-6 w-3/4 mx-auto" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div className="container px-4 pb-16 md:px-6 md:pb-24 mx-auto">
+                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {[...Array(8)].map((_, i) => (
+                            <ProductCardSkeleton key={i} />
+                        ))}
+                    </div>
+
+                    <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+                        <Skeleton className="h-14 w-48 rounded-full" />
+                    </div>
+                </div>
+            </main>
         </div>
     )
 }
