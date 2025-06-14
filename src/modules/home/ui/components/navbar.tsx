@@ -58,15 +58,6 @@ const Logo = memo(() => (
 
 Logo.displayName = "Logo"
 
-const AuthButtonsSkeleton = memo(() => (
-    <div className="hidden md:flex items-center gap-3">
-        <div className="h-9 w-16 bg-zinc-800/50 rounded-md animate-pulse" />
-        <div className="h-9 w-24 bg-zinc-800/50 rounded-md animate-pulse" />
-    </div>
-))
-
-AuthButtonsSkeleton.displayName = "AuthButtonsSkeleton"
-
 const AuthButtons = memo(({ user }: { user?: User | null }) => (
 
     <div className="hidden md:flex items-center gap-3">
@@ -239,11 +230,7 @@ export const Navbar = memo(() => {
                     ))}
                 </nav>
 
-                {session.isLoading ? (
-                    <AuthButtonsSkeleton />
-                ) : (
-                    <AuthButtons user={session.data?.user} />
-                )}
+                <AuthButtons user={session.data?.user} />
 
                 <MobileMenuButton
                     isSidebarOpen={isSidebarOpen}
