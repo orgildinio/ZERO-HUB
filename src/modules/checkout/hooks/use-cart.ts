@@ -11,7 +11,7 @@ export const useCart = (tenantSlug: string) => {
     const clearAllCarts = useCartStore((state) => state.clearAllCarts);
     const clearCart = useCartStore((state) => state.clearCart);
 
-    const cartItems = useCartStore(useShallow((state) => 
+    const cartItems = useCartStore(useShallow((state) =>
         state.tenantCarts[tenantSlug]?.items || []
     ));
 
@@ -53,19 +53,19 @@ export const useCart = (tenantSlug: string) => {
 
     return {
         cartItems,
-        
-        addProduct: handleAddProduct,
-        removeProduct: handleRemoveProduct,
+
+        addProductToCart: handleAddProduct,
+        removeProductFromCart: handleRemoveProduct,
         updateQuantity: handleUpdateQuantity,
         incrementQuantity: handleIncrementQuantity,
         decrementQuantity: handleDecrementQuantity,
-        
+
         clearCart: clearTenantCart,
         clearAllCarts,
-        
+
         isProductInCart,
         getProductQuantity,
-        
+
         totalItems,
         uniqueItems,
     };

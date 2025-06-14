@@ -16,7 +16,7 @@ import { ArrowRight, Gift, ShoppingBag } from 'lucide-react'
 
 export const CartView = ({ slug }: { slug: string }) => {
 
-    const { totalItems, cartItems, incrementQuantity, decrementQuantity, getProductQuantity, removeProduct } = useCart(slug);
+    const { totalItems, cartItems, incrementQuantity, decrementQuantity, getProductQuantity, removeProductFromCart } = useCart(slug);
 
     const productIds = cartItems.map((item) => (
         item.productId
@@ -58,7 +58,7 @@ export const CartView = ({ slug }: { slug: string }) => {
                                         productQuantity={getProductQuantity(product.id)}
                                         incrementQuantity={incrementQuantity}
                                         decrementQuantity={decrementQuantity}
-                                        removeProduct={removeProduct}
+                                        removeProduct={removeProductFromCart}
                                     />
                                 ))}
                             </div>

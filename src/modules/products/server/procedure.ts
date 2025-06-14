@@ -179,21 +179,22 @@ export const productsRouter = createTRPCRouter({
                     badge: true,
                     slug: true,
                     featured: true,
-                    category: true
+                    category: true,
                 }
             });
+
             const transformedDocs = data.docs.map(doc => ({
                 ...doc,
                 images: doc.images?.map(imageItem => ({
                     ...imageItem,
                     image: imageItem.image as Media,
                 })) || [],
-                category: doc.category as Category
+                category: doc.category as Category,
             }));
 
             return {
                 ...data,
-                docs: transformedDocs
+                docs: transformedDocs,
             }
         }),
     getOne: baseProcedure

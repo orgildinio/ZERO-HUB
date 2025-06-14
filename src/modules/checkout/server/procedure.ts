@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { Media, Tenant } from "@/payload-types";
+import { Category, Media, Tenant } from "@/payload-types";
 
 export const checkoutRouter = createTRPCRouter({
     getProducts: baseProcedure
@@ -26,7 +26,8 @@ export const checkoutRouter = createTRPCRouter({
                     slug: true,
                     pricing: true,
                     images: true,
-                    shipping: true,
+                    category: true,
+                    badge: true
                 }
             });
             if (data.totalDocs !== input.productIds.length) {
@@ -47,6 +48,7 @@ export const checkoutRouter = createTRPCRouter({
 
                     return {
                         ...doc,
+                        category: doc.category as Category,
                         image: primaryImage,
                         tenant: doc.tenant as Tenant & { image: Media | null }
                     }

@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { generateTenantUrl } from "@/lib/utils"
 import { useCart } from "@/modules/checkout/hooks/use-cart"
-import { Heart, ShoppingBag, Star } from "lucide-react"
+import { useWishlist } from "@/modules/products/hooks/use-wishlist"
+import { Heart, ShoppingBag, Star, Trash2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo, useMemo } from "react"
@@ -62,13 +63,25 @@ export const ProductCard = memo(({
 
     const productUrl = useMemo(() => `${generateTenantUrl(tenantSlug)}/products/${slug}`, [tenantSlug, slug]);
 
-    const { addProduct, isProductInCart } = useCart(tenantSlug);
+    const { addProductToCart, isProductInCart } = useCart(tenantSlug);
+    const { addProductToWishlist, isProductInWishlist, removeProductFromWislist } = useWishlist(tenantSlug);
 
     const alreadyInCart = isProductInCart(id)
+    const alreadyInWishlist = isProductInWishlist(id)
 
-    const addToCart = (productId: string) => {
-        addProduct(productId)
+    const addToCart = () => {
+        addProductToCart(id)
         toast.success("Product added to cart!")
+    }
+
+    const addToWishlist = () => {
+        addProductToWishlist(id)
+        toast.success("Product added to wishlist!")
+    }
+
+    const handleRemoveFromWishlist = () => {
+        removeProductFromWislist(id)
+        toast.success("Product removed from wishlist!")
     }
 
     return (
@@ -97,14 +110,27 @@ export const ProductCard = memo(({
                 </Link>
 
                 <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                    <Button
-                        variant="secondary"
-                        size="icon"
-                        className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
-                        aria-label="Add to wishlist"
-                    >
-                        <Heart className="h-4 w-4" />
-                    </Button>
+                    {alreadyInWishlist ? (
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
+                            aria-label="Remove from wishlist"
+                            onClick={handleRemoveFromWishlist}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
+                            aria-label="Add to wishlist"
+                            onClick={addToWishlist}
+                        >
+                            <Heart className="h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
 
                 <div className="p-6">
@@ -146,7 +172,7 @@ export const ProductCard = memo(({
                     <Button
                         className="w-full bg-stone-900 hover:bg-amber-600 text-white rounded-full transition-all duration-300 transform hover:scale-105"
                         size="sm"
-                        onClick={() => addToCart(id)}
+                        onClick={addToCart}
                         disabled={alreadyInCart}
                     >
                         {alreadyInCart ? (
@@ -160,7 +186,7 @@ export const ProductCard = memo(({
                     </Button>
                 </div>
             </div>
-        </div>
+        </div >
     )
 })
 

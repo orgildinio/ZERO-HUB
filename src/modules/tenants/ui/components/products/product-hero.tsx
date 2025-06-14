@@ -72,7 +72,7 @@ export const ProductHero = ({ product, slug }: { slug: string, product: string }
         }));
     };
 
-    const { addProduct } = useCart(slug)
+    const { addProductToCart } = useCart(slug)
 
     return (
         <>
@@ -156,7 +156,7 @@ export const ProductHero = ({ product, slug }: { slug: string, product: string }
                     )}
 
                     <div className="flex flex-col gap-4 sm:flex-row">
-                        <Button size="lg" className="flex-1" onClick={() => addProduct}>
+                        <Button size="lg" className="flex-1" onClick={() => addProductToCart}>
                             Add to Cart
                         </Button>
                         <Button variant="outline" size="lg">

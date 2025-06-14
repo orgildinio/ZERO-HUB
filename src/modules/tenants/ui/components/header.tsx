@@ -11,6 +11,7 @@ import { useSuspenseQuery } from "@tanstack/react-query"
 import { useTRPC } from "@/trpc/client"
 import { generateTenantUrl } from "@/lib/utils"
 import { useCart } from "@/modules/checkout/hooks/use-cart"
+import { useWishlist } from "@/modules/products/hooks/use-wishlist"
 
 export const HeaderSkeleton = memo(() => (
     <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-stone-200/50 shadow-sm">
@@ -95,7 +96,7 @@ const MobileNavigation = memo(({ navigation }: { navigation: Array<{ name: strin
 
 MobileNavigation.displayName = "MobileNavigation"
 
-const ActionButtons = memo(({ items, slug }: { items: number, slug: string }) => (
+const ActionButtons = memo(({ items, slug, wishlistItems }: { items: number, slug: string; wishlistItems: number }) => (
     <div className="ml-auto flex items-center gap-1 sm:gap-2">
 
         <Button
@@ -104,10 +105,10 @@ const ActionButtons = memo(({ items, slug }: { items: number, slug: string }) =>
             className="hover:bg-stone-100 relative"
             asChild
         >
-            <Link href="/wishlist" aria-label="Wishlist (3 items)">
+            <Link href={`${generateTenantUrl(slug)}/wishlist`} aria-label="Wishlist (3 items)">
                 <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="absolute -right-0.5 -top-0.5 sm:-right-1 sm:-top-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-red-500 text-[9px] sm:text-[10px] text-white font-medium">
-                    3
+                    {wishlistItems}
                 </span>
             </Link>
         </Button>
@@ -141,7 +142,9 @@ export const Header = memo(({ slug }: { slug: string }) => {
         { name: "Shop", href: `${generateTenantUrl(slug)}/products` },
         { name: "Categories", href: `${generateTenantUrl(slug)}/categories` },
         { name: "Contact", href: `${generateTenantUrl(slug)}/contact` },
-    ], [slug])
+    ], [slug]);
+
+    const { wishlistItems } = useWishlist(slug)
 
     return (
         <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-stone-200/50 shadow-sm">
@@ -159,7 +162,7 @@ export const Header = memo(({ slug }: { slug: string }) => {
                 </Link>
 
                 <Navigation navigation={navigation} />
-                <ActionButtons items={totalItems} slug={slug} />
+                <ActionButtons items={totalItems} slug={slug} wishlistItems={wishlistItems.length} />
                 <MobileNavigation navigation={navigation} />
             </div>
         </header>
