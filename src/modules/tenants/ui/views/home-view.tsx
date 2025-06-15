@@ -90,6 +90,7 @@ const ProductsSection = memo(({ slug }: { slug: string }) => (
 ProductsSection.displayName = 'ProductsSection'
 
 export const HomeView = ({ slug }: { slug: string }) => {
+    
     return (
         <div className="flex flex-col">
             <HeroSection slug={slug} />
