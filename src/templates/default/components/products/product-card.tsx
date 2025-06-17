@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import toast from "react-hot-toast"
 import { Heart, ShoppingBag, Star, Trash2 } from "lucide-react"
-import { memo, useMemo, useState, useCallback } from "react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -37,7 +37,7 @@ const BADGE_COLORS = {
     default: "bg-gray-100 text-gray-800"
 } as const
 
-export const ProductCard = memo(({
+export const ProductCard = ({
     id,
     name,
     slug,
@@ -55,17 +55,12 @@ export const ProductCard = memo(({
     const [imageLoaded, setImageLoaded] = useState(false)
     const [imageError, setImageError] = useState(false)
 
-    const badgeColor = useMemo(() =>
-        badge ? (BADGE_COLORS[badge as keyof typeof BADGE_COLORS] || BADGE_COLORS.default) : '',
-        [badge]
-    )
+    const badgeColor = badge ? (BADGE_COLORS[badge as keyof typeof BADGE_COLORS] || BADGE_COLORS.default) : ''
 
-    const hasDiscount = useMemo(() =>
-        originalPrice && originalPrice !== price,
-        [originalPrice, price]
-    )
 
-    const starElements = useMemo(() => {
+    const hasDiscount = originalPrice && originalPrice !== price
+
+    const StarElements = () => {
         if (!rating) return null
         return Array.from({ length: 5 }, (_, i) => (
             <Star
@@ -73,12 +68,7 @@ export const ProductCard = memo(({
                 className={`h-4 w-4 flex-shrink-0 ${i < Math.floor(rating) ? "fill-amber-400 text-amber-400" : "text-stone-300"}`}
             />
         ))
-    }, [rating])
-
-    const productUrl = useMemo(() =>
-        `${generateTenantUrl(tenantSlug)}/products/${slug}`,
-        [tenantSlug, slug]
-    )
+    }
 
     const { addProductToCart, isProductInCart } = useCart(tenantSlug)
     const { addProductToWishlist, isProductInWishlist, removeProductFromWislist } = useWishlist(tenantSlug)
@@ -86,28 +76,28 @@ export const ProductCard = memo(({
     const alreadyInCart = isProductInCart(id)
     const alreadyInWishlist = isProductInWishlist(id)
 
-    const handleAddToCart = useCallback(() => {
+    const handleAddToCart = () => {
         addProductToCart(id)
         toast.success("Product added to cart!")
-    }, [addProductToCart, id])
+    }
 
-    const handleAddToWishlist = useCallback(() => {
+    const handleAddToWishlist = () => {
         addProductToWishlist(id)
         toast.success("Product added to wishlist!")
-    }, [addProductToWishlist, id])
+    }
 
-    const handleRemoveFromWishlist = useCallback(() => {
+    const handleRemoveFromWishlist = () => {
         removeProductFromWislist(id)
         toast.success("Product removed from wishlist!")
-    }, [removeProductFromWislist, id])
+    }
 
-    const handleImageLoad = useCallback(() => {
+    const handleImageLoad = () => {
         setImageLoaded(true)
-    }, [])
+    }
 
-    const handleImageError = useCallback(() => {
+    const handleImageError = () => {
         setImageError(true)
-    }, [])
+    }
 
     return (
         <article className="group relative">
@@ -120,7 +110,7 @@ export const ProductCard = memo(({
                     )}
                 </div>
 
-                <Link href={productUrl} className="block" aria-label={`View ${name}`}>
+                <Link href={`${generateTenantUrl(tenantSlug)}/products/${slug}`} className="block" aria-label={`View ${name}`}>
                     <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100">
                         <div className="absolute inset-0 bg-stone-100" />
 
@@ -177,7 +167,7 @@ export const ProductCard = memo(({
                         )}
                     </div>
 
-                    <Link href={productUrl}>
+                    <Link href={`${generateTenantUrl(tenantSlug)}/products/${slug}`}>
                         <h3 className="text-lg font-bold text-stone-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 leading-tight line-clamp-2 flex items-start">
                             <span>{name}</span>
                         </h3>
@@ -187,7 +177,7 @@ export const ProductCard = memo(({
                         {rating && reviews && (
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-1" aria-label={`Rating: ${rating} out of 5`}>
-                                    {starElements}
+                                    <StarElements />
                                 </div>
                                 <span className="text-sm text-stone-600 whitespace-nowrap">({reviews})</span>
                             </div>
@@ -233,7 +223,7 @@ export const ProductCard = memo(({
             </div>
         </article>
     )
-})
+}
 
 ProductCard.displayName = 'ProductCard'
 
