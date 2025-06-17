@@ -23,22 +23,6 @@ type ProductImage = {
     isPrimary?: boolean | null;
 };
 
-const getProductImage = (images: ProductImage[] | undefined): string | null => {
-    if (!images || images.length === 0) return null
-
-    const primaryImage = images.find(img => img.isPrimary)
-    if (primaryImage?.image && typeof primaryImage.image === 'object' && 'url' in primaryImage.image) {
-        return primaryImage.image.url || null;
-    }
-
-    const firstImage = images[0];
-    if (firstImage?.image && typeof firstImage.image === 'object' && 'url' in firstImage.image) {
-        return firstImage.image.url || null;
-    }
-
-    return null;
-}
-
 export const ProductHero = ({ product, slug }: { slug: string, product: string }) => {
 
     const trpc = useTRPC();
