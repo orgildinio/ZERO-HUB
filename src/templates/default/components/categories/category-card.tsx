@@ -15,11 +15,6 @@ interface Props {
 
 export const CategoryCard = ({ itemCount, href, name, image, description }: Props) => {
 
-    const productCountText = useMemo(() =>
-        itemCount ? `${itemCount} product${itemCount !== 1 ? 's' : ''}` : '0 products',
-        [itemCount]
-    )
-
     return (
         <Link href={href} className="group block">
             <div className="relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
