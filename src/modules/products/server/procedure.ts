@@ -1,102 +1,9 @@
-import { Category, Media } from "@/payload-types";
-import { baseProcedure, createTRPCRouter } from "@/trpc/init";
-import type { Where } from "payload";
 import { z } from "zod";
+
+import type { Where } from "payload";
+import { baseProcedure, createTRPCRouter } from "@/trpc/init";
+import { Category, Media } from "@/payload-types";
 import { sortedValues } from "../search-param";
-import { Sort } from "payload";
-
-const buildSort = (sortOption: string | null | undefined): Sort => {
-    const sortMap: Record<string, Sort> = {
-        newest: "-createdAt",
-        low_to_high: "+pricing.compareAtPrice",
-        high_to_low: "-pricing.compareAtPrice",
-        featured: "featured"
-    }
-    return sortOption && sortMap[sortOption] ? sortMap[sortOption] : "-createdAt";
-}
-
-const buildPriceFilter = (minPrice?: string | null, maxPrice?: string | null) => {
-    if (!minPrice && !maxPrice) return {};
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const priceFilter: any = {};
-
-    if (minPrice && maxPrice) {
-        priceFilter["pricing.compareAtPrice"] = {
-            greater_than_equal: minPrice,
-            less_than_equal: maxPrice,
-        };
-    } else if (minPrice) {
-        priceFilter["pricing.compareAtPrice"] = {
-            greater_than_equal: minPrice
-        };
-    } else if (maxPrice) {
-        priceFilter["pricing.compareAtPrice"] = {
-            less_than_equal: maxPrice
-        };
-    }
-
-    return priceFilter;
-};
-
-const buildTenantFilter = (tenantSlug?: string | null) => {
-    if (tenantSlug) {
-        return { "tenant.slug": { equals: tenantSlug } };
-    }
-    return { "isPrivate": { not_equals: true } };
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getCategoryWithSubcategories = async (db: any, categories: string[]) => {
-    const categoriesData = await db.find({
-        collection: "categories",
-        depth: 1,
-        pagination: false,
-        where: {
-            slug: { in: categories }
-        },
-        select: {
-            subcategories: true,
-            slug: true
-        }
-    });
-
-    const allCategorySlugs: string[] = [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    categoriesData.docs.forEach((doc: any) => {
-        allCategorySlugs.push(doc.slug);
-
-        if (doc.subcategories?.docs) {
-            const subcategorySlugs = doc.subcategories.docs.map((subdoc: Category) => subdoc.slug);
-            allCategorySlugs.push(...subcategorySlugs);
-        }
-    });
-
-    return [...new Set(allCategorySlugs)];
-};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const buildWhereClause = async (input: any, db: any): Promise<Where> => {
-    const where: Where = {
-        ...buildPriceFilter(input.minPrice, input.maxPrice),
-        ...buildTenantFilter(input.tenantSlug)
-    };
-
-    if (input.category && input.category.length > 0) {
-        const categorySlugs = await getCategoryWithSubcategories(db, input.category);
-        if (categorySlugs.length > 0) {
-            where["category.slug"] = { in: categorySlugs };
-        }
-    }
-
-    if (input.tags && input.tags.length > 0) {
-        where["tags.name"] = { in: input.tags };
-    }
-
-    if (input.search) {
-        where["name"] = { like: input.search };
-    }
-
-    return where;
-};
-
 
 export const productsRouter = createTRPCRouter({
     getMany: baseProcedure
@@ -104,21 +11,28 @@ export const productsRouter = createTRPCRouter({
             z.object({
                 search: z.string().nullable().optional(),
                 cursor: z.number().default(1),
-                limit: z.number().default(8),
-                category: z.array(z.string()).nullable().optional(),
                 minPrice: z.string().nullable().optional(),
                 maxPrice: z.string().nullable().optional(),
                 sort: z.enum(sortedValues).nullable().optional(),
-                tags: z.array(z.string()).nullable().optional(),
-                tenantSlug: z.string().nullable().optional()
+                category: z.array(z.string()).nullable().optional(),
+                slug: z.string().nullable().optional(),
+                limit: z.number().default(12),
             })
         )
         .query(async ({ ctx, input }) => {
+            const where: Where = {
+                tenantSlug: {
+                    equals: input.slug
+                }
+            }
 
-            const sort = buildSort(input.sort);
-            const where = await buildWhereClause(input, ctx.db);
+            if (input.search) {
+                where["name"] = {
+                    like: input.search,
+                }
+            }
 
-            if (input.category) {
+            if (input.category && input.category.length > 0) {
                 const categoriesData = await ctx.db.find({
                     collection: "categories",
                     limit: 1,
@@ -126,15 +40,14 @@ export const productsRouter = createTRPCRouter({
                     pagination: false,
                     where: {
                         slug: {
-                            equals: input.category
+                            in: input.category
                         }
                     },
                     select: {
                         subcategories: true,
                         slug: true
                     }
-                });
-
+                })
                 const formattedData = categoriesData.docs.map((doc) => ({
                     ...doc,
                     subcategories: (doc.subcategories?.docs ?? []).map((subdoc) => ({
@@ -152,54 +65,141 @@ export const productsRouter = createTRPCRouter({
                     }
                 }
             }
-            if (input.tags && input.tags.length > 0) {
-                where["tags.name"] = {
-                    in: input.tags
-                }
-            }
 
-            if (input.search) {
-                where["name"] = {
-                    like: input.search,
+            if (input.minPrice && input.maxPrice) {
+                where["pricing.price"] = {
+                    greater_than_equal: input.minPrice,
+                    less_than_equal: input.maxPrice,
+                }
+            } else if (input.minPrice) {
+                where["pricing.price"] = {
+                    greater_than_equal: input.minPrice
+                }
+            } else if (input.maxPrice) {
+                where["pricing.price"] = {
+                    less_than_equal: input.maxPrice
                 }
             }
 
             const data = await ctx.db.find({
                 collection: "products",
-                depth: 1,
-                where,
-                sort,
-                page: input.cursor,
                 limit: input.limit,
+                page: input.cursor,
+                depth: 1,
+                where: where,
                 select: {
+                    featured: true,
                     name: true,
+                    slug: true,
+                    category: true,
                     images: true,
                     description: true,
                     pricing: true,
                     badge: true,
-                    slug: true,
-                    featured: true,
-                    category: true,
                 }
             });
 
-            const transformedDocs = data.docs.map(doc => ({
-                ...doc,
-                images: doc.images?.map(imageItem => ({
-                    ...imageItem,
-                    image: imageItem.image as Media,
-                })) || [],
-                category: doc.category as Category,
-            }));
+            const transformedData = await Promise.all(
+                data.docs.map(async (doc) => {
+                    const reviewsData = await ctx.db.find({
+                        collection: "reviews",
+                        depth: 0,
+                        pagination: false,
+                        where: {
+                            product: {
+                                equals: doc.id
+                            }
+                        }
+                    });
+                    return {
+                        ...doc,
+                        images: doc.images?.map(imageItem => ({
+                            ...imageItem,
+                            image: imageItem.image as Media,
+                        })) || [],
+                        category: doc.category as Category,
+                        reviewCount: reviewsData.totalDocs,
+                        reviewRating: reviewsData.docs.length === 0 ? 0 :
+                            reviewsData.docs.reduce((acc, review) => acc + review.rating, 0) / reviewsData.totalDocs
+                    };
+                })
+            );
 
             return {
                 ...data,
-                docs: transformedDocs,
+                docs: transformedData
             }
+        }),
+    getFeatured: baseProcedure
+        .input(
+            z.object({
+                slug: z.string(),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const products = await ctx.db.find({
+                collection: "products",
+                limit: 4,
+                pagination: false,
+                depth: 1,
+                where: {
+                    and: [
+                        {
+                            tenantSlug: {
+                                equals: input.slug
+                            }
+                        },
+                        {
+                            featured: {
+                                equals: true
+                            }
+                        }
+                    ]
+                },
+                select: {
+                    featured: true,
+                    name: true,
+                    slug: true,
+                    category: true,
+                    images: true,
+                    description: true,
+                    pricing: true,
+                    badge: true,
+                }
+            })
+
+            const data = await Promise.all(
+                products.docs.map(async (doc) => {
+                    const reviewsData = await ctx.db.find({
+                        collection: "reviews",
+                        depth: 0,
+                        pagination: false,
+                        where: {
+                            product: {
+                                equals: doc.id
+                            }
+                        }
+                    });
+                    return {
+                        ...doc,
+                        images: doc.images?.map(imageItem => ({
+                            ...imageItem,
+                            image: imageItem.image as Media,
+                        })) || [],
+                        category: doc.category as Category,
+                        reviewCount: reviewsData.totalDocs,
+                        reviewRating: reviewsData.docs.length === 0 ? 0 :
+                            reviewsData.docs.reduce((acc, review) => acc + review.rating, 0) / reviewsData.totalDocs
+                    };
+                })
+            );
+
+            return data
         }),
     getOne: baseProcedure
         .input(
             z.object({
+                slug: z.string(),
                 product: z.string()
             })
         )
@@ -207,12 +207,21 @@ export const productsRouter = createTRPCRouter({
             const product = await ctx.db.find({
                 collection: "products",
                 limit: 1,
-                depth: 2,
+                depth: 1,
                 pagination: false,
                 where: {
-                    slug: {
-                        equals: input.product
-                    }
+                    and: [
+                        {
+                            tenantSlug: {
+                                equals: input.slug
+                            }
+                        },
+                        {
+                            slug: {
+                                equals: input.product
+                            }
+                        }
+                    ]
                 },
                 select: {
                     name: true,
@@ -220,6 +229,8 @@ export const productsRouter = createTRPCRouter({
                     description: true,
                     pricing: true,
                     slug: true,
+                    badge: true,
+                    inventory: true,
                     category: true,
                     specifications: true,
                     variants: true,

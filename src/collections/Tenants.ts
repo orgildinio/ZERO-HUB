@@ -1,22 +1,9 @@
-import { isSuperAdmin } from "@/lib/access";
 import { CollectionConfig } from "payload";
+
+import { isSuperAdmin } from "@/lib/access";
 
 export const Tenants: CollectionConfig = {
     slug: "tenants",
-    indexes: [
-        {
-            fields: ['slug', 'subscription.subscriptionStatus'],
-            unique: false
-        },
-        {
-            fields: ['phone'],
-            unique: true
-        },
-        {
-            fields: ['subscription.subscriptionEndDate', 'subscription.subscriptionStatus'],
-            unique: false
-        }
-    ],
     access: {
         create: ({ req }) => isSuperAdmin(req.user),
         delete: ({ req }) => isSuperAdmin(req.user),
@@ -42,7 +29,6 @@ export const Tenants: CollectionConfig = {
             required: true,
             unique: true,
             admin: {
-                readOnly: true,
                 description: "This is the subdomain of the store (e.g. [slug].zerohub.site).",
                 position: "sidebar"
             },
@@ -95,21 +81,15 @@ export const Tenants: CollectionConfig = {
                 description: "This is the name of the store (e.g. Ashish's Store)."
             },
         },
-        // TODO: Add templates relations
-        // TODO: Add customizations relations
-        // {
-        //     name: "template",
-        //     type: "relationship",
-        //     relationTo: "templates",
-        //     admin: {
-        //         description: "Templates you have purchased.",
-        //         position: "sidebar"
-        //     },
-        //     access: {
-        //         read: ({ req }) => isSuperAdmin(req.user),
-        //         update: ({ req }) => isSuperAdmin(req.user)
-        //     }
-        // },
+        {
+            name: "activeTemplate",
+            relationTo: "tenant-templates",
+            type: 'relationship',
+            admin: {
+                description: "Currently active template configuration for this tenant.",
+                position: "sidebar"
+            },
+        },
         {
             name: "subscription",
             type: "group",
@@ -261,28 +241,6 @@ export const Tenants: CollectionConfig = {
                     }
                 },
                 {
-                    name: "email",
-                    type: "email",
-                    required: false,
-                    admin: {
-                        description: "Email address for banking communications and notifications"
-                    }
-                },
-                {
-                    name: "phone",
-                    type: "text",
-                    required: false,
-                    admin: {
-                        description: "Phone number registered with bank account"
-                    },
-                    validate: (value?: string | null) => {
-                        if (value && !/^\+?[\d\s\-\(\)]{10,}$/.test(value)) {
-                            return 'Please enter a valid phone number';
-                        }
-                        return true;
-                    }
-                },
-                {
                     name: "accountType",
                     type: "select",
                     options: [
@@ -328,7 +286,7 @@ export const Tenants: CollectionConfig = {
                 {
                     name: "commissionFee",
                     type: "number",
-                    defaultValue: 2.5,
+                    defaultValue: 0,
                     min: 0,
                     max: 100,
                     admin: {
@@ -407,7 +365,6 @@ export const Tenants: CollectionConfig = {
                 },
             ]
         },
-        // TODO: Add subscription-plans relation
-        // TODO: Add settings relation
+        // TODO: Add personal settings field
     ]
 }

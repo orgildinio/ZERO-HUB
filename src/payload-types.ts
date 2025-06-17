@@ -70,12 +70,14 @@ export interface Config {
     users: User;
     media: Media;
     tenants: Tenant;
-    categories: Category;
+    templates: Template;
+    'tenant-templates': TenantTemplate;
     products: Product;
     tags: Tag;
-    subscriptions: Subscription;
-    'subscription-plans': SubscriptionPlan;
+    categories: Category;
     reviews: Review;
+    'subscription-plans': SubscriptionPlan;
+    subscriptions: Subscription;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -89,12 +91,14 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    templates: TemplatesSelect<false> | TemplatesSelect<true>;
+    'tenant-templates': TenantTemplatesSelect<false> | TenantTemplatesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
-    subscriptions: SubscriptionsSelect<false> | SubscriptionsSelect<true>;
-    'subscription-plans': SubscriptionPlansSelect<false> | SubscriptionPlansSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    'subscription-plans': SubscriptionPlansSelect<false> | SubscriptionPlansSelect<true>;
+    subscriptions: SubscriptionsSelect<false> | SubscriptionsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -181,6 +185,10 @@ export interface Tenant {
    */
   store: string;
   /**
+   * Currently active template configuration for this tenant.
+   */
+  activeTemplate?: (string | null) | TenantTemplate;
+  /**
    * Subscription and billing information
    */
   subscription?: {
@@ -225,14 +233,6 @@ export interface Tenant {
      * You cannot create products until you verify your bank details.
      */
     bankDetailsSubmitted?: boolean | null;
-    /**
-     * Email address for banking communications and notifications
-     */
-    email?: string | null;
-    /**
-     * Phone number registered with bank account
-     */
-    phone?: string | null;
     /**
      * Type of bank account
      */
@@ -291,14 +291,7 @@ export interface Tenant {
 export interface Media {
   id: string;
   tenant?: (string | null) | Tenant;
-  /**
-   * Alternative text for accessibility and SEO. Describe what the image shows.
-   */
   alt: string;
-  /**
-   * Categorize your media for better organization
-   */
-  category?: ('product' | 'category' | 'marketing' | 'blog' | 'user' | 'system' | 'other') | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -312,96 +305,226 @@ export interface Media {
   focalY?: number | null;
 }
 /**
- * Manage product categories. You must verify your account before creating categories.
+ * Template configurations for each tenant with customizations
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
+ * via the `definition` "tenant-templates".
  */
-export interface Category {
+export interface TenantTemplate {
   id: string;
-  tenant?: (string | null) | Tenant;
   /**
-   * The display name of your category
+   * A descriptive name for this tenant template configuration (e.g., 'Acme Corp - Landing Page Template')
+   */
+  displayName?: string | null;
+  /**
+   * The base template being used
+   */
+  template: string | Template;
+  /**
+   * Tenant-specific customizations for this template
+   */
+  customizations?: {
+    /**
+     * Color scheme customizations
+     */
+    colors?: {
+      /**
+       * Primary brand color (hex code)
+       */
+      primaryColor?: string | null;
+      /**
+       * Secondary brand color (hex code)
+       */
+      secondaryColor?: string | null;
+      /**
+       * Background color (hex code)
+       */
+      backgroundColor?: string | null;
+      /**
+       * Primary text color (hex code)
+       */
+      textColor?: string | null;
+    };
+    /**
+     * Typography customizations
+     */
+    fonts?: {
+      /**
+       * Primary font family for headings
+       */
+      primaryFont?: ('Roboto' | 'Open Sans' | 'Lato' | 'Montserrat' | 'Poppins' | 'Inter') | null;
+      /**
+       * Font family for body text
+       */
+      bodyFont?: ('Roboto' | 'Open Sans' | 'Lato' | 'Source Sans Pro' | 'Inter') | null;
+    };
+    /**
+     * Layout and structure customizations
+     */
+    layout?: {
+      /**
+       * Header layout style
+       */
+      headerStyle?: ('default' | 'centered' | 'left' | 'minimal') | null;
+      /**
+       * Footer layout style
+       */
+      footerStyle?: ('default' | 'minimal' | 'extended') | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage website templates available for tenants
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "templates".
+ */
+export interface Template {
+  id: string;
+  /**
+   * Template name that will be displayed to users
    */
   name: string;
   /**
-   * This is the URL path of the category (e.g. [store_slug].zerohub.site/[slug]).
+   * URL-friendly identifier for the template
    */
   slug: string;
   /**
-   * Brief description of this category (optional)
+   * Brief description of the template features and design
    */
-  description?: string | null;
+  description: string;
   /**
-   * Active categories are visible to customers
+   * Template category for organization and filtering
    */
-  status: 'active' | 'inactive' | 'draft';
+  category:
+    | 'agriculture'
+    | 'books'
+    | 'electronics_and_furniture'
+    | 'fashion_and_lifestyle'
+    | 'gifting'
+    | 'grocery'
+    | 'baby_products'
+    | 'office_supplies'
+    | 'religious_products'
+    | 'pet_products'
+    | 'sports_products'
+    | 'arts_and_collectibles'
+    | 'sexual_wellness_products'
+    | 'drop_shipping'
+    | 'crypto_machinery'
+    | 'tobacco'
+    | 'weapons_and_ammunitions'
+    | 'stamps_and_coin_stores'
+    | 'automobile_parts_and_equipments'
+    | 'garden_supply_stores'
+    | 'household_appliance_stores'
+    | 'non_durable_goods'
+    | 'pawn_shops'
+    | 'wig_and_toupee_shops'
+    | 'camera_and_photographic_stores'
+    | 'leather_goods_and_luggage'
+    | 'men_and_boys_clothing_stores'
+    | 'tent_stores'
+    | 'shoe_stores'
+    | 'petroleum_and_petroleum_products'
+    | 'automotive_tire_stores'
+    | 'chemical_and_allied_products'
+    | 'family_clothing_stores'
+    | 'fabric_and_sewing_stores'
+    | 'art_supply_stores'
+    | 'clocks_and_silverware_stores'
+    | 'cosmetic_stores'
+    | 'home_furnishing_stores'
+    | 'antique_stores'
+    | 'women_clothing'
+    | 'women_accessory_stores';
   /**
-   * Display this category prominently on the homepage
+   * Template preview assets
    */
-  featured?: boolean | null;
-  /**
-   * Lower numbers appear first in category lists
-   */
-  sortOrder?: number | null;
-  /**
-   * Select a parent category to create a subcategory
-   */
-  parent?: (string | null) | Category;
-  /**
-   * Subcategories under this category
-   */
-  subcategories?: {
-    docs?: (string | Category)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  /**
-   * Category images for better visual presentation
-   */
-  images?: {
+  preview?: {
     /**
-     * Small image for category cards (recommended: 300x300px)
+     * Main thumbnail image (recommended: 400x300px)
      */
     thumbnail?: (string | null) | Media;
+    /**
+     * Additional screenshot images showing different pages
+     */
+    screenshots?: (string | Media)[] | null;
+    videoUrl?: (string | null) | Media;
   };
   /**
-   * Search engine optimization settings
+   * Template pricing information
    */
-  seo?: {
+  pricing: {
     /**
-     * SEO title (recommended: 50-60 characters)
+     * Template price in INR (use 0 for free templates)
      */
-    title?: string | null;
+    price: number;
     /**
-     * Meta description (recommended: 150-160 characters)
+     * Original price before discount (optional)
      */
-    description?: string | null;
+    originalPrice?: number | null;
     /**
-     * Comma-separated keywords for this category
+     * Mark as free template (overrides price)
      */
-    keywords?: string | null;
-    /**
-     * Image for social media sharing (recommended: 1200x630px)
-     */
-    ogImage?: (string | null) | Media;
+    isFree?: boolean | null;
   };
   /**
-   * Category statistics and analytics
+   * Technical specifications and requirements
    */
-  stats?: {
+  technical?: {
     /**
-     * Number of products in this category
+     * Features included in the template
      */
-    productCount?: number | null;
+    features?:
+      | (
+          | 'responsive'
+          | 'dark-mode'
+          | 'search'
+          | 'auth'
+          | 'payment'
+          | 'blog'
+          | 'forms'
+          | 'social'
+          | 'analytics'
+          | 'seo'
+          | 'i18n'
+          | 'admin'
+          | 'api'
+          | 'cart'
+          | 'wishlist'
+          | 'reviews'
+          | 'newsletter'
+          | 'livechat'
+        )[]
+      | null;
+  };
+  /**
+   * Current status of the template
+   */
+  status: 'draft' | 'active' | 'inactive' | 'discontinued' | 'coming-soon';
+  /**
+   * Popularity score (higher = more popular)
+   */
+  popularity?: number | null;
+  /**
+   * Template analytics and performance metrics
+   */
+  analytics?: {
     /**
-     * Number of times this category page has been viewed
+     * Total number of purchases
      */
-    viewCount?: number | null;
+    totalPurchases?: number | null;
     /**
-     * Last time this category page was viewed
+     * Total number of page views
      */
-    lastViewed?: string | null;
+    totalViews?: number | null;
+    /**
+     * Number of tenants currently using this template
+     */
+    activeTenants?: number | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -415,6 +538,7 @@ export interface Category {
 export interface Product {
   id: string;
   tenant?: (string | null) | Tenant;
+  tenantSlug: string;
   /**
    * Product name (max 100 characters)
    */
@@ -622,6 +746,93 @@ export interface Product {
   createdAt: string;
 }
 /**
+ * Manage product categories. You must verify your account before creating categories.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  tenantSlug: string;
+  /**
+   * The display name of your category
+   */
+  name: string;
+  /**
+   * This is the URL path of the category (e.g. [store_slug].zerohub.site/[slug]).
+   */
+  slug: string;
+  /**
+   * Brief description of this category (optional)
+   */
+  description?: string | null;
+  /**
+   * Active categories are visible to customers
+   */
+  status: 'active' | 'inactive' | 'draft';
+  /**
+   * Display this category prominently on the homepage
+   */
+  featured?: boolean | null;
+  /**
+   * Select a parent category to create a subcategory
+   */
+  parent?: (string | null) | Category;
+  /**
+   * Subcategories under this category
+   */
+  subcategories?: {
+    docs?: (string | Category)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Small image for category cards (recommended: 300x300px)
+   */
+  thumbnail: string | Media;
+  /**
+   * Search engine optimization settings
+   */
+  seo?: {
+    /**
+     * SEO title (recommended: 50-60 characters)
+     */
+    title?: string | null;
+    /**
+     * Meta description (recommended: 150-160 characters)
+     */
+    description?: string | null;
+    /**
+     * Comma-separated keywords for this category
+     */
+    keywords?: string | null;
+    /**
+     * Image for social media sharing (recommended: 1200x630px)
+     */
+    ogImage?: (string | null) | Media;
+  };
+  /**
+   * Category statistics and analytics
+   */
+  stats?: {
+    /**
+     * Number of products in this category
+     */
+    productCount?: number | null;
+    /**
+     * Number of times this category page has been viewed
+     */
+    viewCount?: number | null;
+    /**
+     * Last time this category page was viewed
+     */
+    lastViewed?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Manage product tags and categories
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -683,31 +894,17 @@ export interface Tag {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "subscriptions".
+ * via the `definition` "reviews".
  */
-export interface Subscription {
+export interface Review {
   id: string;
-  tenant: string | Tenant;
-  plan: string | SubscriptionPlan;
-  razorpaySubscriptionId: string;
-  status:
-    | 'created'
-    | 'pending'
-    | 'authenticated'
-    | 'active'
-    | 'paused'
-    | 'halted'
-    | 'cancelled'
-    | 'completed'
-    | 'expired';
-  startAt?: string | null;
-  endAt?: string | null;
-  currentStart?: string | null;
-  currentEnd?: string | null;
-  chargeAt?: string | null;
-  totalCount?: number | null;
-  paidCount?: number | null;
-  remainingCount?: number | null;
+  tenant?: (string | null) | Tenant;
+  name: string;
+  rating: number;
+  title: string;
+  description: string;
+  email?: string | null;
+  product: string | Product;
   updatedAt: string;
   createdAt: string;
 }
@@ -740,16 +937,31 @@ export interface SubscriptionPlan {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reviews".
+ * via the `definition` "subscriptions".
  */
-export interface Review {
+export interface Subscription {
   id: string;
-  name: string;
-  rating: number;
-  title: string;
-  description: string;
-  email?: string | null;
-  product: string | Product;
+  tenant: string | Tenant;
+  plan: string | SubscriptionPlan;
+  razorpaySubscriptionId: string;
+  status:
+    | 'created'
+    | 'pending'
+    | 'authenticated'
+    | 'active'
+    | 'paused'
+    | 'halted'
+    | 'cancelled'
+    | 'completed'
+    | 'expired';
+  startAt?: string | null;
+  endAt?: string | null;
+  currentStart?: string | null;
+  currentEnd?: string | null;
+  chargeAt?: string | null;
+  totalCount?: number | null;
+  paidCount?: number | null;
+  remainingCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -773,8 +985,12 @@ export interface PayloadLockedDocument {
         value: string | Tenant;
       } | null)
     | ({
-        relationTo: 'categories';
-        value: string | Category;
+        relationTo: 'templates';
+        value: string | Template;
+      } | null)
+    | ({
+        relationTo: 'tenant-templates';
+        value: string | TenantTemplate;
       } | null)
     | ({
         relationTo: 'products';
@@ -785,16 +1001,20 @@ export interface PayloadLockedDocument {
         value: string | Tag;
       } | null)
     | ({
-        relationTo: 'subscriptions';
-        value: string | Subscription;
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: string | Review;
       } | null)
     | ({
         relationTo: 'subscription-plans';
         value: string | SubscriptionPlan;
       } | null)
     | ({
-        relationTo: 'reviews';
-        value: string | Review;
+        relationTo: 'subscriptions';
+        value: string | Subscription;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -869,7 +1089,6 @@ export interface UsersSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   tenant?: T;
   alt?: T;
-  category?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -892,6 +1111,7 @@ export interface TenantsSelect<T extends boolean = true> {
   image?: T;
   phone?: T;
   store?: T;
+  activeTemplate?: T;
   subscription?:
     | T
     | {
@@ -908,8 +1128,6 @@ export interface TenantsSelect<T extends boolean = true> {
         accountNumber?: T;
         ifscCode?: T;
         bankDetailsSubmitted?: T;
-        email?: T;
-        phone?: T;
         accountType?: T;
         razorpayLinkedAccountId?: T;
         razorpayFundAccountId?: T;
@@ -930,37 +1148,74 @@ export interface TenantsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
+ * via the `definition` "templates_select".
  */
-export interface CategoriesSelect<T extends boolean = true> {
-  tenant?: T;
+export interface TemplatesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   description?: T;
-  status?: T;
-  featured?: T;
-  sortOrder?: T;
-  parent?: T;
-  subcategories?: T;
-  images?:
+  category?: T;
+  preview?:
     | T
     | {
         thumbnail?: T;
+        screenshots?: T;
+        videoUrl?: T;
       };
-  seo?:
+  pricing?:
     | T
     | {
-        title?: T;
-        description?: T;
-        keywords?: T;
-        ogImage?: T;
+        price?: T;
+        originalPrice?: T;
+        isFree?: T;
       };
-  stats?:
+  technical?:
     | T
     | {
-        productCount?: T;
-        viewCount?: T;
-        lastViewed?: T;
+        features?: T;
+      };
+  status?: T;
+  popularity?: T;
+  analytics?:
+    | T
+    | {
+        totalPurchases?: T;
+        totalViews?: T;
+        activeTenants?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenant-templates_select".
+ */
+export interface TenantTemplatesSelect<T extends boolean = true> {
+  displayName?: T;
+  template?: T;
+  customizations?:
+    | T
+    | {
+        colors?:
+          | T
+          | {
+              primaryColor?: T;
+              secondaryColor?: T;
+              backgroundColor?: T;
+              textColor?: T;
+            };
+        fonts?:
+          | T
+          | {
+              primaryFont?: T;
+              bodyFont?: T;
+            };
+        layout?:
+          | T
+          | {
+              headerStyle?: T;
+              footerStyle?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;
@@ -971,6 +1226,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   tenant?: T;
+  tenantSlug?: T;
   name?: T;
   slug?: T;
   description?: T;
@@ -1081,21 +1337,49 @@ export interface TagsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "subscriptions_select".
+ * via the `definition` "categories_select".
  */
-export interface SubscriptionsSelect<T extends boolean = true> {
+export interface CategoriesSelect<T extends boolean = true> {
   tenant?: T;
-  plan?: T;
-  razorpaySubscriptionId?: T;
+  tenantSlug?: T;
+  name?: T;
+  slug?: T;
+  description?: T;
   status?: T;
-  startAt?: T;
-  endAt?: T;
-  currentStart?: T;
-  currentEnd?: T;
-  chargeAt?: T;
-  totalCount?: T;
-  paidCount?: T;
-  remainingCount?: T;
+  featured?: T;
+  parent?: T;
+  subcategories?: T;
+  thumbnail?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+        ogImage?: T;
+      };
+  stats?:
+    | T
+    | {
+        productCount?: T;
+        viewCount?: T;
+        lastViewed?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  rating?: T;
+  title?: T;
+  description?: T;
+  email?: T;
+  product?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1124,15 +1408,21 @@ export interface SubscriptionPlansSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reviews_select".
+ * via the `definition` "subscriptions_select".
  */
-export interface ReviewsSelect<T extends boolean = true> {
-  name?: T;
-  rating?: T;
-  title?: T;
-  description?: T;
-  email?: T;
-  product?: T;
+export interface SubscriptionsSelect<T extends boolean = true> {
+  tenant?: T;
+  plan?: T;
+  razorpaySubscriptionId?: T;
+  status?: T;
+  startAt?: T;
+  endAt?: T;
+  currentStart?: T;
+  currentEnd?: T;
+  chargeAt?: T;
+  totalCount?: T;
+  paidCount?: T;
+  remainingCount?: T;
   updatedAt?: T;
   createdAt?: T;
 }

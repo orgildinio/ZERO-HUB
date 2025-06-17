@@ -1,11 +1,10 @@
-import { z } from "zod";
-
+import { Category, Media } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { Category, Media, Tenant } from "@/payload-types";
+import { z } from "zod";
 
 export const checkoutRouter = createTRPCRouter({
-    getProducts: baseProcedure
+    getMany: baseProcedure
         .input(
             z.object({
                 productIds: z.array(z.string())
@@ -14,14 +13,14 @@ export const checkoutRouter = createTRPCRouter({
         .query(async ({ ctx, input }) => {
             const data = await ctx.db.find({
                 collection: "products",
-                depth: 2,
+                pagination: false,
                 where: {
                     id: {
                         in: input.productIds
                     }
                 },
+                depth: 1,
                 select: {
-                    tenant: true,
                     name: true,
                     slug: true,
                     pricing: true,
@@ -35,7 +34,7 @@ export const checkoutRouter = createTRPCRouter({
             }
 
             const totalPrice = data.docs.reduce((acc, product) => {
-                const price = Number(product.pricing.compareAtPrice);
+                const price = Number((product.pricing.compareAtPrice ? product.pricing.compareAtPrice : product.pricing.price));
                 return acc + (isNaN(price) ? 0 : price)
             }, 0);
 
@@ -50,7 +49,6 @@ export const checkoutRouter = createTRPCRouter({
                         ...doc,
                         category: doc.category as Category,
                         image: primaryImage,
-                        tenant: doc.tenant as Tenant & { image: Media | null }
                     }
                 })
             }

@@ -1,7 +1,7 @@
 import { cache } from "react";
 import superjson from 'superjson';
-import { headers as getHeaders } from 'next/headers';
 import { getPayload } from "payload";
+import { headers as getHeaders } from 'next/headers';
 
 import { initTRPC, TRPCError } from '@trpc/server';
 import config from "@payload-config";

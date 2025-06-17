@@ -5,6 +5,18 @@ import { Tenant } from "@/payload-types";
 
 export const Categories: CollectionConfig = {
     slug: "categories",
+    defaultPopulate: {
+        name: true
+    },
+    indexes: [
+        {
+            fields: ['tenantSlug', 'slug'],
+            unique: true
+        },
+        {
+            fields: ['tenantSlug', 'featured'],
+        }
+    ],
     access: {
         create: ({ req }) => {
             if (isSuperAdmin(req.user)) return true
@@ -28,7 +40,40 @@ export const Categories: CollectionConfig = {
             },
         },
     },
+    hooks: {
+        beforeChange: [
+            ({ data, req, operation }) => {
+                if (operation === 'create' || operation === 'update') {
+                    const tenant = req.user?.tenants?.[0].tenant as Tenant
+                    if (tenant?.slug) {
+                        data.tenantSlug = tenant.slug;
+                    }
+                }
+                return data;
+            }
+        ]
+    },
     fields: [
+        {
+            name: "tenantSlug",
+            type: "text",
+            required: true,
+            index: true,
+            admin: {
+                hidden: true
+            },
+            hooks: {
+                beforeValidate: [
+                    ({ value, req }) => {
+                        if (!value) {
+                            const tenant = req.user?.tenants?.[0]?.tenant as Tenant;
+                            return tenant?.slug || '';
+                        }
+                        return value;
+                    }
+                ]
+            }
+        },
         {
             type: "text",
             name: "name",
@@ -49,7 +94,6 @@ export const Categories: CollectionConfig = {
             type: "text",
             required: true,
             index: true,
-            unique: true,
             admin: {
                 description: "This is the URL path of the category (e.g. [store_slug].zerohub.site/[slug]).",
                 position: "sidebar"
@@ -101,15 +145,6 @@ export const Categories: CollectionConfig = {
             }
         },
         {
-            name: "sortOrder",
-            type: "number",
-            defaultValue: 0,
-            admin: {
-                description: "Lower numbers appear first in category lists",
-                position: "sidebar"
-            }
-        },
-        {
             name: "parent",
             type: "relationship",
             relationTo: "categories",
@@ -133,22 +168,13 @@ export const Categories: CollectionConfig = {
             }
         },
         {
-            name: "images",
-            type: "group",
-            label: "Images",
+            name: "thumbnail",
+            type: "upload",
+            relationTo: "media",
+            required: true,
             admin: {
-                description: "Category images for better visual presentation"
-            },
-            fields: [
-                {
-                    name: "thumbnail",
-                    type: "upload",
-                    relationTo: "media",
-                    admin: {
-                        description: "Small image for category cards (recommended: 300x300px)"
-                    }
-                },
-            ]
+                description: "Small image for category cards (recommended: 300x300px)"
+            }
         },
         {
             name: "seo",
@@ -214,21 +240,15 @@ export const Categories: CollectionConfig = {
                     hooks: {
                         afterRead: [
                             async ({ data, req }) => {
-                                if (!data?.id) return 0;
+                                const productCount = await req.payload.find({
+                                    collection: "products",
+                                    where: {
+                                        category: { in: data?.id },
+                                    },
+                                    limit: 0
+                                });
 
-                                try {
-                                    const productCount = await req.payload.find({
-                                        collection: "products",
-                                        where: {
-                                            categories: { in: [data.id] },
-                                        },
-                                        limit: 0
-                                    });
-
-                                    return productCount.totalDocs;
-                                } catch {
-                                    return 0;
-                                }
+                                return productCount.totalDocs;
                             }
                         ]
                     }

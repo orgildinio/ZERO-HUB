@@ -12,14 +12,44 @@ export const Products: CollectionConfig = {
             return Boolean(tenant?.subscription?.subscriptionDetailsSubmitted)
         }
     },
+    indexes: [
+        {
+            fields: ['tenantSlug', 'slug'],
+            unique: true
+        },
+        {
+            fields: ['tenantSlug', 'name'],
+        }
+    ],
     admin: {
         useAsTitle: 'name',
         description: "You must verify your account before creating products.",
     },
     fields: [
         {
+            name: "tenantSlug",
+            type: "text",
+            required: true,
+            index: true,
+            admin: {
+                hidden: true
+            },
+            hooks: {
+                beforeValidate: [
+                    ({ value, req }) => {
+                        if (!value) {
+                            const tenant = req.user?.tenants?.[0]?.tenant as Tenant;
+                            return tenant?.slug || '';
+                        }
+                        return value;
+                    }
+                ]
+            }
+        },
+        {
             name: "name",
             type: "text",
+            index: true,
             required: true,
             maxLength: 100,
             admin: {
@@ -293,6 +323,7 @@ export const Products: CollectionConfig = {
         },
         {
             name: "featured",
+            index: true,
             type: "checkbox",
             defaultValue: false,
             admin: {

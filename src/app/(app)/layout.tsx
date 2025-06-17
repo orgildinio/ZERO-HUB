@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import { Analytics } from "@vercel/analytics/next"
-
 import { Toaster } from 'react-hot-toast'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { TRPCReactProvider } from "@/trpc/client";
 
 const inter = Inter({ subsets: ["latin"] })
@@ -20,15 +18,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body
         className={`${inter.className} antialiased`}
       >
         <NuqsAdapter>
           <TRPCReactProvider>
-            <Toaster />
+          <Toaster />
             {children}
-            <Analytics />
           </TRPCReactProvider>
         </NuqsAdapter>
       </body>

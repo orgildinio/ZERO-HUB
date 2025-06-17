@@ -17,16 +17,17 @@ export const reviewsRouter = createTRPCRouter({
                         equals: input.product
                     }
                 },
-                select:{
-                    images:false,
-                    inventory:false,
-                    name:false,
-                    slug:false,
-                    content:false,
-                    category:false,
-                    tenant:false,
+                select: {
+                    images: false,
+                    inventory: false,
+                    name: false,
+                    slug: false,
+                    content: false,
+                    category: false,
+                    tenant: false,
                 }
             });
+            console.log(product.docs[0])
             if (!product.docs[0] || product.docs.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Product not found." });
 
             const review = await ctx.db.create({

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
-import redis from "@/lib/redis";
+import { TRPCError } from "@trpc/server";
 
 export const tenantsRouter = createTRPCRouter({
     getOne: baseProcedure
@@ -11,51 +11,22 @@ export const tenantsRouter = createTRPCRouter({
             })
         )
         .query(async ({ ctx, input }) => {
-            const cacheKey = `tenant:${input.slug}`;
-
-            try {
-                const cached = await redis.get(cacheKey);
-                if (cached) {
-                    return cached;
-                }
-                const tenant = await ctx.db.find({
-                    collection: "tenants",
-                    depth: 0,
-                    limit: 1,
-                    pagination: false,
-                    where: {
-                        slug: {
-                            equals: input.slug
-                        }
-                    },
-                    select: {
-                        store: true,
-                        slug: true,
+            const tenant = await ctx.db.find({
+                collection: "tenants",
+                pagination: false,
+                limit: 1,
+                depth: 0,
+                where: {
+                    slug: {
+                        equals: input.slug
                     }
-                });
-                const data = tenant.docs[0].store
-                if (!data) {
-                    await redis.setex(cacheKey, 300, JSON.stringify(null));
-                    return null;
+                },
+                select: {
+                    store: true,
                 }
-
-                await redis.setex(cacheKey, 3600, data);
-
-                return data;
-            } catch {
-                const tenant = await ctx.db.find({
-                    collection: "tenants",
-                    depth: 0,
-                    limit: 1,
-                    pagination: false,
-                    where: {
-                        slug: {
-                            equals: input.slug
-                        }
-                    }
-                });
-                const data = tenant.docs[0].store
-                return data
-            }
+            })
+            if (!tenant) throw new TRPCError({ code: "NOT_FOUND", message: "Tenant not found!" })
+            const data = tenant.docs[0]
+            return data
         })
 })

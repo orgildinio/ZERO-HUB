@@ -1,7 +1,7 @@
-import { isSuperAdmin } from '@/lib/access'
-import { tenantsArrayField } from '@payloadcms/plugin-multi-tenant/fields';
-
 import type { CollectionConfig } from 'payload'
+
+import { tenantsArrayField } from '@payloadcms/plugin-multi-tenant/fields';
+import { isSuperAdmin } from '@/lib/access';
 
 const defaultTenantArrayField = tenantsArrayField({
   tenantsArrayFieldName: "tenants",
