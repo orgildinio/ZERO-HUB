@@ -55,19 +55,26 @@ export const ProductCard = ({
     const [imageLoaded, setImageLoaded] = useState(false)
     const [imageError, setImageError] = useState(false)
 
-    const badgeColor = badge ? (BADGE_COLORS[badge as keyof typeof BADGE_COLORS] || BADGE_COLORS.default) : ''
-
+    const badgeColor = badge && typeof badge === 'string'
+        ? (BADGE_COLORS[badge as keyof typeof BADGE_COLORS] || BADGE_COLORS.default)
+        : BADGE_COLORS.default
 
     const hasDiscount = originalPrice && originalPrice !== price
 
-    const StarElements = () => {
-        if (!rating) return null
-        return Array.from({ length: 5 }, (_, i) => (
-            <Star
-                key={i}
-                className={`h-4 w-4 flex-shrink-0 ${i < Math.floor(rating) ? "fill-amber-400 text-amber-400" : "text-stone-300"}`}
-            />
-        ))
+    const StarRating = ({ rating }: { rating: number }) => {
+        return (
+            <div className="flex items-center gap-1" aria-label={`Rating: ${rating} out of 5`}>
+                {Array.from({ length: 5 }, (_, i) => (
+                    <Star
+                        key={i}
+                        className={`h-4 w-4 flex-shrink-0 ${i < Math.floor(rating)
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-stone-300"
+                            }`}
+                    />
+                ))}
+            </div>
+        )
     }
 
     const { addProductToCart, isProductInCart } = useCart(tenantSlug)
@@ -142,11 +149,13 @@ export const ProductCard = ({
                             className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex-shrink-0"
                             aria-label="Remove from wishlist"
                             onClick={handleRemoveFromWishlist}
+                            type="button"
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>
                     ) : (
                         <Button
+                            type="button"
                             variant="secondary"
                             size="icon"
                             className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex-shrink-0"
@@ -177,7 +186,7 @@ export const ProductCard = ({
                         {rating && reviews && (
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-1" aria-label={`Rating: ${rating} out of 5`}>
-                                    <StarElements />
+                                    <StarRating rating={rating} />
                                 </div>
                                 <span className="text-sm text-stone-600 whitespace-nowrap">({reviews})</span>
                             </div>
@@ -207,6 +216,7 @@ export const ProductCard = ({
                     <Button
                         className="w-full bg-stone-900 hover:bg-amber-600 text-white rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
                         size="sm"
+                        type="button"
                         onClick={handleAddToCart}
                         disabled={alreadyInCart}
                     >

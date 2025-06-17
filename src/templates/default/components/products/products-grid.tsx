@@ -74,7 +74,7 @@ export const ProductsGrid = ({ slug }: { slug: string }) => {
                 <EmptyProducts
                     title="No products available yet"
                     description="We're working on adding products to our store. Please check back soon!"
-                    showResetButton={false}
+                    showResetButton={true}
                 />
             </div>
         )
@@ -137,6 +137,8 @@ export const ProductsGrid = ({ slug }: { slug: string }) => {
                                     featured={product.featured}
                                     slug={product.slug}
                                     tenantSlug={slug}
+                                    rating={product.reviewRating}
+                                    reviews={product.reviewCount}
                                 />
                             ))}
                     </div>
