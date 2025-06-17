@@ -16,6 +16,7 @@ import { formatPrice, generateTenantUrl } from "@/lib/utils";
 import { useCart } from "@/modules/products/hooks/use-cart";
 import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 type ProductImage = {
     image: Media;
@@ -46,6 +47,18 @@ export const ProductHero = ({ product, slug }: { slug: string, product: string }
     const { addProductToCart } = useCart(slug)
     const { addProductToWishlist, isProductInWishlist, removeProductFromWislist } = useWishlist(slug)
 
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+    const getCurrentImage = () => {
+        if (!data.images || data.images.length === 0) return "/placeholder.png";
+
+        const selectedImage = data.images[selectedImageIndex];
+        if (selectedImage?.image && typeof selectedImage.image === 'object' && 'url' in selectedImage.image) {
+            return selectedImage.image.url || "/placeholder.png";
+        }
+        return "/placeholder.png";
+    };
+
     return (
         <>
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -57,7 +70,7 @@ export const ProductHero = ({ product, slug }: { slug: string, product: string }
                             </div>
                         )}
                         <Image
-                            src={getProductImage(data.images) || "/placeholder.png"}
+                            src={getCurrentImage()}
                             alt={data.name}
                             fill
                             className="object-cover"
@@ -66,13 +79,22 @@ export const ProductHero = ({ product, slug }: { slug: string, product: string }
                     </div>
                     <div className="grid grid-cols-4 gap-3">
                         {data.images?.map((image, i) => (
-                            <div key={i} className="relative aspect-square overflow-hidden rounded-xl border border-stone-200 bg-white cursor-pointer hover:border-amber-300 transition-colors">
+                            <div key={i}
+                                className={`relative aspect-square overflow-hidden rounded-xl border bg-white cursor-pointer transition-all duration-200 hover:scale-105 ${selectedImageIndex === i
+                                    ? "border-amber-400 ring-2 ring-amber-200 shadow-md"
+                                    : "border-stone-200 hover:border-amber-300"
+                                    }`}
+                                onClick={() => setSelectedImageIndex(i)}
+                            >
                                 <Image
                                     src={image.image.url || "/placeholder.png"}
                                     alt={`${data.name} - View ${i + 1}`}
                                     fill
                                     className="object-cover"
                                 />
+                                {selectedImageIndex === i && (
+                                    <div className="absolute inset-0 bg-amber-100 bg-opacity-20" />
+                                )}
                             </div>
                         ))}
                     </div>
