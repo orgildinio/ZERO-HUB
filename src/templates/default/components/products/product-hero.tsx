@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 
 import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Media } from "@/payload-types";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RichText } from '@payloadcms/richtext-lexical/react'
@@ -17,11 +16,6 @@ import { useCart } from "@/modules/products/hooks/use-cart";
 import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-
-type ProductImage = {
-    image: Media;
-    isPrimary?: boolean | null;
-};
 
 export const ProductHero = ({ product, slug }: { slug: string, product: string }) => {
 
