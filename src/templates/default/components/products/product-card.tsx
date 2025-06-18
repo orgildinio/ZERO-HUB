@@ -28,15 +28,6 @@ interface Props {
     priority?: boolean
 }
 
-const BADGE_COLORS = {
-    Sale: "bg-red-100 text-red-800",
-    Bestseller: "bg-green-100 text-green-800",
-    New: "bg-blue-100 text-blue-800",
-    Trending: "bg-purple-100 text-purple-800",
-    Limited: "bg-red-100 text-red-800",
-    default: "bg-gray-100 text-gray-800"
-} as const
-
 export const ProductCard = ({
     id,
     name,
@@ -54,10 +45,6 @@ export const ProductCard = ({
 }: Props) => {
     const [imageLoaded, setImageLoaded] = useState(false)
     const [imageError, setImageError] = useState(false)
-
-    const badgeColor = badge && typeof badge === 'string'
-        ? (BADGE_COLORS[badge as keyof typeof BADGE_COLORS] || BADGE_COLORS.default)
-        : BADGE_COLORS.default
 
     const hasDiscount = originalPrice && originalPrice !== price
 
@@ -109,15 +96,28 @@ export const ProductCard = ({
     return (
         <article className="group relative">
             <div className="relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full flex flex-col">
-                <div className="absolute top-4 left-4 z-10 min-h-[24px]">
-                    {badge && (
-                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${badgeColor} min-h-[24px]`}>
+                {badge && (
+                    <div className="absolute top-4 left-4 z-10">
+                        <span
+                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${badge === "Sale"
+                                    ? "bg-red-100 text-red-800"
+                                    : badge === "Bestseller"
+                                        ? "bg-green-100 text-green-800"
+                                        : badge === "New"
+                                            ? "bg-blue-100 text-blue-800"
+                                            : badge === "Trending"
+                                                ? "bg-purple-100 text-purple-800"
+                                                : badge === "Limited"
+                                                    ? "bg-red-100 text-red-800"
+                                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                        >
                             {badge}
                         </span>
-                    )}
-                </div>
+                    </div>
+                )}
 
-                <Link href={`${generateTenantUrl(tenantSlug)}/products/${slug}`} className="block" aria-label={`View ${name}`}>
+                <Link href={`${generateTenantUrl(tenantSlug)}/products/${slug}`} aria-label={`View ${name}`}>
                     <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100">
                         <div className="absolute inset-0 bg-stone-100" />
 
