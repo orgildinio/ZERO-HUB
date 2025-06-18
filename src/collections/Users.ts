@@ -23,6 +23,7 @@ export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
+    group: "Customers",
     hidden: ({ user }) => !isSuperAdmin(user)
   },
   access: {

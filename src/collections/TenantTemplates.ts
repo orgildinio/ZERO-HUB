@@ -6,6 +6,7 @@ export const TenantTemplates: CollectionConfig = {
     slug: "tenant-templates",
     admin: {
         useAsTitle: 'displayName',
+        group: "Tenants",
         hidden: ({ user }) => !isSuperAdmin(user),
         description: "Template configurations for each tenant with customizations"
     },

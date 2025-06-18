@@ -4,7 +4,8 @@ import { isSuperAdmin } from "@/lib/access";
 export const Customers: CollectionConfig = {
     slug: "customers",
     admin: {
-        useAsTitle: "firstname"
+        useAsTitle: "firstname",
+        group: "Customers",
     },
     access: {
         read: () => true,

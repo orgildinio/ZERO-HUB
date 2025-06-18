@@ -26,6 +26,7 @@ export const Categories: CollectionConfig = {
     },
     admin: {
         useAsTitle: 'name',
+        group: "Store",
         description: "Manage product categories. You must verify your account before creating categories.",
         preview: (doc) => {
             if (doc?.slug) {

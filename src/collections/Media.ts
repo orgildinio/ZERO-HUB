@@ -25,6 +25,7 @@ export const Media: CollectionConfig = {
   admin: {
     description: "Upload and manage media files. Supported formats: images, videos, documents.",
     useAsTitle: 'filename',
+    group: "Media",
     hidden: ({ user }) => !isSuperAdmin(user)
   },
   fields: [

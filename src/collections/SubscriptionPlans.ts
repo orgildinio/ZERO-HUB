@@ -5,6 +5,7 @@ export const SubscriptionPlans: CollectionConfig = {
     slug: "subscription-plans",
     admin: {
         useAsTitle: 'name',
+        group: "Subscriptions",
         hidden: ({ user }) => !isSuperAdmin(user)
     },
     access: {

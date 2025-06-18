@@ -10,6 +10,7 @@ export const Tenants: CollectionConfig = {
     },
     admin: {
         useAsTitle: "slug",
+        group: "Tenants",
         hidden: ({ user }) => !isSuperAdmin(user),
         preview: (doc) => {
             return `https://${doc.slug}.zerohub.site`

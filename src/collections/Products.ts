@@ -23,6 +23,7 @@ export const Products: CollectionConfig = {
     ],
     admin: {
         useAsTitle: 'name',
+        group: "Store",
         description: "You must verify your account before creating products.",
     },
     fields: [

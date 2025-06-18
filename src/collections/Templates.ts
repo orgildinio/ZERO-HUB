@@ -5,6 +5,7 @@ export const Templates: CollectionConfig = {
     slug: "templates",
     admin: {
         useAsTitle: "name",
+        group: "Tenants",
         hidden: ({ user }) => !isSuperAdmin(user),
         description: "Manage website templates available for tenants",
     },

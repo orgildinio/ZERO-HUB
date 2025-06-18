@@ -10,6 +10,7 @@ export const Subscriptions: CollectionConfig = {
         delete: ({ req }) => isSuperAdmin(req.user),
     },
     admin: {
+        group: "Subscriptions",
         useAsTitle: 'razorpaySubscriptionId',
     },
     fields: [
