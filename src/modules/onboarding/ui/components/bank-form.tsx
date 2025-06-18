@@ -139,7 +139,7 @@ export const BankForm = ({ email, phone }: { email: string; phone: string }) => 
             },
             onSuccess: async () => {
                 toast.success("Bank verified! Redirecting to admin page.")
-                router.push("/verify-bank/success")
+                router.push("/admin")
             },
         }),
     )

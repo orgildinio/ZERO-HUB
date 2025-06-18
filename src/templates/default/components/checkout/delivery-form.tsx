@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { checkoutSchema } from "@/modules/checkout/schema"
+import { formatPrice } from "@/lib/utils"
 
 interface DeliveryOption {
     id: string
@@ -138,7 +139,7 @@ export const DeliveryForm = ({ form }: Props) => {
                                                         <p className="text-sm text-stone-600">{option.duration}</p>
                                                     </div>
                                                     <span className="font-bold text-stone-900">
-                                                        ${option.price.toFixed(2)}
+                                                        {formatPrice(option.price)}
                                                     </span>
                                                 </Label>
                                             </div>

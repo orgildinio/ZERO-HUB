@@ -453,9 +453,6 @@ export const Products: CollectionConfig = {
                 readOnly: true,
                 description: "Product analytics (read-only)",
             },
-            access: {
-                update: () => false
-            },
             fields: [
                 {
                     name: "views",

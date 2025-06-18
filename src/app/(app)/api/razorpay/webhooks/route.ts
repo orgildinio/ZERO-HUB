@@ -45,7 +45,9 @@ export async function POST(req: NextRequest) {
         switch (payload.event) {
             case 'subscription.activated':
                 await handleSubscriptionActivated(payload);
-                return NextResponse.redirect('https://zerohub.site/admin')
+                break;
+            case 'account.rejected':
+                return NextResponse.json({ status: 400, message: "Something went wrong" })
             default:
                 console.log('Unhandled webhook event:', payload.event);
         }

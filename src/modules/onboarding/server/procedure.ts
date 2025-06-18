@@ -91,7 +91,6 @@ export const onboardingRouter = createTRPCRouter({
                     }
                 })
 
-                //TODO: Assign default template to tenant
                 return {
                     subscription: razorpaySubscription,
                     payloadSubscription: subscription,
@@ -186,9 +185,13 @@ export const onboardingRouter = createTRPCRouter({
                                 country: input.country
                             }
                         }
+                    },
+                    legal_info: {
+                        pan: input.panCardNumber
                     }
                 });
                 if (!account) throw new TRPCError({ code: 'BAD_REQUEST', message: "Failed to create razorpay account." })
+
                 const updatedTenant = await ctx.db.update({
                     collection: "tenants",
                     where: {
@@ -203,7 +206,8 @@ export const onboardingRouter = createTRPCRouter({
                             ifscCode: input.ifscCode,
                             status: 'pending',
                             razorpayLinkedAccountId: account.id,
-                            panCardNumber: input.panCardNumber
+                            panCardNumber: input.panCardNumber,
+                            bankDetailsSubmitted: true
                         }
                     }
                 })

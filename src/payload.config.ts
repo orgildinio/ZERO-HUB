@@ -21,6 +21,8 @@ import { Categories } from './collections/Categories';
 import { Reviews } from './collections/Reviews';
 import { SubscriptionPlans } from './collections/SubscriptionPlans';
 import { Subscriptions } from './collections/Subscriptions';
+import { Customers } from './collections/Customers';
+import { Orders } from './collections/Orders';
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -45,7 +47,7 @@ export default buildConfig({
       ]
     }
   },
-  collections: [Users, Media, Tenants, Templates, TenantTemplates, Products, Tags, Categories, Reviews, SubscriptionPlans, Subscriptions],
+  collections: [Users, Media, Tenants, Templates, TenantTemplates, Products, Tags, Categories, Reviews, SubscriptionPlans, Subscriptions, Customers, Orders],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -66,7 +68,9 @@ export default buildConfig({
         products: {},
         tags: {},
         media: {},
-        reviews: {}
+        reviews: {},
+        orders: {},
+        customers: {}
       },
       tenantsArrayField: {
         includeDefaultField: false

@@ -51,6 +51,7 @@ export async function handleSubscriptionActivated(subscription: SubscriptionPayl
                     subscriptionEndDate: new Date(subscription.payload.subscription.entity.end_at * 1000).toISOString(),
                     subscriptionDetailsSubmitted: true,
                 },
+                activeTemplate: 'dadbc7c0-dd8e-4bc0-977a-6a3c5d09c18a'
             },
         });
         console.log('Subscription activated successfully:', subscription.payload.subscription.entity.id);

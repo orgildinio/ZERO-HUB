@@ -78,6 +78,8 @@ export interface Config {
     reviews: Review;
     'subscription-plans': SubscriptionPlan;
     subscriptions: Subscription;
+    customers: Customer;
+    orders: Order;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -99,6 +101,8 @@ export interface Config {
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'subscription-plans': SubscriptionPlansSelect<false> | SubscriptionPlansSelect<true>;
     subscriptions: SubscriptionsSelect<false> | SubscriptionsSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -967,6 +971,53 @@ export interface Subscription {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  firstname: string;
+  lastname: string;
+  email: string;
+  newsLetter?: boolean | null;
+  shippingAddress: {
+    street: string;
+    apartment: string;
+    city: string;
+    postalCode: string;
+    state: string;
+    country: string;
+  };
+  deliveryOption?: string | null;
+  specialInstructions?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  name: string;
+  customer: string | Customer;
+  isPaid: boolean;
+  orderItems: {
+    product: string;
+    quantity: number;
+    id?: string | null;
+  }[];
+  /**
+   * Checkout session associated with the order.
+   */
+  razorpayCheckoutSessionId?: string | null;
+  razorpayOrderId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -1015,6 +1066,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'subscriptions';
         value: string | Subscription;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: string | Order;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1423,6 +1482,52 @@ export interface SubscriptionsSelect<T extends boolean = true> {
   totalCount?: T;
   paidCount?: T;
   remainingCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  tenant?: T;
+  firstname?: T;
+  lastname?: T;
+  email?: T;
+  newsLetter?: T;
+  shippingAddress?:
+    | T
+    | {
+        street?: T;
+        apartment?: T;
+        city?: T;
+        postalCode?: T;
+        state?: T;
+        country?: T;
+      };
+  deliveryOption?: T;
+  specialInstructions?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  customer?: T;
+  isPaid?: T;
+  orderItems?:
+    | T
+    | {
+        product?: T;
+        quantity?: T;
+        id?: T;
+      };
+  razorpayCheckoutSessionId?: T;
+  razorpayOrderId?: T;
   updatedAt?: T;
   createdAt?: T;
 }

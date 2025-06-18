@@ -14,11 +14,18 @@ export const TenantBankVerifyButton = async () => {
         )
     }
 
+    if (tenant.subscription?.subscriptionDetailsSubmitted) {
+        return (
+            <Link href='/verify-bank'>
+                <Button>
+                    Verify Bank
+                </Button>
+            </Link>
+        )
+    }
     return (
-        <Link href='/verify-bank'>
-            <Button>
-                Verify Bank
-            </Button>
-        </Link>
+        <Button disabled>
+            Purchase subcription to verify account
+        </Button>
     )
 }

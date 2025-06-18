@@ -42,7 +42,6 @@ export const shippingSchema = z.object({
     apartment: z.string()
         .max(20, "Apartment number must be less than 20 characters")
         .trim()
-        .optional()
         .or(z.literal("")),
     city: z.string()
         .min(1, "City is required")
@@ -57,7 +56,6 @@ export const shippingSchema = z.object({
 
     zip: z.string()
         .min(1, "ZIP code is required")
-        .regex(/^\d{5}(-\d{4})?$/, "ZIP code must be in format 123456 or 12345-6789")
         .trim(),
 
     country: z.string()
@@ -79,4 +77,11 @@ export const instructionSchema = z.object({
     safePlace: z.boolean()
 });
 
-export const checkoutSchema = contactSchema.merge(shippingSchema).merge(deliverySchema).merge(instructionSchema)
+export const order = z.object({
+    finalAmount: z.number(),
+    products: z.array(z.object({ productId: z.string(), name: z.string(), quantity: z.number(), price: z.number() })),
+    tenant: z.string(),
+})
+
+export const checkoutSchema = contactSchema.merge(shippingSchema).merge(deliverySchema).merge(instructionSchema).merge(order)
+
