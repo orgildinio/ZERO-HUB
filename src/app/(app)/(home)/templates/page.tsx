@@ -267,7 +267,7 @@ export default function TemplatesPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4, duration: 0.6 }}
                         >
-                            {stats.map((stat, index) => (
+                            {stats.map((stat) => (
                                 <motion.div
                                     key={stat.label}
                                     className="flex items-center gap-3 px-6 py-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50 backdrop-blur-sm"
@@ -499,7 +499,7 @@ export default function TemplatesPage() {
                                 <div className="text-8xl mb-6">🔍</div>
                                 <h3 className="text-2xl font-bold mb-4">No templates found</h3>
                                 <p className="text-zinc-400 mb-8 max-w-md mx-auto">
-                                    We couldn't find any templates matching your criteria. Try adjusting your search or browse all
+                                    We couldn&apos;t find any templates matching your criteria. Try adjusting your search or browse all
                                     templates.
                                 </p>
                                 <Button
