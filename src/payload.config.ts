@@ -40,7 +40,8 @@ export default buildConfig({
       },
       beforeNavLinks: [
         '@/components/payload/razorpay-subscription#SubscriptionVerifyButton',
-        '@/components/payload/razorpay-verification#TenantBankVerifyButton'
+        '@/components/payload/razorpay-change-subscription#SubscriptionUpgradeButton',
+        '@/components/payload/razorpay-verification#TenantBankVerifyButton',
       ]
     }
   },

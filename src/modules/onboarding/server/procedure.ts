@@ -171,22 +171,8 @@ export const onboardingRouter = createTRPCRouter({
                     phone: input.phone,
                     legal_business_name: input.legalBusinessName,
                     business_type: "individual",
-                    legal_info: {
-                        pan: input.panCardNumber,
-                    },
                     contact_name: input.accountHolderName,
-                    contact_info: {
-                        chargeback: {
-                            email: input.email
-                        },
-                        refund: {
-                            email: input.email
-                        },
-                        support: {
-                            email: input.email,
-                            phone: input.phone,
-                        }
-                    },
+                    type: 'route',
                     profile: {
                         category: 'ecommerce',
                         subcategory: input.businessSubcategory,
@@ -200,7 +186,7 @@ export const onboardingRouter = createTRPCRouter({
                                 country: input.country
                             }
                         }
-                    },
+                    }
                 });
                 if (!account) throw new TRPCError({ code: 'BAD_REQUEST', message: "Failed to create razorpay account." })
                 const updatedTenant = await ctx.db.update({

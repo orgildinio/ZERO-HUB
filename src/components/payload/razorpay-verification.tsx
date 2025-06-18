@@ -17,7 +17,7 @@ export const TenantBankVerifyButton = async () => {
     return (
         <Link href='/verify-bank'>
             <Button>
-                Verify your Bank
+                Verify Bank
             </Button>
         </Link>
     )

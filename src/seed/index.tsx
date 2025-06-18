@@ -1,4 +1,5 @@
 import { payload } from "@/lib/payload";
+import { subscriptionPlans } from "./plans";
 
 const seed = async () => {
     // const adminTenant = await payload.create({
@@ -27,31 +28,31 @@ const seed = async () => {
     //     }
     // });
 
-    const tenant = await payload.create({
-        collection: "tenants",
-        data: {
-            name: "Snax Store",
-            slug: "snax",
-            phone: "+919892698926",
-            store: 'Snax',
-        }
-    });
+    // const tenant = await payload.create({
+    //     collection: "tenants",
+    //     data: {
+    //         name: "Snax Store",
+    //         slug: "snax",
+    //         phone: "+919892698926",
+    //         store: 'Snax',
+    //     }
+    // });
 
-    await payload.create({
-        collection: "users",
-        data: {
-            email: "ashish.zaerocart@gmail.com",
-            password: "ashish",
-            roles: ["user"],
-            username: "snax",
-            phone: "+919892698926",
-            tenants: [
-                {
-                    tenant: tenant.id,
-                }
-            ],
-        }
-    });
+    // await payload.create({
+    //     collection: "users",
+    //     data: {
+    //         email: "ashish.zaerocart@gmail.com",
+    //         password: "ashish",
+    //         roles: ["user"],
+    //         username: "snax",
+    //         phone: "+919892698926",
+    //         tenants: [
+    //             {
+    //                 tenant: tenant.id,
+    //             }
+    //         ],
+    //     }
+    // });
 
     // const template = await payload.create({
     //     collection: "templates",
@@ -96,6 +97,18 @@ const seed = async () => {
     //         activeTemplate: template.id
     //     }
     // })
+
+    for (const plan of subscriptionPlans) {
+        try {
+            await payload.create({
+                collection: "subscription-plans",
+                data: plan
+            });
+            console.log(`Created template: ${plan.name}`);
+        } catch (error) {
+            console.error(`Error creating template ${plan.name}:`, error);
+        }
+    }
 }
 
 await seed();

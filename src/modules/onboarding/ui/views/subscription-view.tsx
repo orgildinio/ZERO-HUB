@@ -22,6 +22,8 @@ import {
 import { useMutation } from '@tanstack/react-query'
 import { useTRPC } from '@/trpc/client'
 import { faqs, plans } from '@/constants/plans'
+import { Skeleton } from "@/components/ui/skeleton"
+import { formatPrice } from '@/lib/utils'
 
 export const SubscriptionView = () => {
 
@@ -168,13 +170,13 @@ export const SubscriptionView = () => {
                                                 <div className="mb-5">
                                                     <div className="flex items-baseline mb-1">
                                                         <span className="text-2xl font-bold text-white">
-                                                            ${billingPeriod === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
+                                                            {billingPeriod === "monthly" ? formatPrice(plan.monthlyPrice) : formatPrice(plan.yearlyPrice)}
                                                         </span>
                                                         <span className="text-zinc-400 ml-1 text-sm">/ {billingPeriod}</span>
                                                     </div>
                                                     {billingPeriod === "yearly" && (
                                                         <div className="text-xs text-green-400 font-medium">
-                                                            Save ${plan.monthlyPrice * 12 - plan.yearlyPrice} per year
+                                                            Save {formatPrice(plan.monthlyPrice * 12 - plan.yearlyPrice)} per year
                                                         </div>
                                                     )}
                                                 </div>
@@ -284,21 +286,22 @@ export const SubscriptionView = () => {
                                                 <div className="flex justify-between items-center p-2 bg-zinc-800/30 rounded text-sm">
                                                     <span className="text-zinc-400">Plan price:</span>
                                                     <span className="font-medium">
-                                                        $
-                                                        {billingPeriod === "monthly" ? selectedPlanData.monthlyPrice : selectedPlanData.yearlyPrice}
+                                                        {billingPeriod === "monthly" ? 
+                                                        formatPrice(selectedPlanData.monthlyPrice) : 
+                                                        formatPrice(selectedPlanData.yearlyPrice + (2 * selectedPlanData.monthlyPrice)
+                                                        )}
                                                     </span>
                                                 </div>
                                                 {billingPeriod === "yearly" && (
                                                     <div className="flex justify-between items-center p-2 bg-green-950/20 border border-green-800/30 rounded text-sm">
                                                         <span className="text-green-400">Annual savings:</span>
-                                                        <span className="text-green-400 font-medium">-${selectedPlanData.monthlyPrice * 12 - selectedPlanData.yearlyPrice}</span>
+                                                        <span className="text-green-400 font-medium">-{formatPrice(selectedPlanData.monthlyPrice * 12 - selectedPlanData.yearlyPrice)}</span>
                                                     </div>
                                                 )}
                                                 <div className="border-t border-zinc-800 pt-2 flex justify-between items-center font-bold">
                                                     <span>Total:</span>
                                                     <span className={selectedPlanData.accentColor}>
-                                                        $
-                                                        {billingPeriod === "monthly" ? selectedPlanData.monthlyPrice : selectedPlanData.yearlyPrice}
+                                                        {billingPeriod === "monthly" ? formatPrice(selectedPlanData.monthlyPrice) : formatPrice(selectedPlanData.yearlyPrice)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -412,8 +415,6 @@ export const SubscriptionView = () => {
         </div>
     )
 }
-
-import { Skeleton } from "@/components/ui/skeleton"
 
 export function PricingLoading() {
     return (
