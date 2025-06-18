@@ -141,7 +141,7 @@ export const ProductCard = ({
                     </div>
                 </Link>
 
-                <div className="absolute top-4 right-4 flex flex-col gap-2 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 min-h-[40px] min-w-[40px]">
+                <div className="absolute top-4 right-4 flex flex-col gap-2 transition-all duration-300 transform translate-x-0 min-h-[40px] min-w-[40px]">
                     {alreadyInWishlist ? (
                         <Button
                             variant="secondary"

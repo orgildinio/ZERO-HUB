@@ -29,7 +29,7 @@ export const CategoryCard = ({ itemCount, href, name, image, description }: Prop
 
                     <div className="absolute bottom-4 left-4 right-4 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 opacity-0 group-hover:opacity-100">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">{itemCount} product{itemCount === 1 ? '' : 's'}</span>
+                            <span className="text-sm font-medium">{itemCount ? itemCount : 0} product{itemCount === 1 ? '' : 's'}</span>
                             <ArrowRight className="h-4 w-4" />
                         </div>
                     </div>

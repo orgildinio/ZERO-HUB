@@ -51,7 +51,7 @@ export const Categories: CollectionConfig = {
                     }
                 }
                 return data;
-            }
+            },
         ]
     },
     fields: [
@@ -244,7 +244,7 @@ export const Categories: CollectionConfig = {
                                 const productCount = await req.payload.find({
                                     collection: "products",
                                     where: {
-                                        category: { in: data?.id },
+                                        category: { equals: data?.id },
                                     },
                                     limit: 0
                                 });

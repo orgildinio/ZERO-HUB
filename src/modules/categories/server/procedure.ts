@@ -27,7 +27,7 @@ export const categoriesRouter = createTRPCRouter({
                 select: {
                     name: true,
                     slug: true,
-                    "stats.productCount": true,
+                    stats: true,
                     featured: true,
                     thumbnail: true,
                     subcategories: true,
@@ -78,7 +78,7 @@ export const categoriesRouter = createTRPCRouter({
                 select: {
                     name: true,
                     slug: true,
-                    "stats.productCount": true,
+                    stats: true,
                     thumbnail: true,
                     subcategories: true,
                     description: true,
