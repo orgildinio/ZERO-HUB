@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Grid, List, Crown, Zap, Sparkles, TrendingUp, Filter, ArrowRight, Star } from "lucide-react"
+import { Search, Grid, List, Crown, Zap, Sparkles, Filter, ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,119 +20,119 @@ const templates = [
         category: "Dashboard",
         price: 0,
         isPremium: false,
-        rating: 4.8,
-        downloads: 1250,
-        preview: "/placeholder.svg?height=300&width=400",
+        rating: 0,
+        downloads: 0,
+        preview: "/templates/1.png",
         tags: ["React", "TypeScript", "Charts", "Analytics"],
         author: "SaaSApp Team",
         lastUpdated: "2024-01-15",
         features: ["Responsive Design", "Dark/Light Mode", "Chart Components", "Data Tables"],
     },
-    {
-        id: "2",
-        title: "E-commerce Admin",
-        description: "Complete e-commerce admin panel with product management, order tracking, and customer analytics.",
-        category: "E-commerce",
-        price: 49,
-        isPremium: true,
-        rating: 4.9,
-        downloads: 890,
-        preview: "/placeholder.svg?height=300&width=400",
-        tags: ["React", "E-commerce", "Admin", "CRM"],
-        author: "Pro Templates",
-        lastUpdated: "2024-01-20",
-        features: ["Product Management", "Order Tracking", "Customer Analytics", "Inventory Management"],
-    },
-    {
-        id: "3",
-        title: "Landing Page Pro",
-        description: "High-converting landing page template with multiple sections and call-to-action components.",
-        category: "Landing Page",
-        price: 29,
-        isPremium: true,
-        rating: 4.7,
-        downloads: 2100,
-        preview: "/placeholder.svg?height=300&width=400",
-        tags: ["Landing", "Marketing", "Conversion", "SEO"],
-        author: "Design Studio",
-        lastUpdated: "2024-01-18",
-        features: ["Hero Section", "Testimonials", "Pricing Tables", "Contact Forms"],
-    },
-    {
-        id: "4",
-        title: "Blog Template",
-        description: "Clean and minimal blog template with article management and comment system.",
-        category: "Blog",
-        price: 0,
-        isPremium: false,
-        rating: 4.5,
-        downloads: 1680,
-        preview: "/placeholder.svg?height=300&width=400",
-        tags: ["Blog", "Content", "Minimal", "SEO"],
-        author: "SaaSApp Team",
-        lastUpdated: "2024-01-12",
-        features: ["Article Management", "Comment System", "SEO Optimized", "Social Sharing"],
-    },
-    {
-        id: "5",
-        title: "SaaS Starter Kit",
-        description: "Complete SaaS application template with authentication, billing, and user management.",
-        category: "SaaS",
-        price: 99,
-        isPremium: true,
-        rating: 5.0,
-        downloads: 450,
-        preview: "/placeholder.svg?height=300&width=400",
-        tags: ["SaaS", "Authentication", "Billing", "Full-stack"],
-        author: "Enterprise Solutions",
-        lastUpdated: "2024-01-22",
-        features: ["User Authentication", "Stripe Integration", "Admin Panel", "API Documentation"],
-    },
-    {
-        id: "6",
-        title: "Portfolio Showcase",
-        description: "Creative portfolio template for designers and developers to showcase their work.",
-        category: "Portfolio",
-        price: 0,
-        isPremium: false,
-        rating: 4.6,
-        downloads: 980,
-        preview: "/placeholder.svg?height=300&width=400",
-        tags: ["Portfolio", "Creative", "Showcase", "Responsive"],
-        author: "Creative Collective",
-        lastUpdated: "2024-01-10",
-        features: ["Project Gallery", "Contact Form", "Smooth Animations", "Mobile Optimized"],
-    },
-    {
-        id: "7",
-        title: "CRM Dashboard",
-        description: "Customer relationship management dashboard with lead tracking and sales analytics.",
-        category: "Dashboard",
-        price: 79,
-        isPremium: true,
-        rating: 4.8,
-        downloads: 320,
-        preview: "/placeholder.svg?height=300&width=400",
-        tags: ["CRM", "Sales", "Analytics", "Business"],
-        author: "Business Tools",
-        lastUpdated: "2024-01-25",
-        features: ["Lead Management", "Sales Pipeline", "Customer Analytics", "Report Generation"],
-    },
-    {
-        id: "8",
-        title: "Documentation Site",
-        description: "Professional documentation template with search, navigation, and code highlighting.",
-        category: "Documentation",
-        price: 0,
-        isPremium: false,
-        rating: 4.4,
-        downloads: 750,
-        preview: "/placeholder.svg?height=300&width=400",
-        tags: ["Documentation", "Technical", "Search", "Navigation"],
-        author: "SaaSApp Team",
-        lastUpdated: "2024-01-08",
-        features: ["Search Functionality", "Code Highlighting", "Navigation Menu", "Responsive Layout"],
-    },
+    // {
+    //     id: "2",
+    //     title: "E-commerce Admin",
+    //     description: "Complete e-commerce admin panel with product management, order tracking, and customer analytics.",
+    //     category: "E-commerce",
+    //     price: 49,
+    //     isPremium: true,
+    //     rating: 4.9,
+    //     downloads: 890,
+    //     preview: "/placeholder.svg?height=300&width=400",
+    //     tags: ["React", "E-commerce", "Admin", "CRM"],
+    //     author: "Pro Templates",
+    //     lastUpdated: "2024-01-20",
+    //     features: ["Product Management", "Order Tracking", "Customer Analytics", "Inventory Management"],
+    // },
+    // {
+    //     id: "3",
+    //     title: "Landing Page Pro",
+    //     description: "High-converting landing page template with multiple sections and call-to-action components.",
+    //     category: "Landing Page",
+    //     price: 29,
+    //     isPremium: true,
+    //     rating: 4.7,
+    //     downloads: 2100,
+    //     preview: "/placeholder.svg?height=300&width=400",
+    //     tags: ["Landing", "Marketing", "Conversion", "SEO"],
+    //     author: "Design Studio",
+    //     lastUpdated: "2024-01-18",
+    //     features: ["Hero Section", "Testimonials", "Pricing Tables", "Contact Forms"],
+    // },
+    // {
+    //     id: "4",
+    //     title: "Blog Template",
+    //     description: "Clean and minimal blog template with article management and comment system.",
+    //     category: "Blog",
+    //     price: 0,
+    //     isPremium: false,
+    //     rating: 4.5,
+    //     downloads: 1680,
+    //     preview: "/placeholder.svg?height=300&width=400",
+    //     tags: ["Blog", "Content", "Minimal", "SEO"],
+    //     author: "SaaSApp Team",
+    //     lastUpdated: "2024-01-12",
+    //     features: ["Article Management", "Comment System", "SEO Optimized", "Social Sharing"],
+    // },
+    // {
+    //     id: "5",
+    //     title: "SaaS Starter Kit",
+    //     description: "Complete SaaS application template with authentication, billing, and user management.",
+    //     category: "SaaS",
+    //     price: 99,
+    //     isPremium: true,
+    //     rating: 5.0,
+    //     downloads: 450,
+    //     preview: "/placeholder.svg?height=300&width=400",
+    //     tags: ["SaaS", "Authentication", "Billing", "Full-stack"],
+    //     author: "Enterprise Solutions",
+    //     lastUpdated: "2024-01-22",
+    //     features: ["User Authentication", "Stripe Integration", "Admin Panel", "API Documentation"],
+    // },
+    // {
+    //     id: "6",
+    //     title: "Portfolio Showcase",
+    //     description: "Creative portfolio template for designers and developers to showcase their work.",
+    //     category: "Portfolio",
+    //     price: 0,
+    //     isPremium: false,
+    //     rating: 4.6,
+    //     downloads: 980,
+    //     preview: "/placeholder.svg?height=300&width=400",
+    //     tags: ["Portfolio", "Creative", "Showcase", "Responsive"],
+    //     author: "Creative Collective",
+    //     lastUpdated: "2024-01-10",
+    //     features: ["Project Gallery", "Contact Form", "Smooth Animations", "Mobile Optimized"],
+    // },
+    // {
+    //     id: "7",
+    //     title: "CRM Dashboard",
+    //     description: "Customer relationship management dashboard with lead tracking and sales analytics.",
+    //     category: "Dashboard",
+    //     price: 79,
+    //     isPremium: true,
+    //     rating: 4.8,
+    //     downloads: 320,
+    //     preview: "/placeholder.svg?height=300&width=400",
+    //     tags: ["CRM", "Sales", "Analytics", "Business"],
+    //     author: "Business Tools",
+    //     lastUpdated: "2024-01-25",
+    //     features: ["Lead Management", "Sales Pipeline", "Customer Analytics", "Report Generation"],
+    // },
+    // {
+    //     id: "8",
+    //     title: "Documentation Site",
+    //     description: "Professional documentation template with search, navigation, and code highlighting.",
+    //     category: "Documentation",
+    //     price: 0,
+    //     isPremium: false,
+    //     rating: 4.4,
+    //     downloads: 750,
+    //     preview: "/placeholder.svg?height=300&width=400",
+    //     tags: ["Documentation", "Technical", "Search", "Navigation"],
+    //     author: "SaaSApp Team",
+    //     lastUpdated: "2024-01-08",
+    //     features: ["Search Functionality", "Code Highlighting", "Navigation Menu", "Responsive Layout"],
+    // },
 ]
 
 const categories = ["All", "Dashboard", "E-commerce", "Landing Page", "Blog", "SaaS", "Portfolio", "Documentation"]
@@ -142,12 +142,6 @@ const sortOptions = [
     { value: "price-low", label: "Price: Low to High" },
     { value: "price-high", label: "Price: High to Low" },
     { value: "rating", label: "Highest Rated" },
-]
-
-const stats = [
-    { label: "Templates", value: "150+", icon: <Grid className="h-5 w-5" /> },
-    { label: "Downloads", value: "50K+", icon: <TrendingUp className="h-5 w-5" /> },
-    { label: "Avg Rating", value: "4.8", icon: <Star className="h-5 w-5" /> },
 ]
 
 export default function TemplatesPage() {
@@ -160,11 +154,10 @@ export default function TemplatesPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [isModalLoading, setIsModalLoading] = useState(false)
 
-    // Simulate initial loading
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsLoading(false)
-        }, 1500)
+        }, 500)
 
         return () => clearTimeout(timer)
     }, [])
@@ -213,7 +206,7 @@ export default function TemplatesPage() {
         // Simulate loading delay for modal content
         setTimeout(() => {
             setIsModalLoading(false)
-        }, 800)
+        }, 400)
     }
 
     const handleModalClose = () => {
@@ -224,21 +217,19 @@ export default function TemplatesPage() {
     return (
         <div className="min-h-screen relative">
 
-            {/* Hero Section */}
             <section className="relative py-24 md:py-32 overflow-hidden">
                 <div className="container relative z-10 mx-auto">
                     <motion.div
                         className="text-center max-w-5xl mx-auto"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
+                        transition={{ duration: 0.5 }}
                     >
-                        {/* Badge */}
                         <motion.div
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 mb-8"
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.2, duration: 0.6 }}
+                            transition={{ delay: 0.2, duration: 0.3 }}
                         >
                             <Sparkles className="h-4 w-4 text-blue-400" />
                             <span className="text-sm font-medium text-blue-300">Premium Template Collection</span>
@@ -260,35 +251,11 @@ export default function TemplatesPage() {
                             landing pages, find the perfect starting point for your next project.
                         </p>
 
-                        {/* Stats */}
-                        <motion.div
-                            className="flex flex-wrap justify-center gap-8 mb-12"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4, duration: 0.6 }}
-                        >
-                            {stats.map((stat) => (
-                                <motion.div
-                                    key={stat.label}
-                                    className="flex items-center gap-3 px-6 py-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50 backdrop-blur-sm"
-                                    whileHover={{ scale: 1.05, backgroundColor: "rgba(39, 39, 42, 0.8)" }}
-                                    transition={{ type: "spring", stiffness: 300 }}
-                                >
-                                    <div className="text-blue-400">{stat.icon}</div>
-                                    <div>
-                                        <div className="text-2xl font-bold text-white">{stat.value}</div>
-                                        <div className="text-sm text-zinc-400">{stat.label}</div>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-
-                        {/* CTA Buttons */}
                         <motion.div
                             className="flex flex-col sm:flex-row gap-4 justify-center"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.6, duration: 0.6 }}
+                            transition={{ delay: 0.2, duration: 0.2 }}
                         >
                             <Button
                                 size="lg"
@@ -309,23 +276,8 @@ export default function TemplatesPage() {
                         </motion.div>
                     </motion.div>
                 </div>
-
-                {/* Decorative Elements */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-20">
-                    <motion.div
-                        className="w-full h-full rounded-full border border-blue-500/30"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 50, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                    />
-                    <motion.div
-                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-purple-500/20"
-                        animate={{ rotate: -360 }}
-                        transition={{ duration: 40, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                    />
-                </div>
             </section>
 
-            {/* Enhanced Filters Section */}
             <section className="py-8 border-y border-zinc-800/50 backdrop-blur-sm bg-zinc-950/50">
                 <div className="container mx-auto">
                     <motion.div
@@ -334,7 +286,6 @@ export default function TemplatesPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        {/* Search */}
                         <div className="relative flex-1 max-w-md">
                             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-zinc-400" />
                             <Input
@@ -346,14 +297,12 @@ export default function TemplatesPage() {
                             />
                         </div>
 
-                        {/* Filters */}
                         <div className="flex flex-wrap gap-4 items-center">
                             <div className="flex items-center gap-2 text-sm text-zinc-400">
                                 <Filter className="h-4 w-4" />
                                 <span>Filter by:</span>
                             </div>
 
-                            {/* Category Filter */}
                             <Select value={selectedCategory} onValueChange={setSelectedCategory} disabled={isLoading}>
                                 <SelectTrigger className="w-44 bg-zinc-900/80 border-zinc-700 text-white rounded-xl backdrop-blur-sm">
                                     <SelectValue placeholder="Category" />
@@ -367,7 +316,6 @@ export default function TemplatesPage() {
                                 </SelectContent>
                             </Select>
 
-                            {/* Price Filter */}
                             <Select value={priceFilter} onValueChange={setPriceFilter} disabled={isLoading}>
                                 <SelectTrigger className="w-36 bg-zinc-900/80 border-zinc-700 text-white rounded-xl backdrop-blur-sm">
                                     <SelectValue placeholder="Price" />
@@ -385,7 +333,6 @@ export default function TemplatesPage() {
                                 </SelectContent>
                             </Select>
 
-                            {/* Sort */}
                             <Select value={sortBy} onValueChange={setSortBy} disabled={isLoading}>
                                 <SelectTrigger className="w-52 bg-zinc-900/80 border-zinc-700 text-white rounded-xl backdrop-blur-sm">
                                     <SelectValue placeholder="Sort by" />
@@ -403,7 +350,6 @@ export default function TemplatesPage() {
                                 </SelectContent>
                             </Select>
 
-                            {/* View Mode */}
                             <div className="flex border border-zinc-700 rounded-xl overflow-hidden bg-zinc-900/50 backdrop-blur-sm">
                                 <Button
                                     variant={viewMode === "grid" ? "default" : "ghost"}
@@ -427,7 +373,6 @@ export default function TemplatesPage() {
                         </div>
                     </motion.div>
 
-                    {/* Results Count */}
                     {!isLoading && (
                         <motion.div
                             className="mt-6 flex items-center justify-between"
@@ -447,7 +392,6 @@ export default function TemplatesPage() {
                 </div>
             </section>
 
-            {/* Templates Grid */}
             <section className="py-16 bg-zinc-950">
                 <div className="container mx-auto">
                     <AnimatePresence mode="wait">
@@ -457,7 +401,7 @@ export default function TemplatesPage() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                transition={{ duration: 0.3 }}
+                                transition={{ duration: 0.2 }}
                             >
                                 <TemplatesGridSkeleton viewMode={viewMode} count={8} />
                             </motion.div>
@@ -518,7 +462,6 @@ export default function TemplatesPage() {
                 </div>
             </section>
 
-            {/* Template Modal */}
             {isModalLoading ? (
                 <TemplateModalSkeleton isOpen={!!selectedTemplate} onClose={handleModalClose} />
             ) : (

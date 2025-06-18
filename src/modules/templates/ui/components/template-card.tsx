@@ -1,11 +1,9 @@
-"use client"
-
-import { motion } from "framer-motion"
 import { Star, Download, Eye, Crown, ExternalLink, Sparkles } from "lucide-react"
 import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { formatPrice } from "@/lib/utils"
 
 interface Template {
     id: string
@@ -39,10 +37,8 @@ export function TemplateCard({ template, viewMode, onPreview }: TemplateCardProp
 
     if (viewMode === "list") {
         return (
-            <motion.div
+            <div
                 className="bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-zinc-700/70 transition-all duration-500 backdrop-blur-sm group"
-                whileHover={{ y: -4, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
                 <div className="flex flex-col md:flex-row">
                     <div className="relative md:w-80 h-48 md:h-auto overflow-hidden">
@@ -89,7 +85,7 @@ export function TemplateCard({ template, viewMode, onPreview }: TemplateCardProp
                                         Free
                                     </span>
                                 ) : (
-                                    <span className="text-2xl font-bold text-white">${template.price}</span>
+                                    <span className="text-2xl font-bold text-white">{formatPrice(template.price)}</span>
                                 )}
                             </div>
                         </div>
@@ -130,31 +126,31 @@ export function TemplateCard({ template, viewMode, onPreview }: TemplateCardProp
                                     variant="outline"
                                     size="sm"
                                     onClick={onPreview}
-                                    className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white backdrop-blur-sm"
+                                    className="border-zinc-700 text-zinc-300 hover:bg-black hover:text-white backdrop-blur-sm"
                                 >
                                     <Eye className="w-4 h-4 mr-2" />
                                     Preview
                                 </Button>
                                 <Button
                                     size="sm"
+                                    disabled
                                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0"
                                 >
                                     <ExternalLink className="w-4 h-4 mr-2" />
-                                    {template.price === 0 ? "Download" : "Purchase"}
+                                    {/* {template.price === 0 ? "Download" : "Purchase"} */}
+                                    Coming soon...
                                 </Button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </div>
         )
     }
 
     return (
-        <motion.div
+        <div
             className="bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-zinc-700/70 transition-all duration-500 group backdrop-blur-sm"
-            whileHover={{ y: -8, scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
             <div className="relative h-52 overflow-hidden">
                 <Image
@@ -175,7 +171,7 @@ export function TemplateCard({ template, viewMode, onPreview }: TemplateCardProp
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Button
                         onClick={onPreview}
-                        className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm shadow-lg"
+                        className="bg-black hover:bg-black/90 text-white border-white/20 backdrop-blur-sm shadow-lg"
                     >
                         <Eye className="w-4 h-4 mr-2" />
                         Preview
@@ -193,7 +189,7 @@ export function TemplateCard({ template, viewMode, onPreview }: TemplateCardProp
                             Free
                         </span>
                     ) : (
-                        <span className="text-sm font-bold text-white">${template.price}</span>
+                        <span className="text-sm font-bold text-white">{formatPrice(template.price)}</span>
                     )}
                 </div>
 
@@ -233,10 +229,12 @@ export function TemplateCard({ template, viewMode, onPreview }: TemplateCardProp
                 <Button
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg"
                     size="sm"
+                    disabled
                 >
-                    {template.price === 0 ? "Download Free" : `Purchase $${template.price}`}
+                    {/* {template.price === 0 ? "Download Free" : `Purchase $${template.price}`} */}
+                    Coming soon...
                 </Button>
             </div>
-        </motion.div>
+        </div>
     )
 }

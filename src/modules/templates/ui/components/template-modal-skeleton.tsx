@@ -16,12 +16,7 @@ export function TemplateModalSkeleton({ isOpen, onClose }: TemplateModalSkeleton
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
-            <motion.div
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                onClick={onClose}
-            />
+            <motion.div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
             {/* Modal */}
             <motion.div

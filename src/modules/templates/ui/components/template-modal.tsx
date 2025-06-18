@@ -1,8 +1,9 @@
 "use client"
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { X, Star, Download, Crown, ExternalLink, Check, Calendar, User } from "lucide-react"
 import Image from "next/image"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -29,8 +30,14 @@ interface TemplateModalProps {
     onClose: () => void
 }
 
+const images = ['/templates/4.png', '/templates/5.png', '/templates/7.jpg', '/templates/6.jpg']
+
 export function TemplateModal({ template, isOpen, onClose }: TemplateModalProps) {
+    const [selectedImage, setSelectedImage] = useState(0)
+
     if (!template) return null
+
+    const allImages = [template.preview, ...images]
 
     const formatNumber = (num: number) => {
         if (num >= 1000) {
@@ -48,23 +55,14 @@ export function TemplateModal({ template, isOpen, onClose }: TemplateModalProps)
     }
 
     return (
-        <AnimatePresence>
+        <>
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    {/* Backdrop */}
-                    <motion.div
-                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                    />
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
                     {/* Modal */}
                     <motion.div
                         className="relative bg-zinc-900 border border-zinc-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         transition={{ type: "spring", duration: 0.5 }}
                     >
@@ -96,24 +94,31 @@ export function TemplateModal({ template, isOpen, onClose }: TemplateModalProps)
                                 <div className="space-y-4">
                                     <div className="relative h-64 lg:h-80 rounded-lg overflow-hidden">
                                         <Image
-                                            src={template.preview || "/placeholder.svg"}
+                                            src={allImages[selectedImage] || "/placeholder.svg"}
                                             alt={template.title}
                                             fill
                                             className="object-cover"
                                         />
                                     </div>
 
-                                    {/* Additional previews could go here */}
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {[1, 2, 3].map((i) => (
-                                            <div key={i} className="relative h-20 rounded-md overflow-hidden bg-zinc-800">
+                                    {/* Clickable preview thumbnails */}
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {allImages.map((image, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedImage(index)}
+                                                className={`relative h-20 rounded-md overflow-hidden transition-all duration-200 ${selectedImage === index
+                                                    ? 'ring-2 ring-blue-500 opacity-100'
+                                                    : 'opacity-50 hover:opacity-75'
+                                                    }`}
+                                            >
                                                 <Image
-                                                    src={`/placeholder.svg?height=80&width=120&text=Preview ${i}`}
-                                                    alt={`Preview ${i}`}
+                                                    src={image || `/placeholder.svg?height=80&width=120&text=Preview ${index + 1}`}
+                                                    alt={`Preview ${index + 1}`}
                                                     fill
-                                                    className="object-cover opacity-50"
+                                                    className="object-cover"
                                                 />
-                                            </div>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
@@ -186,9 +191,9 @@ export function TemplateModal({ template, isOpen, onClose }: TemplateModalProps)
 
                                     {/* Actions */}
                                     <div className="flex gap-3 pt-4">
-                                        <Button className="flex-1 bg-zinc-100 text-black hover:bg-zinc-200">
+                                        <Button className="flex-1 bg-zinc-100 text-black hover:bg-zinc-200" disabled>
                                             <ExternalLink className="w-4 h-4 mr-2" />
-                                            {template.price === 0 ? "Download Free" : `Purchase $${template.price}`}
+                                            {/* {template.price === 0 ? "Download Free" : `Purchase $${template.price}`} */} Coming soon...
                                         </Button>
                                         <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
                                             Live Demo
@@ -200,6 +205,6 @@ export function TemplateModal({ template, isOpen, onClose }: TemplateModalProps)
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </>
     )
 }

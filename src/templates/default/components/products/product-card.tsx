@@ -64,7 +64,7 @@ export const ProductCard = ({
         )
     }
 
-    const { addProductToCart, isProductInCart } = useCart(tenantSlug)
+    const { addProductToCart, isProductInCart, removeProductFromCart } = useCart(tenantSlug)
     const { addProductToWishlist, isProductInWishlist, removeProductFromWislist } = useWishlist(tenantSlug)
 
     const alreadyInCart = isProductInCart(id)
@@ -85,6 +85,11 @@ export const ProductCard = ({
         toast.success("Product removed from wishlist!")
     }
 
+    const handleRemoveFromCart = () => {
+        removeProductFromCart(id)
+        toast.success("Product removed from cart!")
+    }
+
     const handleImageLoad = () => {
         setImageLoaded(true)
     }
@@ -100,16 +105,16 @@ export const ProductCard = ({
                     <div className="absolute top-4 left-4 z-10">
                         <span
                             className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${badge === "Sale"
-                                    ? "bg-red-100 text-red-800"
-                                    : badge === "Bestseller"
-                                        ? "bg-green-100 text-green-800"
-                                        : badge === "New"
-                                            ? "bg-blue-100 text-blue-800"
-                                            : badge === "Trending"
-                                                ? "bg-purple-100 text-purple-800"
-                                                : badge === "Limited"
-                                                    ? "bg-red-100 text-red-800"
-                                                    : "bg-gray-100 text-gray-800"
+                                ? "bg-red-100 text-red-800"
+                                : badge === "Bestseller"
+                                    ? "bg-green-100 text-green-800"
+                                    : badge === "New"
+                                        ? "bg-blue-100 text-blue-800"
+                                        : badge === "Trending"
+                                            ? "bg-purple-100 text-purple-800"
+                                            : badge === "Limited"
+                                                ? "bg-red-100 text-red-800"
+                                                : "bg-gray-100 text-gray-800"
                                 }`}
                         >
                             {badge}
@@ -213,22 +218,31 @@ export const ProductCard = ({
                         )}
                     </div>
 
-                    <Button
-                        className="w-full bg-stone-900 hover:bg-amber-600 text-white rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
-                        size="sm"
-                        type="button"
-                        onClick={handleAddToCart}
-                        disabled={alreadyInCart}
-                    >
-                        {alreadyInCart ? (
-                            <span>Added</span>
-                        ) : (
+                    {alreadyInCart ? (
+                        <Button
+                            className="w-full bg-stone-900 hover:bg-amber-600 text-white rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+                            size="sm"
+                            type="button"
+                            onClick={handleRemoveFromCart}
+                        >
+                            <>
+                                <Trash2 className="h-4 w-4 mr-2 flex-shrink-0" />
+                                <span>Remove from Cart</span>
+                            </>
+                        </Button>
+                    ) : (
+                        <Button
+                            className="w-full bg-stone-900 hover:bg-amber-600 text-white rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+                            size="sm"
+                            type="button"
+                            onClick={handleAddToCart}
+                        >
                             <>
                                 <ShoppingBag className="h-4 w-4 mr-2 flex-shrink-0" />
                                 <span>Add to Cart</span>
                             </>
-                        )}
-                    </Button>
+                        </Button>
+                    )}
                 </div>
             </div>
         </article>
