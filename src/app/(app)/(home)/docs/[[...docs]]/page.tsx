@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, CheckCircle, Clock, Globe, Rocket, Shield, Users, Zap, Mail, Key, CreditCard, Store, User, Phone, Lock } from 'lucide-react'
+import { ArrowRight, CheckCircle, Globe, Rocket, Shield, Users, Zap, Mail, CreditCard, Store, User, Phone, Lock } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,7 +74,7 @@ const DocsPage = () => {
                 <section className='scroll-mt-20' id='signup-process'>
                     <h2 className="text-2xl font-bold tracking-tight mt-10 mb-4 scroll-m-20">Account Creation Process</h2>
                     <p className="text-zinc-300 leading-7">
-                        Welcome to ZEROHUB! You've clicked "Start Selling" on our homepage, now let's get your seller account set up.
+                        Welcome to ZEROHUB! You&apos;ve clicked &quot;Start Selling&quot; on our homepage, now let&apos;s get your seller account set up.
                         This process takes less than 5 minutes and gets you ready to start selling online.
                     </p>
 
@@ -145,7 +145,7 @@ const DocsPage = () => {
                                 <div className="flex-1">
                                     <h4 className="font-semibold text-white mb-3 text-lg">Account Creation & Redirect</h4>
                                     <p className="text-zinc-300 text-sm mb-4">
-                                        Once you submit the form, your account is created and you'll be automatically redirected to your admin dashboard.
+                                        Once you submit the form, your account is created and you&apos;ll be automatically redirected to your admin dashboard.
                                     </p>
 
                                     {/* Mock Dashboard Preview */}
@@ -314,7 +314,7 @@ const DocsPage = () => {
                 <section id="after-creation" className="scroll-mt-20">
                     <h2 className="text-2xl font-bold tracking-tight mt-10 mb-4 scroll-m-20">What Happens Next?</h2>
                     <p className="text-zinc-300 leading-7">
-                        After completing the registration form, here's what you can expect in your seller journey.
+                        After completing the registration form, here&apos;s what you can expect in your seller journey.
                     </p>
 
                     <Tabs defaultValue="dashboard" className="my-8">
@@ -337,7 +337,7 @@ const DocsPage = () => {
                             <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-6 border border-blue-500/20">
                                 <h3 className="text-lg font-semibold text-white mb-2">Immediate Dashboard Access</h3>
                                 <p className="text-zinc-300 mb-4">
-                                    Right after registration, you'll be redirected to your admin dashboard where you can start configuring your store.
+                                    Right after registration, you&apos;ll be redirected to your admin dashboard where you can start configuring your store.
                                 </p>
                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                     <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
