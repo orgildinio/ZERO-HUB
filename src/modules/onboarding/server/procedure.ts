@@ -192,6 +192,18 @@ export const onboardingRouter = createTRPCRouter({
                 });
                 if (!account) throw new TRPCError({ code: 'BAD_REQUEST', message: "Failed to create razorpay account." })
 
+                const razorpayProduct = await razorpay.products.requestProductConfiguration(account.id, {
+                    product_name: "route",
+                })
+                const updatedRazorpayProduct = await razorpay.products.edit(account.id, razorpayProduct.id, {
+                    settlements: {
+                        account_number: input.accountNumber,
+                        ifsc_code: input.ifscCode,
+                        beneficiary_name: input.accountHolderName
+                    },
+                    "tnc_accepted": true
+                })
+
                 const updatedTenant = await ctx.db.update({
                     collection: "tenants",
                     where: {
@@ -204,8 +216,9 @@ export const onboardingRouter = createTRPCRouter({
                             accountHolderName: input.accountHolderName,
                             accountNumber: input.accountNumber,
                             ifscCode: input.ifscCode,
-                            status: 'pending',
+                            status: 'verified',
                             razorpayLinkedAccountId: account.id,
+                            razorpayLinkedProductId: updatedRazorpayProduct.id,
                             panCardNumber: input.panCardNumber,
                             bankDetailsSubmitted: true
                         }

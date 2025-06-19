@@ -262,7 +262,7 @@ export const Tenants: CollectionConfig = {
                     }
                 },
                 {
-                    name: "razorpayFundAccountId",
+                    name: "razorpayLinkedProductId",
                     type: "text",
                     admin: {
                         description: "Razorpay fund account ID for automated payouts",

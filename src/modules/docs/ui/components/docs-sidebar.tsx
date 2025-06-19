@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, ChevronDown, Clock, CreditCard, Database, FileText, FolderOpen, Globe, HardDrive, HelpCircle, Key, Layers, Mail, Map, Rocket, Settings, Shield, Users, Webhook, Zap } from "lucide-react"
+import { BookOpen, ChevronDown, Clock, FileText, Globe, HelpCircle, Key, Map, Paintbrush, Rocket, Settings, Shield, Users } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -23,95 +23,31 @@ export const DocsSidebar = ({ className, ...props }: DocsSidebarNavProps) => {
                     <NavLink href="/docs/introduction" icon={<FileText className="h-4 w-4" />}>
                         Introduction
                     </NavLink>
+                    <NavLink href="/docs/account-setup" icon={<FileText className="h-4 w-4" />}>
+                        Accout Setup
+                    </NavLink>
+                    <NavLink href="/docs/account-subscription" icon={<FileText className="h-4 w-4" />}>
+                        Account Subscription
+                    </NavLink>
+                    <NavLink href="/docs/account-verification" icon={<FileText className="h-4 w-4" />}>
+                        Account Verification
+                    </NavLink>
                 </div>
             </div>
 
             <div className="space-y-3">
-                <NavGroup icon={<Layers className="h-4 w-4 text-green-400" />} title="Installation" badge="Popular">
-                    <NavLink href="/docs/installation/cloud" icon={<Globe className="h-4 w-4" />}>
-                        Cloud Installation
+                <NavGroup icon={<Paintbrush className="h-4 w-4 text-amber-400" />} title="Templates" badge="Secure">
+                    <NavLink href="/docs/templates/purchase" icon={<Key className="h-4 w-4" />}>
+                        Purchase Templates
                     </NavLink>
-                    <NavLink href="/docs/installation/self-hosted" icon={<HardDrive className="h-4 w-4" />}>
-                        Self-Hosted
+                    <NavLink href="/docs/templates/apply" icon={<Globe className="h-4 w-4" />}>
+                        Apply Templates
                     </NavLink>
-                    <NavLink href="/docs/installation/docker" icon={<Layers className="h-4 w-4" />}>
-                        Docker
+                    <NavLink href="/docs/templates/customize" icon={<Users className="h-4 w-4" />}>
+                        Customize Templates
                     </NavLink>
-                    <NavLink href="/docs/installation/kubernetes" icon={<Settings className="h-4 w-4" />}>
-                        Kubernetes
-                    </NavLink>
-                </NavGroup>
-            </div>
-
-            <div className="space-y-3">
-                <NavGroup icon={<Settings className="h-4 w-4 text-purple-400" />} title="Configuration">
-                    <NavLink href="/docs/configuration/app" icon={<Settings className="h-4 w-4" />}>
-                        App Configuration
-                    </NavLink>
-                    <NavLink href="/docs/configuration/database" icon={<Database className="h-4 w-4" />}>
-                        Database
-                    </NavLink>
-                    <NavLink href="/docs/configuration/auth" icon={<Key className="h-4 w-4" />}>
-                        Authentication
-                    </NavLink>
-                    <NavLink href="/docs/configuration/email" icon={<Mail className="h-4 w-4" />}>
-                        Email
-                    </NavLink>
-                    <NavLink href="/docs/configuration/storage" icon={<HardDrive className="h-4 w-4" />}>
-                        Storage
-                    </NavLink>
-                </NavGroup>
-            </div>
-
-            <div className="space-y-3">
-                <NavGroup icon={<Shield className="h-4 w-4 text-amber-400" />} title="Authentication" badge="Secure">
-                    <NavLink href="/docs/authentication/jwt" icon={<Key className="h-4 w-4" />}>
-                        JWT Authentication
-                    </NavLink>
-                    <NavLink href="/docs/authentication/oauth" icon={<Globe className="h-4 w-4" />}>
-                        OAuth Providers
-                    </NavLink>
-                    <NavLink href="/docs/authentication/roles" icon={<Users className="h-4 w-4" />}>
-                        Roles & Permissions
-                    </NavLink>
-                    <NavLink href="/docs/authentication/mfa" icon={<Shield className="h-4 w-4" />}>
-                        Multi-Factor Auth
-                    </NavLink>
-                </NavGroup>
-            </div>
-
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 px-2">
-                    <Zap className="h-4 w-4 text-yellow-400" />
-                    <h4 className="text-sm font-semibold text-white">API Reference</h4>
-                </div>
-                <NavGroup icon={<Zap className="h-4 w-4 text-blue-400" />} title="Core API" defaultOpen>
-                    <NavLink href="/docs/api/authentication" icon={<Key className="h-4 w-4" />}>
-                        Authentication
-                    </NavLink>
-                    <NavLink href="/docs/api/users" icon={<Users className="h-4 w-4" />}>
-                        Users
-                    </NavLink>
-                    <NavLink href="/docs/api/projects" icon={<FolderOpen className="h-4 w-4" />}>
-                        Projects
-                    </NavLink>
-                    <NavLink href="/docs/api/teams" icon={<Users className="h-4 w-4" />}>
-                        Teams
-                    </NavLink>
-                </NavGroup>
-
-                <NavGroup icon={<Zap className="h-4 w-4 text-purple-400" />} title="Advanced API">
-                    <NavLink href="/docs/api/webhooks" icon={<Webhook className="h-4 w-4" />}>
-                        Webhooks
-                    </NavLink>
-                    <NavLink href="/docs/api/integrations" icon={<Globe className="h-4 w-4" />}>
-                        Integrations
-                    </NavLink>
-                    <NavLink href="/docs/api/analytics" icon={<BarChart3 className="h-4 w-4" />}>
-                        Analytics
-                    </NavLink>
-                    <NavLink href="/docs/api/billing" icon={<CreditCard className="h-4 w-4" />}>
-                        Billing
+                    <NavLink href="/docs/templates/custom" icon={<Shield className="h-4 w-4" />}>
+                        Custom Templates
                     </NavLink>
                 </NavGroup>
             </div>

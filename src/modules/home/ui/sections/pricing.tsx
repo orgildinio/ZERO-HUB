@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Star, Zap, ArrowRight, Sparkles } from "lucide-react"
 import { plans } from "@/constants"
+import { formatPrice } from "@/lib/utils"
 
 type BillingPeriod = "monthly" | "yearly"
 
@@ -59,13 +60,13 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, billingPeriod, isPopular }) =
 
                 <div className="mb-6">
                     <div className="flex items-baseline mb-2">
-                        <span className="text-4xl font-bold text-white">${price}</span>
+                        <span className="text-4xl font-bold text-white">{formatPrice(price)}</span>
                         <span className="text-zinc-400 ml-2">/ {billingPeriod}</span>
                     </div>
                     {billingPeriod === "yearly" && savings > 0 && (
                         <div className="flex items-center text-xs text-green-400">
                             <Zap className="h-3 w-3 mr-1" />
-                            ${savings} savings per year
+                            {formatPrice(savings)} savings per year
                         </div>
                     )}
                 </div>

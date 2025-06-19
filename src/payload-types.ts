@@ -248,7 +248,7 @@ export interface Tenant {
     /**
      * Razorpay fund account ID for automated payouts
      */
-    razorpayFundAccountId?: string | null;
+    razorpayLinkedProductId?: string | null;
     /**
      * Current verification status of bank details
      */
@@ -1189,7 +1189,7 @@ export interface TenantsSelect<T extends boolean = true> {
         bankDetailsSubmitted?: T;
         accountType?: T;
         razorpayLinkedAccountId?: T;
-        razorpayFundAccountId?: T;
+        razorpayLinkedProductId?: T;
         status?: T;
         commissionFee?: T;
         flatFee?: T;

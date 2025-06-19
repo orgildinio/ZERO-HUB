@@ -275,7 +275,7 @@ export const HeroSection = () => {
                                 className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-black bg-white rounded-lg hover:bg-zinc-100 transition-all duration-300 hover:scale-105"
                                 onClick={handleGetStarted}
                             >
-                                Get Started
+                                Start Selling
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                             <Button

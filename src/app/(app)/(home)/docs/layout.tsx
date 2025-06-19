@@ -15,7 +15,7 @@ const DocsLayout = ({ children }: { children: React.ReactNode }) => {
     const [searchOpen, setSearchOpen] = useState(false)
 
     return (
-        <div className="relative flex min-h-screen flex-col">
+        <div className="relative flex min-h-screen flex-col bg-black">
             <div className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-zinc-800/50 bg-zinc-950/95 px-4 backdrop-blur-xl md:px-6 lg:px-8">
                 <Button
                     variant="ghost"
@@ -71,7 +71,7 @@ const DocsLayout = ({ children }: { children: React.ReactNode }) => {
                     </Button>
                 </div>
             </div>
-            <div className="container flex-1 items-start md:grid md:grid-cols-[280px_minmax(0,1fr)] lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[360px_minmax(0,1fr)]">
+            <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[350px_minmax(0,1fr)] xl:grid-cols-[310px_minmax(0,1fr)]">
                 <aside
                     className={`fixed inset-0 top-16 z-30 h-[calc(100vh-4rem)] w-full shrink-0 overflow-y-auto border-r border-zinc-800/50 bg-zinc-950/95 backdrop-blur-xl md:sticky md:block ${sidebarOpen ? "block" : "hidden"
                         }`}
