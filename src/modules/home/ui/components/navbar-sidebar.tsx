@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { NavbarDropdown } from "./navbar-dropdown";
-import { featureItems, resourceItems } from "@/constants";
+import { resourceItems } from "@/constants";
 import { User } from "@/payload-types";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
@@ -80,9 +80,6 @@ export const NavbarSidebar = memo<Props>(({
     items,
     onOpenChange,
     open,
-    featuresContainerRef,
-    featuresDropdownRef,
-    featuresOverflow,
     resourcesContainerRef,
     resourcesDropdownRef,
     resourcesOverflow
@@ -97,16 +94,16 @@ export const NavbarSidebar = memo<Props>(({
     );
     const session = useQuery(sessionQueryOptions);
 
-    const featuresDropdownProps = useMemo(() => ({
-        title: "Features",
-        subtitle: "Explore Features",
-        active: pathname,
-        containerRef: featuresContainerRef,
-        dropdownRef: featuresDropdownRef,
-        items: featureItems,
-        overflow: featuresOverflow,
-        mobile: true
-    }), [pathname, featuresContainerRef, featuresDropdownRef, featuresOverflow]);
+    // const featuresDropdownProps = useMemo(() => ({
+    //     title: "Features",
+    //     subtitle: "Explore Features",
+    //     active: pathname,
+    //     containerRef: featuresContainerRef,
+    //     dropdownRef: featuresDropdownRef,
+    //     items: featureItems,
+    //     overflow: featuresOverflow,
+    //     mobile: true
+    // }), [pathname, featuresContainerRef, featuresDropdownRef, featuresOverflow]);
 
     const resourcesDropdownProps = useMemo(() => ({
         title: "Resources",
@@ -144,7 +141,7 @@ export const NavbarSidebar = memo<Props>(({
                 </SheetHeader>
 
                 <ScrollArea className="flex flex-col overflow-auto h-full pb-2">
-                    <NavbarDropdown {...featuresDropdownProps} />
+                    {/* <NavbarDropdown {...featuresDropdownProps} /> */}
                     <NavbarDropdown {...resourcesDropdownProps} />
                     {navigationItems}
                     <AuthSection onClose={handleClose} user={session.data?.user} />

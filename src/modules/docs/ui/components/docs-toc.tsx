@@ -4,51 +4,70 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import { usePathname } from "next/navigation"
 
-type DocsTocProps = React.HTMLAttributes<HTMLDivElement>
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface DocsTocProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function DocsToc({ className, ...props }: DocsTocProps) {
     const [headings, setHeadings] = useState<{ id: string; text: string; level: number }[]>([])
     const [activeId, setActiveId] = useState<string>("")
+    const pathname = usePathname()
 
     useEffect(() => {
-        const elements = Array.from(document.querySelectorAll("h2, h3"))
-            .filter((element) => element.id)
-            .map((element) => ({
-                id: element.id,
-                text: element.textContent || "",
-                level: Number(element.tagName.substring(1)),
-            }))
+        setHeadings([])
+        setActiveId("")
+        const timeoutId = setTimeout(() => {
+            const elements = Array.from(document.querySelectorAll("h2, h3"))
+                .filter((element) => element.id)
+                .map((element) => ({
+                    id: element.id,
+                    text: element.textContent || "",
+                    level: Number(element.tagName.substring(1)),
+                }))
 
-        setHeadings(elements)
+            setHeadings(elements)
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        setActiveId(entry.target.id)
-                    }
-                })
-            },
-            { rootMargin: "0px 0px -80% 0px" },
-        )
-
-        elements.forEach(({ id }) => {
-            const element = document.getElementById(id)
-            if (element) {
-                observer.observe(element)
+            if (elements.length > 0) {
+                setActiveId(elements[0].id)
             }
-        })
 
-        return () => {
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            setActiveId(entry.target.id)
+                        }
+                    })
+                },
+                {
+                    rootMargin: "0px 0px -80% 0px",
+                    threshold: 0.1,
+                },
+            )
+
             elements.forEach(({ id }) => {
                 const element = document.getElementById(id)
                 if (element) {
-                    observer.unobserve(element)
+                    observer.observe(element)
                 }
             })
+
+            return () => {
+                elements.forEach(({ id }) => {
+                    const element = document.getElementById(id)
+                    if (element) {
+                        observer.unobserve(element)
+                    }
+                })
+                observer.disconnect()
+            }
+        }, 100)
+
+        return () => {
+            clearTimeout(timeoutId)
         }
-    }, [])
+    }, [pathname])
 
     if (headings.length === 0) {
         return null
@@ -57,7 +76,7 @@ export function DocsToc({ className, ...props }: DocsTocProps) {
     return (
         <div className={cn("space-y-2", className)} {...props}>
             <p className="font-medium">On This Page</p>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-sm ml-6">
                 {headings.map((heading) => (
                     <li key={heading.id}>
                         <a

@@ -116,7 +116,170 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@layer components {
+
+  /* Atom One Dark Theme for code blocks */
+  .atom-one-dark {
+    background-color: #282c34;
+    color: #abb2bf;
+    border-radius: 0.5rem;
+  }
+
+  .atom-one-dark .hljs-comment,
+  .atom-one-dark .hljs-quote {
+    color: #5c6370;
+    font-style: italic;
+  }
+
+  .atom-one-dark .hljs-doctag,
+  .atom-one-dark .hljs-keyword,
+  .atom-one-dark .hljs-formula {
+    color: #c678dd;
+  }
+
+  .atom-one-dark .hljs-section,
+  .atom-one-dark .hljs-name,
+  .atom-one-dark .hljs-selector-tag,
+  .atom-one-dark .hljs-deletion,
+  .atom-one-dark .hljs-subst {
+    color: #e06c75;
+  }
+
+  .atom-one-dark .hljs-literal {
+    color: #56b6c2;
+  }
+
+  .atom-one-dark .hljs-string,
+  .atom-one-dark .hljs-regexp,
+  .atom-one-dark .hljs-addition,
+  .atom-one-dark .hljs-attribute,
+  .atom-one-dark .hljs-meta .hljs-string {
+    color: #98c379;
+  }
+
+  .atom-one-dark .hljs-attr,
+  .atom-one-dark .hljs-variable,
+  .atom-one-dark .hljs-template-variable,
+  .atom-one-dark .hljs-type,
+  .atom-one-dark .hljs-selector-class,
+  .atom-one-dark .hljs-selector-attr,
+  .atom-one-dark .hljs-selector-pseudo,
+  .atom-one-dark .hljs-number {
+    color: #d19a66;
+  }
+
+  .atom-one-dark .hljs-symbol,
+  .atom-one-dark .hljs-bullet,
+  .atom-one-dark .hljs-link,
+  .atom-one-dark .hljs-meta,
+  .atom-one-dark .hljs-selector-id,
+  .atom-one-dark .hljs-title {
+    color: #61aeee;
+  }
+
+  .atom-one-dark .hljs-built_in,
+  .atom-one-dark .hljs-class .hljs-title,
+  .atom-one-dark .hljs-title.class_ {
+    color: #e6c07b;
+  }
+
+  .atom-one-dark .hljs-emphasis {
+    font-style: italic;
+  }
+
+  .atom-one-dark .hljs-strong {
+    font-weight: bold;
+  }
+}
+
+@layer utilities {
+
+  /* Responsive dropdown styles */
+  .dropdown-responsive {
+    width: 16rem;
+    /* Default width */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Edge */
+  }
+  
+  .scrollbar-hide {
+    scrollbar-width: none; /* For Firefox */
+  }
+
+  @media (min-width: 640px) {
+    .dropdown-responsive {
+      width: 18rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .dropdown-responsive {
+      width: 20rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .dropdown-responsive {
+      width: 24rem;
+    }
+  }
+}
+
+/* Add hover delay for better user experience */
+.group:hover .group-hover\:opacity-100 {
+  transition-delay: 150ms;
+}
+
+.group:hover .group-hover\:visible {
+  transition-delay: 150ms;
+}
+
+/* Add pointer events to prevent dropdown from closing when moving from trigger to content */
+.group:hover .group-hover\:pointer-events-auto {
+  pointer-events: auto;
+}
+
+/* Documentation styles */
+.docs-container {
+  @apply max-w-3xl mx-auto;
+}
+
+.docs-section-heading {
+  @apply text-2xl font-bold tracking-tight mt-10 mb-4 scroll-m-20;
+}
+
+.docs-subsection-heading {
+  @apply text-xl font-semibold tracking-tight mt-8 mb-3 scroll-m-20;
+}
+
+.docs-text {
+  @apply text-zinc-300 leading-7;
+}
+
+.inline-code {
+  @apply bg-zinc-800 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.docs-table {
+  @apply w-full border-collapse text-sm;
+}
+
+.docs-table th {
+  @apply border-b border-zinc-800 px-4 py-2 text-left font-medium text-zinc-300;
+}
+
+.docs-table td {
+  @apply border-b border-zinc-800 px-4 py-2 text-zinc-400;
+}
+
+.docs-table tr:last-child td {
+  @apply border-b-0;
 }

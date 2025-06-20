@@ -5,7 +5,7 @@ export const Orders: CollectionConfig = {
     slug: "orders",
     admin: {
         useAsTitle: "name",
-        group: "Store",
+        group: "Customers",
     },
     access: {
         read: () => true,

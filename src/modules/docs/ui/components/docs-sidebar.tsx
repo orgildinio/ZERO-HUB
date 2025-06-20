@@ -1,4 +1,4 @@
-import { BookOpen, ChevronDown, Clock, FileText, Globe, HelpCircle, Key, Map, Paintbrush, Rocket, Settings, Shield, Users } from "lucide-react"
+import { BarChart3, BookOpen, ChevronDown, CreditCard, Database, FileText, HelpCircle, Layers, Mail, Map, Package, Palette, Rocket, Settings, Shield, ShoppingCart, Star, Store, Tags, Users } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -10,7 +10,7 @@ type DocsSidebarNavProps = React.HTMLAttributes<HTMLDivElement>
 
 export const DocsSidebar = ({ className, ...props }: DocsSidebarNavProps) => {
     return (
-        <div className={cn("space-y-6", className)} {...props}>
+        <div className={cn("space-y-6 scrollbar-hide", className)} {...props}>
             <div className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
                     <Rocket className="h-4 w-4 text-blue-400" />
@@ -23,19 +23,117 @@ export const DocsSidebar = ({ className, ...props }: DocsSidebarNavProps) => {
                     <NavLink href="/docs/introduction" icon={<FileText className="h-4 w-4" />}>
                         Introduction
                     </NavLink>
-                    <NavLink href="/docs/account-setup" icon={<FileText className="h-4 w-4" />}>
-                        Accout Setup
-                    </NavLink>
-                    <NavLink href="/docs/account-subscription" icon={<FileText className="h-4 w-4" />}>
-                        Account Subscription
-                    </NavLink>
-                    <NavLink href="/docs/account-verification" icon={<FileText className="h-4 w-4" />}>
-                        Account Verification
-                    </NavLink>
                 </div>
             </div>
 
             <div className="space-y-3">
+                <NavGroup icon={<Store className="h-4 w-4 text-green-400" />} title="Get Started" badge="Essential" defaultOpen>
+                    <NavLink href="/docs/get-started/account-setup" icon={<Users className="h-4 w-4" />}>
+                        Account Creation & Setup
+                    </NavLink>
+                    <NavLink href="/docs/get-started/account-subscription" icon={<CreditCard className="h-4 w-4" />}>
+                        Purchase Subscription
+                    </NavLink>
+                    <NavLink href="/docs/get-started/account-verification" icon={<Shield className="h-4 w-4" />}>
+                        Bank Account Verification
+                    </NavLink>
+                </NavGroup>
+            </div>
+
+            <div className="space-y-3">
+                <div className="flex items-center gap-2 px-2">
+                    <BarChart3 className="h-4 w-4 text-purple-400" />
+                    <h4 className="text-sm font-semibold text-white">Dashboard Docs</h4>
+                </div>
+
+                <NavGroup icon={<Package className="h-4 w-4 text-blue-400" />} title="Products" badge="Core">
+                    <NavLink href="/docs/dashboard/products/create" icon={<Package className="h-4 w-4" />}>
+                        Create Products
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/products/update" icon={<Settings className="h-4 w-4" />}>
+                        Update Products
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/products/delete" icon={<FileText className="h-4 w-4" />}>
+                        Delete Products
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/products/inventory" icon={<Database className="h-4 w-4" />}>
+                        Inventory Management
+                    </NavLink>
+                </NavGroup>
+
+                <NavGroup icon={<Tags className="h-4 w-4 text-green-400" />} title="Categories">
+                    <NavLink href="/docs/dashboard/categories/create" icon={<Tags className="h-4 w-4" />}>
+                        Create Categories
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/categories/update" icon={<Settings className="h-4 w-4" />}>
+                        Update Categories
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/categories/delete" icon={<FileText className="h-4 w-4" />}>
+                        Delete Categories
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/categories/organization" icon={<Layers className="h-4 w-4" />}>
+                        Category Organization
+                    </NavLink>
+                </NavGroup>
+
+                <NavGroup icon={<Star className="h-4 w-4 text-yellow-400" />} title="Reviews">
+                    <NavLink href="/docs/dashboard/reviews/management" icon={<Star className="h-4 w-4" />}>
+                        Review Management
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/reviews/moderation" icon={<Shield className="h-4 w-4" />}>
+                        Review Moderation
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/reviews/responses" icon={<Mail className="h-4 w-4" />}>
+                        Responding to Reviews
+                    </NavLink>
+                </NavGroup>
+
+                <NavGroup icon={<Users className="h-4 w-4 text-cyan-400" />} title="Customers">
+                    <NavLink href="/docs/dashboard/customers/management" icon={<Users className="h-4 w-4" />}>
+                        Customer Management
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/customers/profiles" icon={<FileText className="h-4 w-4" />}>
+                        Customer Profiles
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/customers/support" icon={<HelpCircle className="h-4 w-4" />}>
+                        Customer Support
+                    </NavLink>
+                </NavGroup>
+
+                <NavGroup icon={<ShoppingCart className="h-4 w-4 text-orange-400" />} title="Orders">
+                    <NavLink href="/docs/dashboard/orders/management" icon={<ShoppingCart className="h-4 w-4" />}>
+                        Order Management
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/orders/fulfillment" icon={<Package className="h-4 w-4" />}>
+                        Order Fulfillment
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/orders/tracking" icon={<Map className="h-4 w-4" />}>
+                        Order Tracking
+                    </NavLink>
+                    <NavLink href="/docs/dashboard/orders/returns" icon={<FileText className="h-4 w-4" />}>
+                        Returns & Refunds
+                    </NavLink>
+                </NavGroup>
+            </div>
+
+            <div className="space-y-3">
+                <NavGroup icon={<Palette className="h-4 w-4 text-pink-400" />} title="Templates" badge="Popular">
+                    <NavLink href="/docs/templates/purchase" icon={<CreditCard className="h-4 w-4" />}>
+                        Purchase Templates
+                    </NavLink>
+                    <NavLink href="/docs/templates/change" icon={<Settings className="h-4 w-4" />}>
+                        Change Templates
+                    </NavLink>
+                    <NavLink href="/docs/templates/customize" icon={<Palette className="h-4 w-4" />}>
+                        Template Customization
+                    </NavLink>
+                    <NavLink href="/docs/templates/marketplace" icon={<Store className="h-4 w-4" />}>
+                        Template Marketplace
+                    </NavLink>
+                </NavGroup>
+            </div>
+
+            {/* <div className="space-y-3">
                 <NavGroup icon={<Paintbrush className="h-4 w-4 text-amber-400" />} title="Templates" badge="Secure">
                     <NavLink href="/docs/templates/purchase" icon={<Key className="h-4 w-4" />}>
                         Purchase Templates
@@ -50,9 +148,9 @@ export const DocsSidebar = ({ className, ...props }: DocsSidebarNavProps) => {
                         Custom Templates
                     </NavLink>
                 </NavGroup>
-            </div>
+            </div> */}
 
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
                     <HelpCircle className="h-4 w-4 text-cyan-400" />
                     <h4 className="text-sm font-semibold text-white">Resources</h4>
@@ -61,9 +159,6 @@ export const DocsSidebar = ({ className, ...props }: DocsSidebarNavProps) => {
                     <NavLink href="/docs/resources/faq" icon={<HelpCircle className="h-4 w-4" />}>
                         FAQ
                     </NavLink>
-                    <NavLink href="/docs/resources/troubleshooting" icon={<Settings className="h-4 w-4" />}>
-                        Troubleshooting
-                    </NavLink>
                     <NavLink href="/docs/resources/changelog" icon={<Clock className="h-4 w-4" />}>
                         Changelog
                     </NavLink>
@@ -71,7 +166,7 @@ export const DocsSidebar = ({ className, ...props }: DocsSidebarNavProps) => {
                         Roadmap
                     </NavLink>
                 </div>
-            </div>
+            </div> */}
         </div>
     )
 }
