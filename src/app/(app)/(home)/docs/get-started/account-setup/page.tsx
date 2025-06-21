@@ -384,7 +384,7 @@ const DocsPage = () => {
 
             <DocsPager
                 next={{
-                    href: "/docs/account-subscription",
+                    href: "/docs/get-started/account-subscription",
                     title: "Account Subscription",
                 }}
             />

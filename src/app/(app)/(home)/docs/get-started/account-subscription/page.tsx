@@ -508,11 +508,11 @@ const DocsPage = () => {
 
             <DocsPager
                 prev={{
-                    href: "/docs/account-setup",
+                    href: "/docs/get-started/account-setup",
                     title: "Account Setup Guide",
                 }}
                 next={{
-                    href: "/docs/account-verification",
+                    href: "/docs/get-started/account-verification",
                     title: "Account Verification",
                 }}
             />

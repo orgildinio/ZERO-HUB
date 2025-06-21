@@ -28,18 +28,6 @@ export const Categories: CollectionConfig = {
         useAsTitle: 'name',
         group: "Store",
         description: "Manage product categories. You must verify your account before creating categories.",
-        preview: (doc) => {
-            if (doc?.slug) {
-                return `[store_slug].${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${doc.slug}`;
-            }
-            return null;
-        },
-        livePreview: {
-            url: ({ data, req }) => {
-                const tenant = req.user?.tenants?.[0].tenant as Tenant
-                return `${tenant.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
-            },
-        },
     },
     hooks: {
         beforeChange: [
