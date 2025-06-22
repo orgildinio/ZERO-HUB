@@ -70,8 +70,6 @@ export interface Config {
     users: User;
     media: Media;
     tenants: Tenant;
-    templates: Template;
-    'tenant-templates': TenantTemplate;
     products: Product;
     tags: Tag;
     categories: Category;
@@ -93,8 +91,6 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
-    templates: TemplatesSelect<false> | TemplatesSelect<true>;
-    'tenant-templates': TenantTemplatesSelect<false> | TenantTemplatesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -177,10 +173,6 @@ export interface Tenant {
    */
   slug: string;
   /**
-   * Store logo (recommended: 200x200px PNG/JPG)
-   */
-  image?: (string | null) | Media;
-  /**
    * Primary contact phone number
    */
   phone: string;
@@ -188,10 +180,6 @@ export interface Tenant {
    * This is the name of the store (e.g. Ashish's Store).
    */
   store: string;
-  /**
-   * Currently active template configuration for this tenant.
-   */
-  activeTemplate?: (string | null) | TenantTemplate;
   /**
    * Subscription and billing information
    */
@@ -265,10 +253,6 @@ export interface Tenant {
      * PAN card number for tax identification (e.g. ABCDE1234F)
      */
     panCardNumber?: string | null;
-    /**
-     * Upload clear photo of PAN card (front side only, recommended: JPG/PNG format)
-     */
-    panCardPhoto?: (string | null) | Media;
   };
   /**
    * Maximum number of products allowed for this tenant
@@ -307,231 +291,6 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * Template configurations for each tenant with customizations
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenant-templates".
- */
-export interface TenantTemplate {
-  id: string;
-  /**
-   * A descriptive name for this tenant template configuration (e.g., 'Acme Corp - Landing Page Template')
-   */
-  displayName?: string | null;
-  /**
-   * The base template being used
-   */
-  template: string | Template;
-  /**
-   * Tenant-specific customizations for this template
-   */
-  customizations?: {
-    /**
-     * Color scheme customizations
-     */
-    colors?: {
-      /**
-       * Primary brand color (hex code)
-       */
-      primaryColor?: string | null;
-      /**
-       * Secondary brand color (hex code)
-       */
-      secondaryColor?: string | null;
-      /**
-       * Background color (hex code)
-       */
-      backgroundColor?: string | null;
-      /**
-       * Primary text color (hex code)
-       */
-      textColor?: string | null;
-    };
-    /**
-     * Typography customizations
-     */
-    fonts?: {
-      /**
-       * Primary font family for headings
-       */
-      primaryFont?: ('Roboto' | 'Open Sans' | 'Lato' | 'Montserrat' | 'Poppins' | 'Inter') | null;
-      /**
-       * Font family for body text
-       */
-      bodyFont?: ('Roboto' | 'Open Sans' | 'Lato' | 'Source Sans Pro' | 'Inter') | null;
-    };
-    /**
-     * Layout and structure customizations
-     */
-    layout?: {
-      /**
-       * Header layout style
-       */
-      headerStyle?: ('default' | 'centered' | 'left' | 'minimal') | null;
-      /**
-       * Footer layout style
-       */
-      footerStyle?: ('default' | 'minimal' | 'extended') | null;
-    };
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Manage website templates available for tenants
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "templates".
- */
-export interface Template {
-  id: string;
-  /**
-   * Template name that will be displayed to users
-   */
-  name: string;
-  /**
-   * URL-friendly identifier for the template
-   */
-  slug: string;
-  /**
-   * Brief description of the template features and design
-   */
-  description: string;
-  /**
-   * Template category for organization and filtering
-   */
-  category:
-    | 'agriculture'
-    | 'books'
-    | 'electronics_and_furniture'
-    | 'fashion_and_lifestyle'
-    | 'gifting'
-    | 'grocery'
-    | 'baby_products'
-    | 'office_supplies'
-    | 'religious_products'
-    | 'pet_products'
-    | 'sports_products'
-    | 'arts_and_collectibles'
-    | 'sexual_wellness_products'
-    | 'drop_shipping'
-    | 'crypto_machinery'
-    | 'tobacco'
-    | 'weapons_and_ammunitions'
-    | 'stamps_and_coin_stores'
-    | 'automobile_parts_and_equipments'
-    | 'garden_supply_stores'
-    | 'household_appliance_stores'
-    | 'non_durable_goods'
-    | 'pawn_shops'
-    | 'wig_and_toupee_shops'
-    | 'camera_and_photographic_stores'
-    | 'leather_goods_and_luggage'
-    | 'men_and_boys_clothing_stores'
-    | 'tent_stores'
-    | 'shoe_stores'
-    | 'petroleum_and_petroleum_products'
-    | 'automotive_tire_stores'
-    | 'chemical_and_allied_products'
-    | 'family_clothing_stores'
-    | 'fabric_and_sewing_stores'
-    | 'art_supply_stores'
-    | 'clocks_and_silverware_stores'
-    | 'cosmetic_stores'
-    | 'home_furnishing_stores'
-    | 'antique_stores'
-    | 'women_clothing'
-    | 'women_accessory_stores';
-  /**
-   * Template preview assets
-   */
-  preview?: {
-    /**
-     * Main thumbnail image (recommended: 400x300px)
-     */
-    thumbnail?: (string | null) | Media;
-    /**
-     * Additional screenshot images showing different pages
-     */
-    screenshots?: (string | Media)[] | null;
-    videoUrl?: (string | null) | Media;
-  };
-  /**
-   * Template pricing information
-   */
-  pricing: {
-    /**
-     * Template price in INR (use 0 for free templates)
-     */
-    price: number;
-    /**
-     * Original price before discount (optional)
-     */
-    originalPrice?: number | null;
-    /**
-     * Mark as free template (overrides price)
-     */
-    isFree?: boolean | null;
-  };
-  /**
-   * Technical specifications and requirements
-   */
-  technical?: {
-    /**
-     * Features included in the template
-     */
-    features?:
-      | (
-          | 'responsive'
-          | 'dark-mode'
-          | 'search'
-          | 'auth'
-          | 'payment'
-          | 'blog'
-          | 'forms'
-          | 'social'
-          | 'analytics'
-          | 'seo'
-          | 'i18n'
-          | 'admin'
-          | 'api'
-          | 'cart'
-          | 'wishlist'
-          | 'reviews'
-          | 'newsletter'
-          | 'livechat'
-        )[]
-      | null;
-  };
-  /**
-   * Current status of the template
-   */
-  status: 'draft' | 'active' | 'inactive' | 'discontinued' | 'coming-soon';
-  /**
-   * Popularity score (higher = more popular)
-   */
-  popularity?: number | null;
-  /**
-   * Template analytics and performance metrics
-   */
-  analytics?: {
-    /**
-     * Total number of purchases
-     */
-    totalPurchases?: number | null;
-    /**
-     * Total number of page views
-     */
-    totalViews?: number | null;
-    /**
-     * Number of tenants currently using this template
-     */
-    activeTenants?: number | null;
-  };
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * You must verify your account before creating products.
@@ -1036,14 +795,6 @@ export interface PayloadLockedDocument {
         value: string | Tenant;
       } | null)
     | ({
-        relationTo: 'templates';
-        value: string | Template;
-      } | null)
-    | ({
-        relationTo: 'tenant-templates';
-        value: string | TenantTemplate;
-      } | null)
-    | ({
         relationTo: 'products';
         value: string | Product;
       } | null)
@@ -1167,10 +918,8 @@ export interface MediaSelect<T extends boolean = true> {
 export interface TenantsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
-  image?: T;
   phone?: T;
   store?: T;
-  activeTemplate?: T;
   subscription?:
     | T
     | {
@@ -1194,87 +943,12 @@ export interface TenantsSelect<T extends boolean = true> {
         commissionFee?: T;
         flatFee?: T;
         panCardNumber?: T;
-        panCardPhoto?: T;
       };
   maxProducts?: T;
   analytics?:
     | T
     | {
         totalProducts?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "templates_select".
- */
-export interface TemplatesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  description?: T;
-  category?: T;
-  preview?:
-    | T
-    | {
-        thumbnail?: T;
-        screenshots?: T;
-        videoUrl?: T;
-      };
-  pricing?:
-    | T
-    | {
-        price?: T;
-        originalPrice?: T;
-        isFree?: T;
-      };
-  technical?:
-    | T
-    | {
-        features?: T;
-      };
-  status?: T;
-  popularity?: T;
-  analytics?:
-    | T
-    | {
-        totalPurchases?: T;
-        totalViews?: T;
-        activeTenants?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenant-templates_select".
- */
-export interface TenantTemplatesSelect<T extends boolean = true> {
-  displayName?: T;
-  template?: T;
-  customizations?:
-    | T
-    | {
-        colors?:
-          | T
-          | {
-              primaryColor?: T;
-              secondaryColor?: T;
-              backgroundColor?: T;
-              textColor?: T;
-            };
-        fonts?:
-          | T
-          | {
-              primaryFont?: T;
-              bodyFont?: T;
-            };
-        layout?:
-          | T
-          | {
-              headerStyle?: T;
-              footerStyle?: T;
-            };
       };
   updatedAt?: T;
   createdAt?: T;

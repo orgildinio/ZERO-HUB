@@ -30,7 +30,6 @@ import { TenantBankVerifyButton as TenantBankVerifyButton_d8fa5c4a94460e33c6a3c2
 import { TenantSelector as TenantSelector_1d0591e3cf4f332c83a86da13a0de59a } from '@payloadcms/plugin-multi-tenant/client'
 import { TenantSelectionProvider as TenantSelectionProvider_d6d5f193a167989e2ee7d14202901e62 } from '@payloadcms/plugin-multi-tenant/rsc'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
-import { Dashboard as Dashboard_18606adbd12c28b088c62a671d3755fb } from '@/components/payload/test'
 
 export const importMap = {
   "@payloadcms/plugin-multi-tenant/client#TenantField": TenantField_1d0591e3cf4f332c83a86da13a0de59a,
@@ -64,6 +63,5 @@ export const importMap = {
   "@/components/payload/razorpay-verification#TenantBankVerifyButton": TenantBankVerifyButton_d8fa5c4a94460e33c6a3c268f6fe22bb,
   "@payloadcms/plugin-multi-tenant/client#TenantSelector": TenantSelector_1d0591e3cf4f332c83a86da13a0de59a,
   "@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider": TenantSelectionProvider_d6d5f193a167989e2ee7d14202901e62,
-  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
-  "@/components/payload/test#Dashboard": Dashboard_18606adbd12c28b088c62a671d3755fb
+  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e
 }

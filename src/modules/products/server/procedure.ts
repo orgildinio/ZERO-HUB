@@ -284,5 +284,5 @@ export const productsRouter = createTRPCRouter({
                 reviews: review.docs,
                 ratingDistribution,
             }
-        })
+        }),
 })

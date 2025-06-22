@@ -13,8 +13,6 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { isSuperAdmin } from './lib/access';
 import { Tenants } from './collections/Tenants';
-import { Templates } from './collections/Templates';
-import { TenantTemplates } from './collections/TenantTemplates';
 import { Products } from './collections/Products';
 import { Tags } from './collections/Tags';
 import { Categories } from './collections/Categories';
@@ -47,7 +45,7 @@ export default buildConfig({
       ],
     }
   },
-  collections: [Users, Media, Tenants, Templates, TenantTemplates, Products, Tags, Categories, Reviews, SubscriptionPlans, Subscriptions, Customers, Orders],
+  collections: [Users, Media, Tenants, Products, Tags, Categories, Reviews, SubscriptionPlans, Subscriptions, Customers, Orders],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

@@ -5,7 +5,7 @@ import path from 'path';
 import nodemailer from 'nodemailer';
 import ejs from 'ejs';
 
-import redis from "@/lib/redis"
+import { redis } from "@/lib/redis"
 
 
 const transporter = nodemailer.createTransport({

@@ -48,14 +48,6 @@ export const Tenants: CollectionConfig = {
             }
         },
         {
-            name: "image",
-            relationTo: "media",
-            type: "upload",
-            admin: {
-                description: "Store logo (recommended: 200x200px PNG/JPG)"
-            },
-        },
-        {
             name: "phone",
             required: true,
             type: "text",
@@ -82,15 +74,15 @@ export const Tenants: CollectionConfig = {
                 description: "This is the name of the store (e.g. Ashish's Store)."
             },
         },
-        {
-            name: "activeTemplate",
-            relationTo: "tenant-templates",
-            type: 'relationship',
-            admin: {
-                description: "Currently active template configuration for this tenant.",
-                position: "sidebar"
-            },
-        },
+        // {
+        //     name: "activeTemplate",
+        //     relationTo: "tenant-templates",
+        //     type: 'relationship',
+        //     admin: {
+        //         description: "Currently active template configuration for this tenant.",
+        //         position: "sidebar"
+        //     },
+        // },
         {
             name: "subscription",
             type: "group",
@@ -319,15 +311,6 @@ export const Tenants: CollectionConfig = {
                         return true;
                     }
                 },
-                {
-                    name: "panCardPhoto",
-                    relationTo: "media",
-                    type: "upload",
-                    required: false,
-                    admin: {
-                        description: "Upload clear photo of PAN card (front side only, recommended: JPG/PNG format)"
-                    }
-                }
             ]
         },
         {
