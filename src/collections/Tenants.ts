@@ -74,15 +74,16 @@ export const Tenants: CollectionConfig = {
                 description: "This is the name of the store (e.g. Ashish's Store)."
             },
         },
-        // {
-        //     name: "activeTemplate",
-        //     relationTo: "tenant-templates",
-        //     type: 'relationship',
-        //     admin: {
-        //         description: "Currently active template configuration for this tenant.",
-        //         position: "sidebar"
-        //     },
-        // },
+        {
+            name: "activeTemplate",
+            required: true,
+            defaultValue: 'default',
+            type: 'text',
+            admin: {
+                description: "Currently active template configuration for this tenant.",
+                position: "sidebar"
+            },
+        },
         {
             name: "subscription",
             type: "group",

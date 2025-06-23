@@ -181,6 +181,10 @@ export interface Tenant {
    */
   store: string;
   /**
+   * Currently active template configuration for this tenant.
+   */
+  activeTemplate: string;
+  /**
    * Subscription and billing information
    */
   subscription?: {
@@ -920,6 +924,7 @@ export interface TenantsSelect<T extends boolean = true> {
   slug?: T;
   phone?: T;
   store?: T;
+  activeTemplate?: T;
   subscription?:
     | T
     | {

@@ -23,13 +23,12 @@ interface Props {
     ratingDistribution: Record<number, number>;
     reviews: Review[];
     product: string;
-    slug: string
 }
 
 const MAX_RATING = 5;
 const MIN_RATING = 0;
 
-export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, reviews, product, slug }: Props) => {
+export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, reviews, product }: Props) => {
 
     const [showReviewForm, setShowReviewForm] = useState(false)
 
@@ -44,7 +43,6 @@ export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, r
             description: '',
             rating: 0,
             product: product,
-            tenant: slug
         }
     });
 

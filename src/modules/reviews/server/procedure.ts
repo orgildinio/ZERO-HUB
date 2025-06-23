@@ -39,7 +39,6 @@ export const reviewsRouter = createTRPCRouter({
                     description: input.description,
                     title: input.title,
                     rating: input.rating,
-                    tenant: input.tenant
                 }
             });
             return review

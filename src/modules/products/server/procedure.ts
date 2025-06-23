@@ -4,6 +4,9 @@ import type { Where } from "payload";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { Category, Media } from "@/payload-types";
 import { sortedValues } from "../search-param";
+import { db } from "@/db";
+import { categories, products, productsImages, reviews } from "../../../../drizzle/schema";
+import { eq, inArray } from "drizzle-orm";
 
 export const productsRouter = createTRPCRouter({
     getMany: baseProcedure
@@ -285,4 +288,67 @@ export const productsRouter = createTRPCRouter({
                 ratingDistribution,
             }
         }),
+    getManyByDrizzle: baseProcedure
+        .input(
+            z.object({
+                slug: z.string()
+            })
+        )
+        .query(async ({ input }) => {
+            const { slug } = input;
+            const productsList = await db
+                .select({
+                    id: products.id,
+                    featured: products.featured,
+                    name: products.name,
+                    slug: products.slug,
+                    categoryId: products.categoryId,
+                    description: products.description,
+                    pricingPrice: products.pricingPrice,
+                    pricingCompareAtPrice: products.pricingCompareAtPrice,
+                    badge: products.badge,
+                    categoryName: categories.name,
+                    categorySlug: categories.slug,
+                })
+                .from(products)
+                .leftJoin(categories, eq(products.categoryId, categories.id))
+                .where(eq(products.tenantSlug, slug));
+
+            if (productsList.length === 0) return [];
+
+            const productIds = productsList.map(p => p.id);
+            const productReviews = await db
+                .select()
+                .from(reviews)
+                .where(inArray(reviews.productId, productIds))
+            const images = await db
+                .select()
+                .from(productsImages)
+                .where(inArray(productsImages.parentId, productIds));
+
+            const imagesByProductId: Record<string, typeof images> = {};
+            const reviewsByProductId: Record<string, typeof productReviews> = {};
+
+            productReviews.forEach(review => {
+                const productId = review.productId;
+                if (!reviewsByProductId[productId]) {
+                    imagesByProductId[productId] = [];
+                }
+                reviewsByProductId[productId].push(review)
+            })
+
+            images.forEach(image => {
+                const productId = image.parentId;
+                if (!imagesByProductId[productId]) {
+                    imagesByProductId[productId] = [];
+                }
+                imagesByProductId[productId].push(image);
+            });
+
+            return productsList.map(product => ({
+                ...product,
+                images: imagesByProductId[product.id] || [],
+                reviews: reviewsByProductId[product.id]
+            }));
+        })
 })

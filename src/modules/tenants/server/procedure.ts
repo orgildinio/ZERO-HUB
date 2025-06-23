@@ -23,6 +23,7 @@ export const tenantsRouter = createTRPCRouter({
                 },
                 select: {
                     store: true,
+                    activeTemplate: true
                 }
             })
             if (!tenant) throw new TRPCError({ code: "NOT_FOUND", message: "Tenant not found!" })
