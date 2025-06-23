@@ -100,7 +100,8 @@ export const authRouter = createTRPCRouter({
                     name: input.username,
                     slug: input.username,
                     phone: input.phone,
-                    store: input.store
+                    store: input.store,
+                    activeTemplate: 'default'
                 }
             })
             await ctx.db.create({
