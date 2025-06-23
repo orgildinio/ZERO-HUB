@@ -238,6 +238,7 @@ export const ProductHero = ({ product, slug }: { slug: string, product: string }
                             reviewRating={data.reviewRating}
                             reviews={data.reviews}
                             product={product}
+                            slug={slug}
                         />
                     </TabsContent>
                 </Tabs>

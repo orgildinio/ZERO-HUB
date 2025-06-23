@@ -38,7 +38,8 @@ export const reviewsRouter = createTRPCRouter({
                     email: input.email || '',
                     description: input.description,
                     title: input.title,
-                    rating: input.rating
+                    rating: input.rating,
+                    tenant: input.tenant
                 }
             });
             return review
