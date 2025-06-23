@@ -9,7 +9,6 @@ import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { RichText } from '@payloadcms/richtext-lexical/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice, generateTenantUrl } from "@/lib/utils";
 import { useCart } from "@/modules/products/hooks/use-cart";
@@ -195,7 +194,7 @@ export const ProductHero = ({ product, slug }: { slug: string, product: string }
                     <div>
                         <h3 className="mb-4 text-xl font-bold text-stone-900">Description</h3>
                         {data.description ? (
-                            <RichText data={data.description} className="text-stone-600 leading-relaxed" />
+                            <p className="text-stone-600 leading-relaxed" >{data.description}</p>
                         ) : (
                             <p className="text-gray-600">No description provided.</p>
                         )}
@@ -238,6 +237,7 @@ export const ProductHero = ({ product, slug }: { slug: string, product: string }
                             reviewRating={data.reviewRating}
                             reviews={data.reviews}
                             product={product}
+                            slug={slug}
                         />
                     </TabsContent>
                 </Tabs>

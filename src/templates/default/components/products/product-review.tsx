@@ -23,12 +23,13 @@ interface Props {
     ratingDistribution: Record<number, number>;
     reviews: Review[];
     product: string;
+    slug: string
 }
 
 const MAX_RATING = 5;
 const MIN_RATING = 0;
 
-export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, reviews, product }: Props) => {
+export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, reviews, product, slug }: Props) => {
 
     const [showReviewForm, setShowReviewForm] = useState(false)
 
@@ -43,6 +44,7 @@ export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, r
             description: '',
             rating: 0,
             product: product,
+            tenant: slug
         }
     });
 
@@ -50,7 +52,6 @@ export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, r
 
     const reviewMutation = useMutation(trpc.reviews.create.mutationOptions({
         onError: (error) => {
-            console.log(error)
             toast.error(error.message)
         },
         onSuccess: async () => {
@@ -63,6 +64,7 @@ export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, r
         const sanitized = {
             ...data,
             product: product,
+            tenant: slug,
             email: data.email?.trim().toLowerCase() || undefined,
         };
         reviewMutation.mutate(sanitized);
@@ -189,6 +191,7 @@ export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, r
                             <div className="flex gap-2">
                                 <Button
                                     type="submit"
+                                    className="cursor-pointer"
                                 >
                                     Submit Review
                                 </Button>

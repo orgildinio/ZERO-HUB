@@ -87,7 +87,7 @@ export const Products: CollectionConfig = {
         },
         {
             name: "description",
-            type: "richText",
+            type: "text",
             required: true,
             admin: {
                 description: "Detailed product description"

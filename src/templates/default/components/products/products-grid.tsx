@@ -53,8 +53,8 @@ export const ProductsGrid = ({ slug }: { slug: string }) => {
                 ...filters,
             },
             {
-                getNextPageParam: (lastpage) => {
-                    return lastpage.docs.length > 0 ? lastpage.nextPage : undefined
+                getNextPageParam: (lastPage) => {
+                    return lastPage.docs.length > 0 ? lastPage.nextPage : undefined
                 },
             },
         ),

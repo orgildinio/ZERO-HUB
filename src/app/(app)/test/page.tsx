@@ -5,7 +5,7 @@ import { TestView } from './_components/test-view';
 
 const Page = () => {
     const queryClient = getQueryClient()
-    void queryClient.prefetchQuery(trpc.products.getManyByDrizzle.queryOptions({ slug: 'cactus' }));
+    void queryClient.prefetchInfiniteQuery(trpc.products.getManyByDrizzle.infiniteQueryOptions({ slug: 'cactus' }));
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
             <TestView slug='cactus' />

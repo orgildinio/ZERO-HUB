@@ -5,8 +5,9 @@ import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { Category, Media } from "@/payload-types";
 import { sortedValues } from "../search-param";
 import { db } from "@/db";
-import { categories, products, productsImages, reviews } from "../../../../drizzle/schema";
-import { eq, inArray } from "drizzle-orm";
+
+import { categories, media, products, productsImages, reviews } from "../../../../drizzle/schema";
+import { and, or, gt, eq, inArray, gte, lte } from 'drizzle-orm';
 
 export const productsRouter = createTRPCRouter({
     getMany: baseProcedure
@@ -291,11 +292,89 @@ export const productsRouter = createTRPCRouter({
     getManyByDrizzle: baseProcedure
         .input(
             z.object({
-                slug: z.string()
+                slug: z.string(),
+                cursor: z.object({
+                    id: z.string(),
+                    updatedAt: z.string(),
+                }).optional(),
+                limit: z.number().default(4),
+                minPrice: z.string().nullable().optional(),
+                maxPrice: z.string().nullable().optional(),
+                category: z.array(z.string()).nullable().optional(),
             })
         )
         .query(async ({ input }) => {
-            const { slug } = input;
+            const { slug, cursor, limit, minPrice, maxPrice, category } = input;
+
+            const baseCondition = eq(products.tenantSlug, slug);
+
+            const whereConditions = [baseCondition];
+
+            if (cursor) {
+                const cursorCondition = or(
+                    gt(products.updatedAt, cursor.updatedAt),
+                    and(
+                        eq(products.updatedAt, cursor.updatedAt),
+                        gt(products.id, cursor.id)
+                    )
+                );
+                if (cursorCondition) {
+                    whereConditions.push(cursorCondition);
+                }
+            }
+
+            if (minPrice && maxPrice) {
+                const priceCondition = and(
+                    gte(products.pricingPrice, minPrice),
+                    lte(products.pricingPrice, maxPrice)
+                );
+                if (priceCondition) {
+                    whereConditions.push(priceCondition);
+                }
+            } else if (minPrice) {
+                whereConditions.push(gte(products.pricingPrice, minPrice));
+            } else if (maxPrice) {
+                whereConditions.push(lte(products.pricingPrice, maxPrice));
+            }
+
+            if (category && category.length > 0) {
+                const categoriesData = await db
+                    .select({
+                        id: categories.id,
+                        slug: categories.slug,
+                        parentId: categories.parentId
+                    })
+                    .from(categories)
+                    .where(inArray(categories.slug, category));
+
+                if (categoriesData.length > 0) {
+                    const parentCategoryIds = categoriesData
+                        .filter(cat => !cat.parentId)
+                        .map(cat => cat.id);
+
+                    const allCategoryIds = categoriesData.map(cat => cat.id);
+
+                    if (parentCategoryIds.length > 0) {
+                        const subcategoriesData = await db
+                            .select({
+                                id: categories.id,
+                                slug: categories.slug,
+                                parentId: categories.parentId
+                            })
+                            .from(categories)
+                            .where(inArray(categories.parentId, parentCategoryIds));
+
+                        allCategoryIds.push(...subcategoriesData.map(sub => sub.id));
+                    }
+
+                    const uniqueCategoryIds = [...new Set(allCategoryIds)];
+                    whereConditions.push(inArray(products.categoryId, uniqueCategoryIds));
+                }
+            }
+
+            const validConditions = whereConditions.filter(Boolean);
+            const whereCondition = validConditions.length === 1 ? validConditions[0] : and(...validConditions);
+
             const productsList = await db
                 .select({
                     id: products.id,
@@ -307,23 +386,61 @@ export const productsRouter = createTRPCRouter({
                     pricingPrice: products.pricingPrice,
                     pricingCompareAtPrice: products.pricingCompareAtPrice,
                     badge: products.badge,
+                    updatedAt: products.updatedAt,
                     categoryName: categories.name,
                     categorySlug: categories.slug,
                 })
                 .from(products)
                 .leftJoin(categories, eq(products.categoryId, categories.id))
-                .where(eq(products.tenantSlug, slug));
+                .where(whereCondition)
+                .orderBy(products.updatedAt, products.id)
+                .limit(limit + 1);
 
-            if (productsList.length === 0) return [];
+            if (!productsList || productsList.length === 0) {
+                return {
+                    data: [],
+                    nextCursor: null,
+                    totalDocs: 0,
+                    hasNextPage: false,
+                };
+            }
 
-            const productIds = productsList.map(p => p.id);
+            const hasNextPage = productsList.length > limit
+            const resultItems = hasNextPage ? productsList.slice(0, limit) : productsList;
+
+            let nextCursor = null;
+            if (hasNextPage && resultItems.length > 0) {
+                const lastItem = resultItems[resultItems.length - 1];
+                nextCursor = {
+                    id: lastItem.id,
+                    updatedAt: lastItem.updatedAt
+                }
+            }
+
+            const productIds = resultItems.map(p => p.id);
+
             const productReviews = await db
-                .select()
+                .select({
+                    id: reviews.id,
+                    name: reviews.name,
+                    rating: reviews.rating,
+                    title: reviews.title,
+                    description: reviews.description,
+                    productId: reviews.productId
+                })
                 .from(reviews)
                 .where(inArray(reviews.productId, productIds))
             const images = await db
-                .select()
+                .select({
+                    imageId: productsImages.imageId,
+                    parentId: productsImages.parentId,
+                    isPrimary: productsImages.isPrimary,
+                    order: productsImages.order,
+                    url:media.url,
+                    filename:media.filename
+                })
                 .from(productsImages)
+                .leftJoin(media, eq(productsImages.imageId, media.id))
                 .where(inArray(productsImages.parentId, productIds));
 
             const imagesByProductId: Record<string, typeof images> = {};
@@ -332,7 +449,7 @@ export const productsRouter = createTRPCRouter({
             productReviews.forEach(review => {
                 const productId = review.productId;
                 if (!reviewsByProductId[productId]) {
-                    imagesByProductId[productId] = [];
+                    reviewsByProductId[productId] = [];
                 }
                 reviewsByProductId[productId].push(review)
             })
@@ -345,10 +462,27 @@ export const productsRouter = createTRPCRouter({
                 imagesByProductId[productId].push(image);
             });
 
-            return productsList.map(product => ({
-                ...product,
-                images: imagesByProductId[product.id] || [],
-                reviews: reviewsByProductId[product.id]
-            }));
+            const data = resultItems.map(item => {
+                const productImages = imagesByProductId[item.id] || []
+                const productReviews = reviewsByProductId[item.id] || []
+
+                const reviewCount = productReviews.length;
+                const reviewRating = reviewCount === 0 ? 0 :
+                    productReviews.reduce((acc, review) => acc + parseFloat(review.rating), 0) / reviewCount;
+
+                return {
+                    ...item,
+                    images: productImages,
+                    reviewCount,
+                    reviewRating,
+                }
+            })
+
+            return {
+                data,
+                nextCursor,
+                totalDocs: resultItems.length,
+                hasNextPage,
+            };
         })
 })
