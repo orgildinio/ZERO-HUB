@@ -50,6 +50,7 @@ export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, r
 
     const reviewMutation = useMutation(trpc.reviews.create.mutationOptions({
         onError: (error) => {
+            console.log(error)
             toast.error(error.message)
         },
         onSuccess: async () => {
@@ -61,6 +62,7 @@ export const ProductReview = ({ reviewCount, reviewRating, ratingDistribution, r
     const onSubmit = (data: z.infer<typeof reviewSchema>) => {
         const sanitized = {
             ...data,
+            product: product,
             email: data.email?.trim().toLowerCase() || undefined,
         };
         reviewMutation.mutate(sanitized);

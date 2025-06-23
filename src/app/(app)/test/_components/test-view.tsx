@@ -6,7 +6,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 export const TestView = ({ slug }: { slug: string }) => {
 
     const trpc = useTRPC();
-    const { data } = useSuspenseQuery(trpc.products.getMany.queryOptions({ slug: slug, limit: 12 }))
+    const { data } = useSuspenseQuery(trpc.products.getManyByDrizzle.queryOptions({ slug: slug }))
     console.log(data)
     return (
         <pre>
