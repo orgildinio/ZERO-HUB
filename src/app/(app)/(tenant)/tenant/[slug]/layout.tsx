@@ -16,7 +16,7 @@ const TenantLayout = async ({ params, children }: Props) => {
     const { slug } = await params
     const queryClient = getQueryClient();
 
-    void queryClient.prefetchQuery(trpc.tenants.getOneOtherWay.queryOptions({ slug: slug }))
+    void queryClient.prefetchQuery(trpc.tenants.getOneByPayload.queryOptions({ slug: slug }))
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>

@@ -7,7 +7,7 @@ import { tenants } from "../../../../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export const tenantsRouter = createTRPCRouter({
-    getOneOtherWay: baseProcedure
+    getOneByPayload: baseProcedure
         .input(
             z.object({
                 slug: z.string()

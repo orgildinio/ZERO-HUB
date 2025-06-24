@@ -46,7 +46,7 @@ HeaderSkeleton.displayName = "HeaderSkeleton"
 
 export const Header = ({ slug }: { slug: string }) => {
     const trpc = useTRPC()
-    const { data } = useSuspenseQuery(trpc.tenants.getOne.queryOptions({ slug }));
+    const { data } = useSuspenseQuery(trpc.tenants.getOneByPayload.queryOptions({ slug }));
 
     const navigation = useMemo(() => [
         { name: "Home", href: generateTenantUrl(slug) },
@@ -75,7 +75,7 @@ export const Header = ({ slug }: { slug: string }) => {
                         <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </div>
                     <span className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent truncate max-w-[120px] sm:max-w-none">
-                        {data.storeName}
+                        {data.store}
                     </span>
                 </Link>
                 <nav className="hidden lg:flex lg:gap-6 xl:gap-8">
