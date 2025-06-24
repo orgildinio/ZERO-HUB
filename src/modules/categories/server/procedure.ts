@@ -56,7 +56,7 @@ export const categoriesRouter = createTRPCRouter({
                 docs: transformedData
             }
         }),
-    getFeatured: baseProcedure
+    getFeaturedByPayload: baseProcedure
         .input(
             z.object({
                 slug: z.string()
@@ -100,6 +100,99 @@ export const categoriesRouter = createTRPCRouter({
                 })),
                 thumbnail: doc.thumbnail as Media
             }));
+
+            return data
+        }),
+    getFeatured: baseProcedure
+        .input(
+            z.object({
+                slug: z.string()
+            })
+        )
+        .query(async ({ input }) => {
+            const categoriesData = await db
+                .select({
+                    id: categories.id,
+                    name: categories.name,
+                    slug: categories.slug,
+                    stats: categories.slug,
+                    featured: categories.featured,
+                    thumbnailId: categories.thumbnailId,
+                    parentId: categories.parentId,
+                    description: categories.description,
+                    updatedAt: categories.updatedAt,
+                    thumbnailFilename: media.filename,
+                    productCount: sql<number>`(
+                    SELECT COUNT(*)
+                    FROM products
+                    WHERE category_id=${categories.id}
+                )`.as('product_count'),
+                })
+                .from(categories)
+                .leftJoin(media, eq(media.id, categories.thumbnailId))
+                .where(and(
+                    eq(categories.tenantSlug, input.slug),
+                    isNull(categories.parentId),
+                    eq(categories.featured, true)
+                ))
+                .orderBy(categories.updatedAt, categories.id)
+                .limit(8);
+
+            const categoryIds = categoriesData.map(c => c.id)
+
+            const subcategoriesData = categoryIds.length > 0
+                ? await db
+                    .select({
+                        id: categories.id,
+                        name: categories.name,
+                        slug: categories.slug,
+                        stats: categories.slug,
+                        featured: categories.featured,
+                        thumbnailId: categories.thumbnailId,
+                        parentId: categories.parentId,
+                        description: categories.description,
+                        updatedAt: categories.updatedAt,
+                        thumbnailFilename: media.filename,
+                        productCount: sql<number>`(
+                                SELECT COUNT(*)
+                                FROM products
+                                WHERE category_id=${categories.id}
+                            )`.as('product_count'),
+                    })
+                    .from(categories)
+                    .leftJoin(media, eq(media.id, categories.thumbnailId))
+                    .where(
+                        and(
+                            eq(categories.tenantSlug, input.slug),
+                            inArray(categories.parentId, categoryIds),
+                            eq(categories.featured, true)
+                        )
+                    )
+                    .orderBy(categories.name)
+                : [];
+
+            const subcategoriesByParent = subcategoriesData.reduce((acc, subcat) => {
+                if (!acc[subcat.parentId!]) {
+                    acc[subcat.parentId!] = [];
+                }
+                acc[subcat.parentId!].push(subcat);
+                return acc;
+            }, {} as Record<string, typeof subcategoriesData>);
+
+            const data = categoriesData.map((category) => ({
+                ...category,
+                thumbnail: category.thumbnailFilename ? {
+                    filename: category.thumbnailFilename,
+                    url: constructMediaURL(category.thumbnailFilename)
+                } : null,
+                subcategories: (subcategoriesByParent[category.id] || []).map((subcat) => ({
+                    ...subcat,
+                    thumbnail: subcat.thumbnailFilename ? {
+                        filename: subcat.thumbnailFilename,
+                        url: constructMediaURL(subcat.thumbnailFilename)
+                    } : null,
+                })),
+            }))
 
             return data
         }),
