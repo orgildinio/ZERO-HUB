@@ -275,7 +275,6 @@ export const categoriesRouter = createTRPCRouter({
                 .leftJoin(media, eq(media.id, categories.thumbnailId))
                 .where(and(
                     eq(categories.tenantSlug, slug),
-                    isNull(categories.parentId),
                     eq(categories.slug, category)
                 ))
                 .limit(1);
