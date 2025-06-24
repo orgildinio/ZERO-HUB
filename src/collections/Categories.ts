@@ -138,9 +138,6 @@ export const Categories: CollectionConfig = {
             type: "relationship",
             relationTo: "categories",
             hasMany: false,
-            filterOptions: ({ data }) => ({
-                id: { not_equals: data?.id },
-            }),
             admin: {
                 description: "Select a parent category to create a subcategory",
                 position: "sidebar"

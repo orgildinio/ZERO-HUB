@@ -185,6 +185,272 @@
       "policies": {},
       "isRLSEnabled": false
     },
+    "public.tenants": {
+      "name": "tenants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "store": {
+          "name": "store",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subscription_subscription_id": {
+          "name": "subscription_subscription_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subscription_subscription_details_submitted": {
+          "name": "subscription_subscription_details_submitted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "subscription_subscription_status": {
+          "name": "subscription_subscription_status",
+          "type": "enum_tenants_subscription_subscription_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'none'"
+        },
+        "subscription_subscription_start_date": {
+          "name": "subscription_subscription_start_date",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subscription_subscription_end_date": {
+          "name": "subscription_subscription_end_date",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_details_account_holder_name": {
+          "name": "bank_details_account_holder_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_details_account_number": {
+          "name": "bank_details_account_number",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_details_ifsc_code": {
+          "name": "bank_details_ifsc_code",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_details_bank_details_submitted": {
+          "name": "bank_details_bank_details_submitted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "bank_details_account_type": {
+          "name": "bank_details_account_type",
+          "type": "enum_tenants_bank_details_account_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'vendor'"
+        },
+        "bank_details_razorpay_linked_account_id": {
+          "name": "bank_details_razorpay_linked_account_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_details_razorpay_linked_product_id": {
+          "name": "bank_details_razorpay_linked_product_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_details_status": {
+          "name": "bank_details_status",
+          "type": "enum_tenants_bank_details_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'not_submitted'"
+        },
+        "bank_details_commission_fee": {
+          "name": "bank_details_commission_fee",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "bank_details_flat_fee": {
+          "name": "bank_details_flat_fee",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "bank_details_pan_card_number": {
+          "name": "bank_details_pan_card_number",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_products": {
+          "name": "max_products",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'100'"
+        },
+        "analytics_total_products": {
+          "name": "analytics_total_products",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "active_template": {
+          "name": "active_template",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'default'"
+        }
+      },
+      "indexes": {
+        "tenants_created_at_idx": {
+          "name": "tenants_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "timestamptz_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "tenants_phone_idx": {
+          "name": "tenants_phone_idx",
+          "columns": [
+            {
+              "expression": "phone",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "text_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "tenants_slug_idx": {
+          "name": "tenants_slug_idx",
+          "columns": [
+            {
+              "expression": "slug",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "text_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "tenants_subscription_subscription_subscription_status_idx": {
+          "name": "tenants_subscription_subscription_subscription_status_idx",
+          "columns": [
+            {
+              "expression": "subscription_subscription_status",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "enum_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "tenants_updated_at_idx": {
+          "name": "tenants_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "timestamptz_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
     "public.products_images": {
       "name": "products_images",
       "schema": "",
@@ -392,265 +658,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.tenants": {
-      "name": "tenants",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "slug": {
-          "name": "slug",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "phone": {
-          "name": "phone",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "store": {
-          "name": "store",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "subscription_subscription_id": {
-          "name": "subscription_subscription_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "subscription_subscription_details_submitted": {
-          "name": "subscription_subscription_details_submitted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "subscription_subscription_status": {
-          "name": "subscription_subscription_status",
-          "type": "enum_tenants_subscription_subscription_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'none'"
-        },
-        "subscription_subscription_start_date": {
-          "name": "subscription_subscription_start_date",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "subscription_subscription_end_date": {
-          "name": "subscription_subscription_end_date",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bank_details_account_holder_name": {
-          "name": "bank_details_account_holder_name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bank_details_account_number": {
-          "name": "bank_details_account_number",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bank_details_ifsc_code": {
-          "name": "bank_details_ifsc_code",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bank_details_bank_details_submitted": {
-          "name": "bank_details_bank_details_submitted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "bank_details_account_type": {
-          "name": "bank_details_account_type",
-          "type": "enum_tenants_bank_details_account_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'vendor'"
-        },
-        "bank_details_razorpay_linked_account_id": {
-          "name": "bank_details_razorpay_linked_account_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bank_details_razorpay_linked_product_id": {
-          "name": "bank_details_razorpay_linked_product_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bank_details_status": {
-          "name": "bank_details_status",
-          "type": "enum_tenants_bank_details_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'not_submitted'"
-        },
-        "bank_details_commission_fee": {
-          "name": "bank_details_commission_fee",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'0'"
-        },
-        "bank_details_flat_fee": {
-          "name": "bank_details_flat_fee",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'0'"
-        },
-        "bank_details_pan_card_number": {
-          "name": "bank_details_pan_card_number",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "max_products": {
-          "name": "max_products",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'100'"
-        },
-        "analytics_total_products": {
-          "name": "analytics_total_products",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'0'"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "tenants_created_at_idx": {
-          "name": "tenants_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "asc": true,
-              "nulls": "last",
-              "opclass": "timestamptz_ops",
-              "isExpression": false
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "tenants_phone_idx": {
-          "name": "tenants_phone_idx",
-          "columns": [
-            {
-              "expression": "phone",
-              "asc": true,
-              "nulls": "last",
-              "opclass": "text_ops",
-              "isExpression": false
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "tenants_slug_idx": {
-          "name": "tenants_slug_idx",
-          "columns": [
-            {
-              "expression": "slug",
-              "asc": true,
-              "nulls": "last",
-              "opclass": "text_ops",
-              "isExpression": false
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "tenants_subscription_subscription_subscription_status_idx": {
-          "name": "tenants_subscription_subscription_subscription_status_idx",
-          "columns": [
-            {
-              "expression": "subscription_subscription_status",
-              "asc": true,
-              "nulls": "last",
-              "opclass": "enum_ops",
-              "isExpression": false
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "tenants_updated_at_idx": {
-          "name": "tenants_updated_at_idx",
-          "columns": [
-            {
-              "expression": "updated_at",
-              "asc": true,
-              "nulls": "last",
-              "opclass": "timestamptz_ops",
-              "isExpression": false
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {},
@@ -1079,6 +1086,91 @@
       "policies": {},
       "isRLSEnabled": false
     },
+    "public.products_variants": {
+      "name": "products_variants",
+      "schema": "",
+      "columns": {
+        "_order": {
+          "name": "_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "products_variants_order_idx": {
+          "name": "products_variants_order_idx",
+          "columns": [
+            {
+              "expression": "_order",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "products_variants_parent_id_idx": {
+          "name": "products_variants_parent_id_idx",
+          "columns": [
+            {
+              "expression": "_parent_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "products_variants_parent_id_fk": {
+          "name": "products_variants_parent_id_fk",
+          "tableFrom": "products_variants",
+          "tableTo": "products",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
     "public.products": {
       "name": "products",
       "schema": "",
@@ -1110,7 +1202,7 @@
         },
         "description": {
           "name": "description",
-          "type": "jsonb",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -1538,91 +1630,6 @@
             "id"
           ],
           "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.products_variants": {
-      "name": "products_variants",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "products_variants_order_idx": {
-          "name": "products_variants_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "asc": true,
-              "nulls": "last",
-              "opclass": "int4_ops",
-              "isExpression": false
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "products_variants_parent_id_idx": {
-          "name": "products_variants_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "asc": true,
-              "nulls": "last",
-              "opclass": "uuid_ops",
-              "isExpression": false
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "products_variants_parent_id_fk": {
-          "name": "products_variants_parent_id_fk",
-          "tableFrom": "products_variants",
-          "tableTo": "products",
-          "schemaTo": "public",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

@@ -2,13 +2,15 @@ import { z } from "zod";
 
 import { Category, Media } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
+import { db } from "@/db";
+import { categories, media } from "../../../../drizzle/schema";
+import { and, eq, gt, inArray, isNull, or } from "drizzle-orm";
 
 export const categoriesRouter = createTRPCRouter({
     getMany: baseProcedure
         .input(
             z.object({
                 slug: z.string(),
-                search: z.string().nullable().optional(),
                 cursor: z.number().default(1),
                 limit: z.number().default(12),
             })
@@ -143,5 +145,111 @@ export const categoriesRouter = createTRPCRouter({
             }));
 
             return data[0]
+        }),
+    getManyByDrizzle: baseProcedure
+        .input(
+            z.object({
+                slug: z.string(),
+                cursor: z.object({
+                    id: z.string(),
+                    updatedAt: z.string()
+                }).optional(),
+                limit: z.number().default(3),
+            })
+        )
+        .query(async ({ input }) => {
+            const { slug, cursor, limit } = input
+
+            const cursorCondition = cursor
+                ? or(
+                    gt(categories.updatedAt, cursor.updatedAt),
+                    and(
+                        eq(categories.updatedAt, cursor.updatedAt),
+                        gt(categories.id, cursor.id)
+                    )
+                )
+                : undefined;
+
+            const categoriesData = await db
+                .select({
+                    id: categories.id,
+                    name: categories.name,
+                    slug: categories.slug,
+                    stats: categories.slug,
+                    featured: categories.featured,
+                    thumbnailId: categories.thumbnailId,
+                    parentId: categories.parentId,
+                    description: categories.description,
+                    updatedAt: categories.updatedAt,
+                    thumbnail: media.url,
+                    thumnailFilename: media.filename
+                })
+                .from(categories)
+                .leftJoin(media, eq(media.id, categories.thumbnailId))
+                .where(and(
+                    eq(categories.tenantSlug, slug),
+                    isNull(categories.parentId),
+                    cursorCondition
+                ))
+                .orderBy(categories.updatedAt, categories.id)
+                .limit(limit + 1)
+
+            const hasNextPage = categoriesData.length > limit;
+            const actualCategories = hasNextPage ? categoriesData.slice(0, limit) : categoriesData;
+
+            const categoryIds = actualCategories.map(c => c.id)
+
+            const subcategoriesData = categoryIds.length > 0
+                ? await db
+                    .select({
+                        id: categories.id,
+                        name: categories.name,
+                        slug: categories.slug,
+                        stats: categories.slug,
+                        featured: categories.featured,
+                        thumbnailId: categories.thumbnailId,
+                        parentId: categories.parentId,
+                        description: categories.description,
+                        updatedAt: categories.updatedAt,
+                        thumbnail: media.url,
+                        thumnailFilename: media.filename
+                    })
+                    .from(categories)
+                    .leftJoin(media, eq(media.id, categories.thumbnailId))
+                    .where(
+                        and(
+                            eq(categories.tenantSlug, slug),
+                            inArray(categories.parentId, categoryIds)
+                        )
+                    )
+                    .orderBy(categories.name)
+                : [];
+
+            const subcategoriesByParent = subcategoriesData.reduce((acc, subcat) => {
+                if (!acc[subcat.parentId!]) {
+                    acc[subcat.parentId!] = [];
+                }
+                acc[subcat.parentId!].push(subcat);
+                return acc;
+            }, {} as Record<string, typeof subcategoriesData>);
+
+            const transformedData = actualCategories.map((category) => ({
+                ...category,
+                subcategories: subcategoriesByParent[category.id] || [],
+            }))
+
+            const nextCursor = hasNextPage && actualCategories.length > 0
+                ? {
+                    id: actualCategories[actualCategories.length - 1].id,
+                    updatedAt: actualCategories[actualCategories.length - 1].updatedAt
+                }
+                : null;
+
+            return {
+                data: transformedData,
+                hasNextPage,
+                nextCursor,
+                totalDocs: actualCategories.length,
+            }
         })
 })

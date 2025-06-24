@@ -62,11 +62,11 @@ export const ProductsGrid = ({ slug }: { slug: string }) => {
 
     const { data: featured } = useSuspenseQuery(trpc.products.getFeatured.queryOptions({ slug: slug }))
 
-    const handleLoadMore = useCallback(() => {
+    const handleLoadMore = () => {
         if (!isFetchingNextPage) {
             fetchNextPage()
         }
-    }, [fetchNextPage, isFetchingNextPage])
+    }
 
     if (products?.pages?.[0]?.docs.length === 0) {
         return (

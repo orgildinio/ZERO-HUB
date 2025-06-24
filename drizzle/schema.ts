@@ -1,4 +1,4 @@
-import { pgTable, index, uniqueIndex, foreignKey, uuid, varchar, timestamp, numeric, integer, boolean, serial, jsonb, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, index, uniqueIndex, foreignKey, uuid, varchar, timestamp, numeric, boolean, integer, serial, jsonb, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const enumCategoriesStatus = pgEnum("enum_categories_status", ['active', 'inactive', 'draft'])
@@ -42,6 +42,41 @@ export const media = pgTable("media", {
 		}).onDelete("set null"),
 ]);
 
+export const tenants = pgTable("tenants", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	name: varchar().notNull(),
+	slug: varchar().notNull(),
+	phone: varchar().notNull(),
+	store: varchar().notNull(),
+	subscriptionSubscriptionId: varchar("subscription_subscription_id"),
+	subscriptionSubscriptionDetailsSubmitted: boolean("subscription_subscription_details_submitted").default(false),
+	subscriptionSubscriptionStatus: enumTenantsSubscriptionSubscriptionStatus("subscription_subscription_status").default('none'),
+	subscriptionSubscriptionStartDate: timestamp("subscription_subscription_start_date", { precision: 3, withTimezone: true, mode: 'string' }),
+	subscriptionSubscriptionEndDate: timestamp("subscription_subscription_end_date", { precision: 3, withTimezone: true, mode: 'string' }),
+	bankDetailsAccountHolderName: varchar("bank_details_account_holder_name"),
+	bankDetailsAccountNumber: varchar("bank_details_account_number"),
+	bankDetailsIfscCode: varchar("bank_details_ifsc_code"),
+	bankDetailsBankDetailsSubmitted: boolean("bank_details_bank_details_submitted").default(false),
+	bankDetailsAccountType: enumTenantsBankDetailsAccountType("bank_details_account_type").default('vendor'),
+	bankDetailsRazorpayLinkedAccountId: varchar("bank_details_razorpay_linked_account_id"),
+	bankDetailsRazorpayLinkedProductId: varchar("bank_details_razorpay_linked_product_id"),
+	bankDetailsStatus: enumTenantsBankDetailsStatus("bank_details_status").default('not_submitted'),
+	bankDetailsCommissionFee: numeric("bank_details_commission_fee").default('0'),
+	bankDetailsFlatFee: numeric("bank_details_flat_fee").default('0'),
+	bankDetailsPanCardNumber: varchar("bank_details_pan_card_number"),
+	maxProducts: numeric("max_products").default('100'),
+	analyticsTotalProducts: numeric("analytics_total_products").default('0'),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	activeTemplate: varchar("active_template").default('default').notNull(),
+}, (table) => [
+	index("tenants_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	uniqueIndex("tenants_phone_idx").using("btree", table.phone.asc().nullsLast().op("text_ops")),
+	uniqueIndex("tenants_slug_idx").using("btree", table.slug.asc().nullsLast().op("text_ops")),
+	index("tenants_subscription_subscription_subscription_status_idx").using("btree", table.subscriptionSubscriptionStatus.asc().nullsLast().op("enum_ops")),
+	index("tenants_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+]);
+
 export const productsImages = pgTable("products_images", {
 	order: integer("_order").notNull(),
 	parentId: uuid("_parent_id").notNull(),
@@ -78,40 +113,6 @@ export const productsSpecifications = pgTable("products_specifications", {
 			foreignColumns: [products.id],
 			name: "products_specifications_parent_id_fk"
 		}).onDelete("cascade"),
-]);
-
-export const tenants = pgTable("tenants", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	name: varchar().notNull(),
-	slug: varchar().notNull(),
-	phone: varchar().notNull(),
-	store: varchar().notNull(),
-	subscriptionSubscriptionId: varchar("subscription_subscription_id"),
-	subscriptionSubscriptionDetailsSubmitted: boolean("subscription_subscription_details_submitted").default(false),
-	subscriptionSubscriptionStatus: enumTenantsSubscriptionSubscriptionStatus("subscription_subscription_status").default('none'),
-	subscriptionSubscriptionStartDate: timestamp("subscription_subscription_start_date", { precision: 3, withTimezone: true, mode: 'string' }),
-	subscriptionSubscriptionEndDate: timestamp("subscription_subscription_end_date", { precision: 3, withTimezone: true, mode: 'string' }),
-	bankDetailsAccountHolderName: varchar("bank_details_account_holder_name"),
-	bankDetailsAccountNumber: varchar("bank_details_account_number"),
-	bankDetailsIfscCode: varchar("bank_details_ifsc_code"),
-	bankDetailsBankDetailsSubmitted: boolean("bank_details_bank_details_submitted").default(false),
-	bankDetailsAccountType: enumTenantsBankDetailsAccountType("bank_details_account_type").default('vendor'),
-	bankDetailsRazorpayLinkedAccountId: varchar("bank_details_razorpay_linked_account_id"),
-	bankDetailsRazorpayLinkedProductId: varchar("bank_details_razorpay_linked_product_id"),
-	bankDetailsStatus: enumTenantsBankDetailsStatus("bank_details_status").default('not_submitted'),
-	bankDetailsCommissionFee: numeric("bank_details_commission_fee").default('0'),
-	bankDetailsFlatFee: numeric("bank_details_flat_fee").default('0'),
-	bankDetailsPanCardNumber: varchar("bank_details_pan_card_number"),
-	maxProducts: numeric("max_products").default('100'),
-	analyticsTotalProducts: numeric("analytics_total_products").default('0'),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("tenants_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	uniqueIndex("tenants_phone_idx").using("btree", table.phone.asc().nullsLast().op("text_ops")),
-	uniqueIndex("tenants_slug_idx").using("btree", table.slug.asc().nullsLast().op("text_ops")),
-	index("tenants_subscription_subscription_subscription_status_idx").using("btree", table.subscriptionSubscriptionStatus.asc().nullsLast().op("enum_ops")),
-	index("tenants_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
 ]);
 
 export const users = pgTable("users", {
@@ -179,12 +180,27 @@ export const productsRels = pgTable("products_rels", {
 		}).onDelete("cascade"),
 ]);
 
+export const productsVariants = pgTable("products_variants", {
+	order: integer("_order").notNull(),
+	parentId: uuid("_parent_id").notNull(),
+	id: varchar().primaryKey().notNull(),
+	name: varchar().notNull(),
+}, (table) => [
+	index("products_variants_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
+	index("products_variants_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.parentId],
+			foreignColumns: [products.id],
+			name: "products_variants_parent_id_fk"
+		}).onDelete("cascade"),
+]);
+
 export const products = pgTable("products", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	tenantId: uuid("tenant_id"),
 	name: varchar().notNull(),
 	slug: varchar().notNull(),
-	description: jsonb().notNull(),
+	description: varchar().notNull(),
 	shortDescription: varchar("short_description"),
 	pricingPrice: numeric("pricing_price").notNull(),
 	pricingCompareAtPrice: numeric("pricing_compare_at_price"),
@@ -238,21 +254,6 @@ export const products = pgTable("products", {
 			foreignColumns: [categories.id],
 			name: "products_category_id_categories_id_fk"
 		}).onDelete("set null"),
-]);
-
-export const productsVariants = pgTable("products_variants", {
-	order: integer("_order").notNull(),
-	parentId: uuid("_parent_id").notNull(),
-	id: varchar().primaryKey().notNull(),
-	name: varchar().notNull(),
-}, (table) => [
-	index("products_variants_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
-	index("products_variants_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.parentId],
-			foreignColumns: [products.id],
-			name: "products_variants_parent_id_fk"
-		}).onDelete("cascade"),
 ]);
 
 export const tags = pgTable("tags", {

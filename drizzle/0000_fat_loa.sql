@@ -30,22 +30,6 @@ CREATE TABLE "media" (
 	"focal_y" numeric
 );
 --> statement-breakpoint
-CREATE TABLE "products_images" (
-	"_order" integer NOT NULL,
-	"_parent_id" uuid NOT NULL,
-	"id" varchar PRIMARY KEY NOT NULL,
-	"image_id" uuid NOT NULL,
-	"is_primary" boolean DEFAULT false
-);
---> statement-breakpoint
-CREATE TABLE "products_specifications" (
-	"_order" integer NOT NULL,
-	"_parent_id" uuid NOT NULL,
-	"id" varchar PRIMARY KEY NOT NULL,
-	"name" varchar NOT NULL,
-	"value" varchar NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "tenants" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar NOT NULL,
@@ -71,7 +55,24 @@ CREATE TABLE "tenants" (
 	"max_products" numeric DEFAULT '100',
 	"analytics_total_products" numeric DEFAULT '0',
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"active_template" varchar DEFAULT 'default' NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "products_images" (
+	"_order" integer NOT NULL,
+	"_parent_id" uuid NOT NULL,
+	"id" varchar PRIMARY KEY NOT NULL,
+	"image_id" uuid NOT NULL,
+	"is_primary" boolean DEFAULT false
+);
+--> statement-breakpoint
+CREATE TABLE "products_specifications" (
+	"_order" integer NOT NULL,
+	"_parent_id" uuid NOT NULL,
+	"id" varchar PRIMARY KEY NOT NULL,
+	"name" varchar NOT NULL,
+	"value" varchar NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
@@ -104,12 +105,19 @@ CREATE TABLE "products_rels" (
 	"tags_id" uuid
 );
 --> statement-breakpoint
+CREATE TABLE "products_variants" (
+	"_order" integer NOT NULL,
+	"_parent_id" uuid NOT NULL,
+	"id" varchar PRIMARY KEY NOT NULL,
+	"name" varchar NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "products" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid,
 	"name" varchar NOT NULL,
 	"slug" varchar NOT NULL,
-	"description" jsonb NOT NULL,
+	"description" varchar NOT NULL,
 	"short_description" varchar,
 	"pricing_price" numeric NOT NULL,
 	"pricing_compare_at_price" numeric,
@@ -141,13 +149,6 @@ CREATE TABLE "products" (
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"tenant_slug" varchar NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "products_variants" (
-	"_order" integer NOT NULL,
-	"_parent_id" uuid NOT NULL,
-	"id" varchar PRIMARY KEY NOT NULL,
-	"name" varchar NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "tags" (
@@ -350,9 +351,9 @@ ALTER TABLE "users_tenants" ADD CONSTRAINT "users_tenants_tenant_id_tenants_id_f
 ALTER TABLE "users_tenants" ADD CONSTRAINT "users_tenants_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products_rels" ADD CONSTRAINT "products_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products_rels" ADD CONSTRAINT "products_rels_tags_fk" FOREIGN KEY ("tags_id") REFERENCES "public"."tags"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "products_variants" ADD CONSTRAINT "products_variants_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products" ADD CONSTRAINT "products_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products" ADD CONSTRAINT "products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "products_variants" ADD CONSTRAINT "products_variants_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tags" ADD CONSTRAINT "tags_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reviews" ADD CONSTRAINT "reviews_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reviews" ADD CONSTRAINT "reviews_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -387,16 +388,16 @@ CREATE INDEX "media_created_at_idx" ON "media" USING btree ("created_at" timesta
 CREATE UNIQUE INDEX "media_filename_idx" ON "media" USING btree ("filename" text_ops);--> statement-breakpoint
 CREATE INDEX "media_tenant_idx" ON "media" USING btree ("tenant_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "media_updated_at_idx" ON "media" USING btree ("updated_at" timestamptz_ops);--> statement-breakpoint
-CREATE INDEX "products_images_image_idx" ON "products_images" USING btree ("image_id" uuid_ops);--> statement-breakpoint
-CREATE INDEX "products_images_order_idx" ON "products_images" USING btree ("_order" int4_ops);--> statement-breakpoint
-CREATE INDEX "products_images_parent_id_idx" ON "products_images" USING btree ("_parent_id" uuid_ops);--> statement-breakpoint
-CREATE INDEX "products_specifications_order_idx" ON "products_specifications" USING btree ("_order" int4_ops);--> statement-breakpoint
-CREATE INDEX "products_specifications_parent_id_idx" ON "products_specifications" USING btree ("_parent_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "tenants_created_at_idx" ON "tenants" USING btree ("created_at" timestamptz_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "tenants_phone_idx" ON "tenants" USING btree ("phone" text_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "tenants_slug_idx" ON "tenants" USING btree ("slug" text_ops);--> statement-breakpoint
 CREATE INDEX "tenants_subscription_subscription_subscription_status_idx" ON "tenants" USING btree ("subscription_subscription_status" enum_ops);--> statement-breakpoint
 CREATE INDEX "tenants_updated_at_idx" ON "tenants" USING btree ("updated_at" timestamptz_ops);--> statement-breakpoint
+CREATE INDEX "products_images_image_idx" ON "products_images" USING btree ("image_id" uuid_ops);--> statement-breakpoint
+CREATE INDEX "products_images_order_idx" ON "products_images" USING btree ("_order" int4_ops);--> statement-breakpoint
+CREATE INDEX "products_images_parent_id_idx" ON "products_images" USING btree ("_parent_id" uuid_ops);--> statement-breakpoint
+CREATE INDEX "products_specifications_order_idx" ON "products_specifications" USING btree ("_order" int4_ops);--> statement-breakpoint
+CREATE INDEX "products_specifications_parent_id_idx" ON "products_specifications" USING btree ("_parent_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "users_created_at_idx" ON "users" USING btree ("created_at" timestamptz_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "users_email_idx" ON "users" USING btree ("email" text_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "users_phone_idx" ON "users" USING btree ("phone" text_ops);--> statement-breakpoint
@@ -409,6 +410,8 @@ CREATE INDEX "products_rels_order_idx" ON "products_rels" USING btree ("order" i
 CREATE INDEX "products_rels_parent_idx" ON "products_rels" USING btree ("parent_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "products_rels_path_idx" ON "products_rels" USING btree ("path" text_ops);--> statement-breakpoint
 CREATE INDEX "products_rels_tags_id_idx" ON "products_rels" USING btree ("tags_id" uuid_ops);--> statement-breakpoint
+CREATE INDEX "products_variants_order_idx" ON "products_variants" USING btree ("_order" int4_ops);--> statement-breakpoint
+CREATE INDEX "products_variants_parent_id_idx" ON "products_variants" USING btree ("_parent_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "products_category_idx" ON "products" USING btree ("category_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "products_created_at_idx" ON "products" USING btree ("created_at" timestamptz_ops);--> statement-breakpoint
 CREATE INDEX "products_featured_idx" ON "products" USING btree ("featured" bool_ops);--> statement-breakpoint
@@ -420,8 +423,6 @@ CREATE INDEX "products_tenant_slug_idx" ON "products" USING btree ("tenant_slug"
 CREATE INDEX "products_updated_at_idx" ON "products" USING btree ("updated_at" timestamptz_ops);--> statement-breakpoint
 CREATE INDEX "tenantSlug_name_idx" ON "products" USING btree ("tenant_slug" text_ops,"name" text_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "tenantSlug_slug_idx" ON "products" USING btree ("tenant_slug" text_ops,"slug" text_ops);--> statement-breakpoint
-CREATE INDEX "products_variants_order_idx" ON "products_variants" USING btree ("_order" int4_ops);--> statement-breakpoint
-CREATE INDEX "products_variants_parent_id_idx" ON "products_variants" USING btree ("_parent_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "tags_created_at_idx" ON "tags" USING btree ("created_at" timestamptz_ops);--> statement-breakpoint
 CREATE INDEX "tags_name_idx" ON "tags" USING btree ("name" text_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "tags_slug_idx" ON "tags" USING btree ("slug" text_ops);--> statement-breakpoint

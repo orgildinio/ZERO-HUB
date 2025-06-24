@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { tenants, media, productsImages, products, productsSpecifications, usersTenants, users, productsRels, tags, categories, productsVariants, reviews, subscriptions, subscriptionPlans, payloadLockedDocuments, payloadLockedDocumentsRels, customers, orders, usersRoles, productsVariantsOptions, subscriptionPlansFeatures, payloadPreferences, payloadPreferencesRels, ordersOrderItems } from "./schema";
+import { tenants, media, productsImages, products, productsSpecifications, usersTenants, users, productsRels, tags, productsVariants, categories, reviews, subscriptions, subscriptionPlans, payloadLockedDocuments, payloadLockedDocumentsRels, customers, orders, usersRoles, productsVariantsOptions, subscriptionPlansFeatures, payloadPreferences, payloadPreferencesRels, ordersOrderItems } from "./schema";
 
 export const mediaRelations = relations(media, ({one, many}) => ({
 	tenant: one(tenants, {
@@ -44,6 +44,7 @@ export const productsRelations = relations(products, ({one, many}) => ({
 	productsImages: many(productsImages),
 	productsSpecifications: many(productsSpecifications),
 	productsRels: many(productsRels),
+	productsVariants: many(productsVariants),
 	tenant: one(tenants, {
 		fields: [products.tenantId],
 		references: [tenants.id]
@@ -52,7 +53,6 @@ export const productsRelations = relations(products, ({one, many}) => ({
 		fields: [products.categoryId],
 		references: [categories.id]
 	}),
-	productsVariants: many(productsVariants),
 	reviews: many(reviews),
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 }));
@@ -102,6 +102,14 @@ export const tagsRelations = relations(tags, ({one, many}) => ({
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 }));
 
+export const productsVariantsRelations = relations(productsVariants, ({one, many}) => ({
+	product: one(products, {
+		fields: [productsVariants.parentId],
+		references: [products.id]
+	}),
+	productsVariantsOptions: many(productsVariantsOptions),
+}));
+
 export const categoriesRelations = relations(categories, ({one, many}) => ({
 	products: many(products),
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
@@ -127,14 +135,6 @@ export const categoriesRelations = relations(categories, ({one, many}) => ({
 		references: [media.id],
 		relationName: "categories_seoOgImageId_media_id"
 	}),
-}));
-
-export const productsVariantsRelations = relations(productsVariants, ({one, many}) => ({
-	product: one(products, {
-		fields: [productsVariants.parentId],
-		references: [products.id]
-	}),
-	productsVariantsOptions: many(productsVariantsOptions),
 }));
 
 export const reviewsRelations = relations(reviews, ({one, many}) => ({
