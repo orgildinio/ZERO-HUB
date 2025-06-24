@@ -1,7 +1,7 @@
 "use client"
 
 import { Award, Filter } from "lucide-react"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 
 import { useTRPC } from "@/trpc/client"
 import type { Media } from "@/payload-types"
