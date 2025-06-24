@@ -8,7 +8,6 @@ import EmptyProducts from "../products/empty-products";
 import { Suspense } from "react";
 
 import { useTRPC } from "@/trpc/client";
-import { Media } from "@/payload-types";
 import { generateTenantUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,21 +16,30 @@ import { SearchFilters } from "../search";
 import { useProductFilters } from "@/modules/products/hooks/use-product-filter";
 
 type ProductImage = {
-    image: Media
-    isPrimary?: boolean | null
+    imageId: string;
+    parentId: string;
+    isPrimary: boolean | null;
+    order: number;
+    url: string | null;
+    filename: string | null;
 }
+
+const constructMediaURL = (filename: string | null) => {
+    if (!filename) return null;
+    return `/api/media/file/${filename}`;
+};
 
 const getProductImage = (images: ProductImage[] | undefined): string | null => {
     if (!images || images.length === 0) return null
 
     const primaryImage = images.find(img => img.isPrimary)
-    if (primaryImage?.image && typeof primaryImage.image === 'object' && 'url' in primaryImage.image) {
-        return primaryImage.image.url || null
+    if (primaryImage) {
+        return constructMediaURL(primaryImage.filename) || null
     }
 
     const firstImage = images[0]
-    if (firstImage?.image && typeof firstImage.image === 'object' && 'url' in firstImage.image) {
-        return firstImage.image.url || null
+    if (firstImage) {
+        return constructMediaURL(firstImage.filename) || null
     }
 
     return null
@@ -143,7 +151,7 @@ const CategoryProducts = ({ slug, category, categoryName }: { slug: string; cate
         },
         {
             getNextPageParam: (lastpage) => {
-                return lastpage.docs.length > 0 ? lastpage.nextPage : undefined
+                return lastpage.data.length > 0 ? lastpage.nextCursor : undefined
             }
         }
     ))
@@ -168,21 +176,21 @@ const CategoryProducts = ({ slug, category, categoryName }: { slug: string; cate
                         </Button>
                     </div>
                 </div>
-                {productsData?.pages?.[0]?.docs.length === 0 ? (
+                {productsData?.pages?.[0]?.data.length === 0 ? (
                     <EmptyProducts
                         description={`We couldn't find any ${categoryName.toLowerCase()} products matching your current filters.`}
                     />
                 ) : (
                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                        {productsData?.pages.flatMap((page) => page.docs).map((product, index) => (
+                        {productsData?.pages.flatMap((page) => page.data).map((product, index) => (
                             <ProductCard
                                 id={product.id}
                                 key={product.slug}
                                 name={product.name}
-                                price={product.pricing.compareAtPrice}
-                                originalPrice={product.pricing.price}
+                                price={product.pricingCompareAtPrice ? parseFloat(product.pricingCompareAtPrice) : null}
+                                originalPrice={parseFloat(product.pricingPrice)}
                                 image={getProductImage(product.images)}
-                                category={product.category.name}
+                                category={product.categoryName}
                                 badge={product.badge}
                                 featured={true}
                                 slug={product.slug}

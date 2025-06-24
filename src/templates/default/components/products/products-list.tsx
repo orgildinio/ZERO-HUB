@@ -4,24 +4,32 @@ import { ProductCard } from "./product-card"
 
 import { useTRPC } from "@/trpc/client"
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query"
-import { Media } from "@/payload-types"
 
 type ProductImage = {
-    image: Media
-    isPrimary?: boolean | null
+    imageId: string;
+    parentId: string;
+    isPrimary: boolean | null;
+    order: number;
+    url: string | null;
+    filename: string | null;
 }
+
+const constructMediaURL = (filename: string | null) => {
+    if (!filename) return null;
+    return `/api/media/file/${filename}`;
+};
 
 const getProductImage = (images: ProductImage[] | undefined): string | null => {
     if (!images || images.length === 0) return null
 
     const primaryImage = images.find(img => img.isPrimary)
-    if (primaryImage?.image && typeof primaryImage.image === 'object' && 'url' in primaryImage.image) {
-        return primaryImage.image.url || null
+    if (primaryImage) {
+        return constructMediaURL(primaryImage.filename) || null
     }
 
     const firstImage = images[0]
-    if (firstImage?.image && typeof firstImage.image === 'object' && 'url' in firstImage.image) {
-        return firstImage.image.url || null
+    if (firstImage) {
+        return constructMediaURL(firstImage.filename) || null
     }
 
     return null
@@ -38,7 +46,7 @@ export const ProductsList = ({ slug }: { slug: string; }) => {
             },
             {
                 getNextPageParam: (lastpage) => {
-                    return lastpage.docs.length > 0 ? lastpage.nextPage : undefined
+                    return lastpage.data.length > 0 ? lastpage.nextCursor : undefined
                 }
             }
         )
@@ -46,15 +54,15 @@ export const ProductsList = ({ slug }: { slug: string; }) => {
 
     return (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 auto-rows-fr">
-            {data?.pages.flatMap((page) => page.docs).map((product, index) => (
+            {data?.pages.flatMap((page) => page.data).map((product, index) => (
                 <ProductCard
                     id={product.id}
                     key={product.slug}
                     name={product.name}
-                    price={product.pricing.compareAtPrice}
-                    originalPrice={product.pricing.price}
+                    price={product.pricingCompareAtPrice ? parseFloat(product.pricingCompareAtPrice) : null}
+                    originalPrice={parseFloat(product.pricingPrice)}
                     image={getProductImage(product.images)}
-                    category={product.category.name}
+                    category={product.categoryName}
                     badge={product.badge}
                     featured={true}
                     slug={product.slug}

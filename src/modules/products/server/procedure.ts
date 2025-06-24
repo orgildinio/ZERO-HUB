@@ -10,7 +10,7 @@ import { categories, media, products, productsImages, reviews } from "../../../.
 import { and, or, gt, eq, inArray, gte, lte } from 'drizzle-orm';
 
 export const productsRouter = createTRPCRouter({
-    getMany: baseProcedure
+    getManyByPayload: baseProcedure
         .input(
             z.object({
                 search: z.string().nullable().optional(),
@@ -134,7 +134,7 @@ export const productsRouter = createTRPCRouter({
                 docs: transformedData
             }
         }),
-    getFeatured: baseProcedure
+    getFeaturedByPayload: baseProcedure
         .input(
             z.object({
                 slug: z.string(),
@@ -199,6 +199,100 @@ export const productsRouter = createTRPCRouter({
             );
 
             return data
+        }),
+    getFeatured: baseProcedure
+        .input(
+            z.object({
+                slug: z.string(),
+            })
+        )
+        .query(async ({ input }) => {
+            const productsData = await db
+                .select({
+                    id: products.id,
+                    featured: products.featured,
+                    name: products.name,
+                    slug: products.slug,
+                    categoryId: products.categoryId,
+                    description: products.description,
+                    pricingPrice: products.pricingPrice,
+                    pricingCompareAtPrice: products.pricingCompareAtPrice,
+                    badge: products.badge,
+                    updatedAt: products.updatedAt,
+                    categoryName: categories.name,
+                    categorySlug: categories.slug,
+                })
+                .from(products)
+                .leftJoin(categories, eq(products.categoryId, categories.id))
+                .where(and(
+                    eq(products.tenantSlug, input.slug),
+                    eq(categories.featured, true)
+                ))
+                .limit(8);
+
+            const productIds = productsData.map(p => p.id);
+
+            const productReviews = await db
+                .select({
+                    id: reviews.id,
+                    name: reviews.name,
+                    rating: reviews.rating,
+                    title: reviews.title,
+                    description: reviews.description,
+                    productId: reviews.productId
+                })
+                .from(reviews)
+                .where(inArray(reviews.productId, productIds))
+            const images = await db
+                .select({
+                    imageId: productsImages.imageId,
+                    parentId: productsImages.parentId,
+                    isPrimary: productsImages.isPrimary,
+                    order: productsImages.order,
+                    url: media.url,
+                    filename: media.filename
+                })
+                .from(productsImages)
+                .leftJoin(media, eq(productsImages.imageId, media.id))
+                .where(inArray(productsImages.parentId, productIds));
+
+            const imagesByProductId: Record<string, typeof images> = {};
+            const reviewsByProductId: Record<string, typeof productReviews> = {};
+
+            productReviews.forEach(review => {
+                const productId = review.productId;
+                if (!reviewsByProductId[productId]) {
+                    reviewsByProductId[productId] = [];
+                }
+                reviewsByProductId[productId].push(review)
+            })
+
+            images.forEach(image => {
+                const productId = image.parentId;
+                if (!imagesByProductId[productId]) {
+                    imagesByProductId[productId] = [];
+                }
+                imagesByProductId[productId].push(image);
+            });
+
+            const data = productsData.map(item => {
+                const productImages = imagesByProductId[item.id] || []
+                const productReviews = reviewsByProductId[item.id] || []
+
+                const reviewCount = productReviews.length;
+                const reviewRating = reviewCount === 0 ? 0 :
+                    productReviews.reduce((acc, review) => acc + parseFloat(review.rating), 0) / reviewCount;
+
+                return {
+                    ...item,
+                    images: productImages,
+                    reviewCount,
+                    reviewRating,
+                }
+            })
+
+            return data
+
         }),
     getOne: baseProcedure
         .input(
@@ -289,7 +383,7 @@ export const productsRouter = createTRPCRouter({
                 ratingDistribution,
             }
         }),
-    getManyByDrizzle: baseProcedure
+    getMany: baseProcedure
         .input(
             z.object({
                 slug: z.string(),
@@ -297,7 +391,7 @@ export const productsRouter = createTRPCRouter({
                     id: z.string(),
                     updatedAt: z.string(),
                 }).optional(),
-                limit: z.number().default(4),
+                limit: z.number().default(12),
                 minPrice: z.string().nullable().optional(),
                 maxPrice: z.string().nullable().optional(),
                 category: z.array(z.string()).nullable().optional(),
@@ -436,8 +530,8 @@ export const productsRouter = createTRPCRouter({
                     parentId: productsImages.parentId,
                     isPrimary: productsImages.isPrimary,
                     order: productsImages.order,
-                    url:media.url,
-                    filename:media.filename
+                    url: media.url,
+                    filename: media.filename
                 })
                 .from(productsImages)
                 .leftJoin(media, eq(productsImages.imageId, media.id))
