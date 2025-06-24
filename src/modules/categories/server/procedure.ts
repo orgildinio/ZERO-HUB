@@ -5,6 +5,7 @@ import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { db } from "@/db";
 import { categories, media } from "../../../../drizzle/schema";
 import { and, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 const constructMediaURL = (filename: string) => {
     if (!filename) return null;
@@ -196,7 +197,7 @@ export const categoriesRouter = createTRPCRouter({
 
             return data
         }),
-    getOne: baseProcedure
+    getOneByPayload: baseProcedure
         .input(
             z.object({
                 category: z.string(),
@@ -243,6 +244,92 @@ export const categoriesRouter = createTRPCRouter({
             }));
 
             return data[0]
+        }),
+    getOne: baseProcedure
+        .input(
+            z.object({
+                category: z.string(),
+                slug: z.string()
+            })
+        )
+        .query(async ({ input }) => {
+            const { slug, category } = input
+            const [categoryData] = await db
+                .select({
+                    id: categories.id,
+                    name: categories.name,
+                    slug: categories.slug,
+                    featured: categories.featured,
+                    thumbnailId: categories.thumbnailId,
+                    parentId: categories.parentId,
+                    description: categories.description,
+                    updatedAt: categories.updatedAt,
+                    thumbnailFilename: media.filename,
+                    productCount: sql<number>`(
+                SELECT COUNT(*)
+                FROM products
+                WHERE category_id=${categories.id}
+            )`.as('product_count'),
+                })
+                .from(categories)
+                .leftJoin(media, eq(media.id, categories.thumbnailId))
+                .where(and(
+                    eq(categories.tenantSlug, slug),
+                    isNull(categories.parentId),
+                    eq(categories.slug, category)
+                ))
+                .limit(1);
+            if (!categoryData) throw new TRPCError({ code: 'NOT_FOUND', message: "Category not found" })
+            const subcategoriesData = await db
+                .select({
+                    id: categories.id,
+                    name: categories.name,
+                    slug: categories.slug,
+                    featured: categories.featured,
+                    thumbnailId: categories.thumbnailId,
+                    parentId: categories.parentId,
+                    description: categories.description,
+                    updatedAt: categories.updatedAt,
+                    thumbnailFilename: media.filename,
+                    productCount: sql<number>`(
+                                SELECT COUNT(*)
+                                FROM products
+                                WHERE category_id=${categories.id}
+                            )`.as('product_count'),
+                })
+                .from(categories)
+                .leftJoin(media, eq(media.id, categories.thumbnailId))
+                .where(
+                    and(
+                        eq(categories.tenantSlug, slug),
+                        eq(categories.parentId, categoryData.id),
+                    )
+                )
+
+            const subcategoriesByParent = subcategoriesData.reduce((acc, subcat) => {
+                if (!acc[subcat.parentId!]) {
+                    acc[subcat.parentId!] = [];
+                }
+                acc[subcat.parentId!].push(subcat);
+                return acc;
+            }, {} as Record<string, typeof subcategoriesData>);
+
+            const data = {
+                ...categoryData,
+                thumbnail: categoryData.thumbnailFilename ? {
+                    filename: categoryData.thumbnailFilename,
+                    url: constructMediaURL(categoryData.thumbnailFilename)
+                } : null,
+                subcategories: (subcategoriesByParent[categoryData.id] || []).map((subcat) => ({
+                    ...subcat,
+                    thumbnail: subcat.thumbnailFilename ? {
+                        filename: subcat.thumbnailFilename,
+                        url: constructMediaURL(subcat.thumbnailFilename)
+                    } : null,
+                })),
+            }
+
+            return data
         }),
     getMany: baseProcedure
         .input(

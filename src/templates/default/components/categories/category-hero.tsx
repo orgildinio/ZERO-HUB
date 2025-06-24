@@ -81,7 +81,7 @@ export const CategoryHero = ({ slug, category }: { slug: string; category: strin
                             <p className="text-lg text-stone-300 max-w-2xl leading-relaxed mb-8">{categoryData.description}</p>
                             <div className="grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0 mb-8">
                                 <div className="text-center lg:text-left">
-                                    <div className="text-3xl font-bold text-white mb-1">{categoryData.stats?.productCount}</div>
+                                    <div className="text-3xl font-bold text-white mb-1">{categoryData.productCount}</div>
                                     <div className="text-sm text-stone-400 uppercase tracking-wide">Products</div>
                                 </div>
                                 <div className="text-center lg:text-left">
@@ -102,7 +102,7 @@ export const CategoryHero = ({ slug, category }: { slug: string; category: strin
                                 <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-3xl blur-2xl"></div>
                                 <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200 shadow-2xl">
                                     <Image
-                                        src={categoryData.thumbnail.url || "/placeholder.png"}
+                                        src={categoryData.thumbnail?.url || "/placeholder.png"}
                                         alt={`${categoryData.name} collection`}
                                         fill
                                         priority
