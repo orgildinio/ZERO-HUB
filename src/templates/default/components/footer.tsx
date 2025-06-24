@@ -17,7 +17,7 @@ interface Props {
 export const Footer = memo(({ slug }: Props) => {
 
     const trpc = useTRPC();
-    const { data } = useSuspenseQuery(trpc.tenants.getOneByPayload.queryOptions({ slug }));
+    const { data } = useSuspenseQuery(trpc.tenants.getOne.queryOptions({ slug }));
 
     const navigation = useMemo(() => [
         { name: "Home", href: generateTenantUrl(slug) },
@@ -31,7 +31,7 @@ export const Footer = memo(({ slug }: Props) => {
             <div className="container px-4 py-12 md:px-6 lg:py-16 mx-auto">
                 <div className="flex flex-col items-center justify-center gap-6 text-center">
                     <Link href={`${generateTenantUrl(slug)}`} className="text-2xl font-bold text-stone-900 hover:text-amber-600 transition-colors">
-                        {data.store}
+                        {data.storeName}
                     </Link>
                     <nav className="flex flex-wrap items-center justify-center gap-8">
                         {navigation.map((item) => (
@@ -80,7 +80,7 @@ export const Footer = memo(({ slug }: Props) => {
                             </Link>
                         </Button>
                     </div>
-                    <p className="text-sm text-stone-600">© 2025 {data.store}. All rights reserved.</p>
+                    <p className="text-sm text-stone-600">© 2025 {data.storeName}. All rights reserved.</p>
                 </div>
             </div>
         </footer >
