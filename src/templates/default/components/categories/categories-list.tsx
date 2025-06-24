@@ -19,14 +19,14 @@ export const CategoriesList = ({ slug }: { slug: string }) => {
             getNextPageParam: (lastPage) => lastPage.data.length > 0 ? lastPage.nextCursor : undefined
         }
     ))
-
+    console.log(data)
     return (
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {data.pages.flatMap((page) => page.data).map((category) => (
                 <CategoryCard
                     key={category.slug}
                     name={category.name}
-                    image={category.thumbnail}
+                    image={category.thumbnail?.url}
                     itemCount={category.productCount}
                     href={`${generateTenantUrl(slug)}/categories/${category.slug}`}
                     description={category.description}

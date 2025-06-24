@@ -6,6 +6,11 @@ import { db } from "@/db";
 import { categories, media } from "../../../../drizzle/schema";
 import { and, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 
+const constructMediaURL = (filename: string) => {
+    if (!filename) return null;
+    return `/api/media/file/${filename}`;
+};
+
 export const categoriesRouter = createTRPCRouter({
     getManyByPayload: baseProcedure
         .input(
@@ -181,8 +186,7 @@ export const categoriesRouter = createTRPCRouter({
                     parentId: categories.parentId,
                     description: categories.description,
                     updatedAt: categories.updatedAt,
-                    thumbnail: media.url,
-                    thumnailFilename: media.filename,
+                    thumbnailFilename: media.filename,
                     productCount: sql<number>`(
                         SELECT COUNT(*)
                         FROM products
@@ -216,8 +220,7 @@ export const categoriesRouter = createTRPCRouter({
                         parentId: categories.parentId,
                         description: categories.description,
                         updatedAt: categories.updatedAt,
-                        thumbnail: media.url,
-                        thumnailFilename: media.filename
+                        thumbnailFilename: media.filename
                     })
                     .from(categories)
                     .leftJoin(media, eq(media.id, categories.thumbnailId))
@@ -240,7 +243,17 @@ export const categoriesRouter = createTRPCRouter({
 
             const transformedData = actualCategories.map((category) => ({
                 ...category,
-                subcategories: subcategoriesByParent[category.id] || [],
+                thumbnail: category.thumbnailFilename ? {
+                    filename: category.thumbnailFilename,
+                    url: constructMediaURL(category.thumbnailFilename)
+                } : null,
+                subcategories: (subcategoriesByParent[category.id] || []).map((subcat) => ({
+                    ...subcat,
+                    thumbnail: subcat.thumbnailFilename ? {
+                        filename: subcat.thumbnailFilename,
+                        url: constructMediaURL(subcat.thumbnailFilename)
+                    } : null,
+                })),
             }))
 
             const nextCursor = hasNextPage && actualCategories.length > 0
