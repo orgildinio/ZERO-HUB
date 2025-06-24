@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowRight, Award, Star } from "lucide-react";
 import { ProductCard } from "../products/product-card";
 import EmptyProducts from "../products/empty-products";
+import { Suspense } from "react";
 
 import { useTRPC } from "@/trpc/client";
 import { Media } from "@/payload-types";
@@ -36,24 +37,9 @@ const getProductImage = (images: ProductImage[] | undefined): string | null => {
     return null
 }
 
-export const CategoryHero = ({ slug, category }: { slug: string; category: string }) => {
-
-    const [filters] = useProductFilters()
-
+const CategoryHeroSection = ({ slug, category }: { slug: string; category: string }) => {
     const trpc = useTRPC();
     const { data: categoryData } = useSuspenseQuery(trpc.categories.getOne.queryOptions({ slug: slug, category: category }));
-    const { data: productsData, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(trpc.products.getMany.infiniteQueryOptions(
-        {
-            ...filters,
-            slug: slug,
-            category: [category]
-        },
-        {
-            getNextPageParam: (lastpage) => {
-                return lastpage.docs.length > 0 ? lastpage.nextPage : undefined
-            }
-        }
-    ))
 
     return (
         <>
@@ -127,8 +113,11 @@ export const CategoryHero = ({ slug, category }: { slug: string; category: strin
                                     variant="outline"
                                     size="sm"
                                     className="rounded-full border-stone-300 hover:border-amber-500 hover:text-amber-600 whitespace-nowrap"
+                                    asChild
                                 >
-                                    {subcategory.name}
+                                    <Link href={`${generateTenantUrl(slug)}/categories/${subcategory.slug}`}>
+                                        {subcategory.name}
+                                    </Link>
                                 </Button>
                             ))}
                         </div>
@@ -138,66 +127,133 @@ export const CategoryHero = ({ slug, category }: { slug: string; category: strin
                     </div>
                 </div>
             </section>
-            <section className="py-12">
-                <div className="container px-4 md:px-6 mx-auto">
-                    <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex-1">
-                            <h2 className="text-3xl font-bold text-stone-900 mb-2">{categoryData.name} Collection</h2>
-                        </div>
-                        <div className="flex-shrink-0">
-                            <Button
-                                variant="outline"
-                                className="border-stone-300 hover:border-amber-600 hover:bg-amber-50 hover:text-amber-700 rounded-full"
-                                asChild
-                            >
-                                <Link href={`${generateTenantUrl(slug)}/products`} prefetch={false}>
-                                    View All Products
-                                    <ArrowRight className="h-4 w-4 ml-2" />
-                                </Link>
-                            </Button>
-                        </div>
+        </>
+    )
+}
+
+const CategoryProducts = ({ slug, category, categoryName }: { slug: string; category: string; categoryName: string }) => {
+    const [filters] = useProductFilters()
+    const trpc = useTRPC();
+
+    const { data: productsData, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(trpc.products.getMany.infiniteQueryOptions(
+        {
+            ...filters,
+            slug: slug,
+            category: [category]
+        },
+        {
+            getNextPageParam: (lastpage) => {
+                return lastpage.docs.length > 0 ? lastpage.nextPage : undefined
+            }
+        }
+    ))
+
+    return (
+        <section className="py-12">
+            <div className="container px-4 md:px-6 mx-auto">
+                <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1">
+                        <h2 className="text-3xl font-bold text-stone-900 mb-2">{categoryName} Collection</h2>
                     </div>
-                    {productsData?.pages?.[0]?.docs.length === 0 ? (
-                        <EmptyProducts
-                            description={`We couldn't find any ${categoryData.name.toLowerCase()} products matching your current filters.`}
-                        />
-                    ) : (
-                        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                            {productsData?.pages.flatMap((page) => page.docs).map((product, index) => (
-                                <ProductCard
-                                    id={product.id}
-                                    key={product.slug}
-                                    name={product.name}
-                                    price={product.pricing.compareAtPrice}
-                                    originalPrice={product.pricing.price}
-                                    image={getProductImage(product.images)}
-                                    category={product.category.name}
-                                    badge={product.badge}
-                                    featured={true}
-                                    slug={product.slug}
-                                    tenantSlug={slug}
-                                    priority={index < 2}
-                                    rating={product.reviewRating}
-                                    reviews={product.reviewCount}
-                                />
-                            ))}
-                        </div>
-                    )}
-                    <div className="mt-16 text-center">
-                        {hasNextPage && (
-                            <Button
-                                disabled={isFetchingNextPage}
-                                onClick={() => fetchNextPage()}
-                                size="lg"
-                                variant="outline"
-                                className="border-2 border-stone-300 hover:border-stone-900 hover:bg-stone-900 hover:text-white px-12 py-6 text-lg rounded-full transition-all duration-300"
-                            >
-                                Load More Products
-                            </Button>
-                        )}
+                    <div className="flex-shrink-0">
+                        <Button
+                            variant="outline"
+                            className="border-stone-300 hover:border-amber-600 hover:bg-amber-50 hover:text-amber-700 rounded-full"
+                            asChild
+                        >
+                            <Link href={`${generateTenantUrl(slug)}/products`} prefetch={false}>
+                                View All Products
+                                <ArrowRight className="h-4 w-4 ml-2" />
+                            </Link>
+                        </Button>
                     </div>
                 </div>
-            </section>
+                {productsData?.pages?.[0]?.docs.length === 0 ? (
+                    <EmptyProducts
+                        description={`We couldn't find any ${categoryName.toLowerCase()} products matching your current filters.`}
+                    />
+                ) : (
+                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                        {productsData?.pages.flatMap((page) => page.docs).map((product, index) => (
+                            <ProductCard
+                                id={product.id}
+                                key={product.slug}
+                                name={product.name}
+                                price={product.pricing.compareAtPrice}
+                                originalPrice={product.pricing.price}
+                                image={getProductImage(product.images)}
+                                category={product.category.name}
+                                badge={product.badge}
+                                featured={true}
+                                slug={product.slug}
+                                tenantSlug={slug}
+                                priority={index < 2}
+                                rating={product.reviewRating}
+                                reviews={product.reviewCount}
+                            />
+                        ))}
+                    </div>
+                )}
+                <div className="mt-16 text-center">
+                    {hasNextPage && (
+                        <Button
+                            disabled={isFetchingNextPage}
+                            onClick={() => fetchNextPage()}
+                            size="lg"
+                            variant="outline"
+                            className="border-2 border-stone-300 hover:border-stone-900 hover:bg-stone-900 hover:text-white px-12 py-6 text-lg rounded-full transition-all duration-300"
+                        >
+                            {isFetchingNextPage ? "Loading..." : "Load More Products"}
+                        </Button>
+                    )}
+                </div>
+            </div>
+        </section>
+    )
+}
+
+const ProductsSkeleton = () => {
+    return (
+        <section className="py-12">
+            <div className="container px-4 md:px-6 mx-auto">
+                <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1">
+                        <Skeleton className="h-8 w-48 mb-2" />
+                    </div>
+                    <div className="flex-shrink-0">
+                        <Skeleton className="h-10 w-40 rounded-full" />
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} className="space-y-4">
+                            <Skeleton className="aspect-square w-full rounded-lg" />
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-4 w-1/2" />
+                            <Skeleton className="h-6 w-1/3" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )
+}
+
+export const CategoryHero = ({ slug, category }: { slug: string; category: string }) => {
+    const trpc = useTRPC();
+    const { data: categoryData } = useSuspenseQuery(trpc.categories.getOne.queryOptions({ slug: slug, category: category }));
+
+    return (
+        <>
+            <CategoryHeroSection slug={slug} category={category} />
+
+            <Suspense fallback={<ProductsSkeleton />}>
+                <CategoryProducts
+                    slug={slug}
+                    category={category}
+                    categoryName={categoryData.name}
+                />
+            </Suspense>
         </>
     )
 }
