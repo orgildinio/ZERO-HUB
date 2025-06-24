@@ -220,7 +220,12 @@ export const categoriesRouter = createTRPCRouter({
                         parentId: categories.parentId,
                         description: categories.description,
                         updatedAt: categories.updatedAt,
-                        thumbnailFilename: media.filename
+                        thumbnailFilename: media.filename,
+                        productCount: sql<number>`(
+                            SELECT COUNT(*)
+                            FROM products
+                            WHERE category_id=${categories.id}
+                        )`.as('product_count'),
                     })
                     .from(categories)
                     .leftJoin(media, eq(media.id, categories.thumbnailId))
