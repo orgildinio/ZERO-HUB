@@ -19,7 +19,10 @@ const ProductsPage = async ({ params, searchParams }: Props) => {
 
     const queryClient = getQueryClient();
 
-    void queryClient.prefetchInfiniteQuery(trpc.categories.getMany.infiniteQueryOptions({ slug: slug }))
+    void queryClient.prefetchInfiniteQuery(trpc.categories.getMany.infiniteQueryOptions({
+        slug: slug,
+        limit: 12
+    }))
     void queryClient.prefetchInfiniteQuery(trpc.products.getMany.infiniteQueryOptions({
         slug: slug,
         ...filters,

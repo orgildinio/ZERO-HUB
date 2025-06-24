@@ -15,7 +15,10 @@ const CategoriesPage = async ({ params }: Props) => {
     const queryClient = getQueryClient();
 
     void queryClient.prefetchQuery(trpc.categories.getFeatured.queryOptions({ slug: slug }))
-    void queryClient.prefetchInfiniteQuery(trpc.categories.getMany.infiniteQueryOptions({ slug: slug }))
+    void queryClient.prefetchInfiniteQuery(trpc.categories.getMany.infiniteQueryOptions({
+        slug: slug,
+        limit: 12
+    }))
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>

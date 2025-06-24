@@ -4,10 +4,10 @@ import { Category, Media } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { db } from "@/db";
 import { categories, media } from "../../../../drizzle/schema";
-import { and, eq, gt, inArray, isNull, or } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 
 export const categoriesRouter = createTRPCRouter({
-    getMany: baseProcedure
+    getManyByPayload: baseProcedure
         .input(
             z.object({
                 slug: z.string(),
@@ -146,7 +146,7 @@ export const categoriesRouter = createTRPCRouter({
 
             return data[0]
         }),
-    getManyByDrizzle: baseProcedure
+    getMany: baseProcedure
         .input(
             z.object({
                 slug: z.string(),
@@ -182,7 +182,12 @@ export const categoriesRouter = createTRPCRouter({
                     description: categories.description,
                     updatedAt: categories.updatedAt,
                     thumbnail: media.url,
-                    thumnailFilename: media.filename
+                    thumnailFilename: media.filename,
+                    productCount: sql<number>`(
+                        SELECT COUNT(*)
+                        FROM products
+                        WHERE category_id=${categories.id}
+                    )`.as('product_count'),
                 })
                 .from(categories)
                 .leftJoin(media, eq(media.id, categories.thumbnailId))

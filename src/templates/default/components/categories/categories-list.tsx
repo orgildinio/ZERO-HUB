@@ -13,20 +13,21 @@ export const CategoriesList = ({ slug }: { slug: string }) => {
     const { data } = useSuspenseInfiniteQuery(trpc.categories.getMany.infiniteQueryOptions(
         {
             slug: slug,
+            limit: 12
         },
         {
-            getNextPageParam: (lastPage) => lastPage.docs.length > 0 ? lastPage.nextPage : undefined
+            getNextPageParam: (lastPage) => lastPage.data.length > 0 ? lastPage.nextCursor : undefined
         }
     ))
 
     return (
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {data.pages.flatMap((page) => page.docs).map((category) => (
+            {data.pages.flatMap((page) => page.data).map((category) => (
                 <CategoryCard
                     key={category.slug}
                     name={category.name}
-                    image={category.thumbnail.url}
-                    itemCount={category.stats?.productCount}
+                    image={category.thumbnail}
+                    itemCount={category.productCount}
                     href={`${generateTenantUrl(slug)}/categories/${category.slug}`}
                     description={category.description}
                 />

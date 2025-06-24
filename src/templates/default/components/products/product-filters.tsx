@@ -26,10 +26,10 @@ export const ProductFilters = ({ slug }: { slug: string }) => {
 
     const trpc = useTRPC();
     const { data: categories } = useSuspenseInfiniteQuery(trpc.categories.getMany.infiniteQueryOptions(
-        { slug: slug },
+        { slug: slug, limit: 12 },
         {
             getNextPageParam: (lastpage) => {
-                return lastpage.docs.length > 0 ? lastpage.nextPage : undefined
+                return lastpage.data.length > 0 ? lastpage.nextCursor : undefined
             }
         }
     ))
@@ -99,7 +99,7 @@ export const ProductFilters = ({ slug }: { slug: string }) => {
             <div className="space-y-4">
                 <h3 className="font-medium text-stone-900">Categories</h3>
                 <div className="space-y-3">
-                    {categories?.pages.flatMap((page) => page.docs).map((category) => (
+                    {categories?.pages.flatMap((page) => page.data).map((category) => (
                         <div key={category.slug} className="flex items-center space-x-3">
                             <Checkbox
                                 id={category.slug}
@@ -112,7 +112,7 @@ export const ProductFilters = ({ slug }: { slug: string }) => {
                             >
                                 {category.name}
                             </label>
-                            <span className="text-xs text-stone-500 bg-stone-100 px-2 py-1 rounded-full">{category.stats?.productCount}</span>
+                            <span className="text-xs text-stone-500 bg-stone-100 px-2 py-1 rounded-full">{category.productCount}</span>
                         </div>
                     ))}
                 </div>
