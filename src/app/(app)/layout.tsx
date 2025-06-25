@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} antialiased scrollbar-hide`}
+        className={`${inter.className} antialiased`}
       >
         <NuqsAdapter>
           <TRPCReactProvider>

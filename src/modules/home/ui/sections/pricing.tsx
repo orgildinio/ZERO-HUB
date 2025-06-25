@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Star, Zap, ArrowRight, Sparkles } from "lucide-react"
@@ -134,9 +134,9 @@ const BillingToggle: React.FC<BillingToggleProps> = ({ billingPeriod, onBillingC
 export const PricingSection: React.FC = () => {
     const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly")
 
-    const handleBillingChange = useCallback((period: BillingPeriod) => {
+    const handleBillingChange = (period: BillingPeriod) => {
         setBillingPeriod(period)
-    }, [])
+    }
 
     const planCards = useMemo(() =>
         (plans as Plan[]).map((plan: Plan) => (

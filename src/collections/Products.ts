@@ -447,43 +447,5 @@ export const Products: CollectionConfig = {
                 description: "Product publication status"
             }
         },
-        {
-            name: "analytics",
-            type: "group",
-            admin: {
-                readOnly: true,
-                description: "Product analytics (read-only)",
-            },
-            fields: [
-                {
-                    name: "views",
-                    type: "number",
-                    defaultValue: 0,
-                    admin: {
-                        readOnly: true,
-                        description: "Total product views"
-                    }
-                },
-                {
-                    name: "sales",
-                    type: "number",
-                    defaultValue: 0,
-                    admin: {
-                        readOnly: true,
-                        description: "Total units sold"
-                    }
-                },
-                {
-                    name: "revenue",
-                    type: "number",
-                    defaultValue: 0,
-                    admin: {
-                        readOnly: true,
-                        step: 0.01,
-                        description: "Total revenue generated"
-                    }
-                }
-            ]
-        },
     ]
 }

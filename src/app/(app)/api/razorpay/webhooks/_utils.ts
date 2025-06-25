@@ -1,12 +1,12 @@
 import { getPayload } from "payload";
-import { SubscriptionPayload } from "./route";
+import { Payload } from "./route";
 
 import config from "@payload-config";
 import { Subscription, Tenant } from "@/payload-types";
 
 const payload = await getPayload({ config });
 
-export async function handleSubscriptionActivated(subscription: SubscriptionPayload) {
+export async function handleSubscriptionActivated(subscription: Payload) {
     try {
         const payloadSubscription = await payload.find({
             collection: "subscriptions",

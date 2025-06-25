@@ -78,6 +78,9 @@ export interface Config {
     subscriptions: Subscription;
     customers: Customer;
     orders: Order;
+    'category-sales-summary': CategorySalesSummary;
+    'products-monthly-sales': ProductsMonthlySale;
+    'monthly-sales-summary': MonthlySalesSummary;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -99,6 +102,9 @@ export interface Config {
     subscriptions: SubscriptionsSelect<false> | SubscriptionsSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
+    'category-sales-summary': CategorySalesSummarySelect<false> | CategorySalesSummarySelect<true>;
+    'products-monthly-sales': ProductsMonthlySalesSelect<false> | ProductsMonthlySalesSelect<true>;
+    'monthly-sales-summary': MonthlySalesSummarySelect<false> | MonthlySalesSummarySelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -478,23 +484,6 @@ export interface Product {
    * Product publication status
    */
   status: 'active' | 'draft' | 'archived';
-  /**
-   * Product analytics (read-only)
-   */
-  analytics?: {
-    /**
-     * Total product views
-     */
-    views?: number | null;
-    /**
-     * Total units sold
-     */
-    sales?: number | null;
-    /**
-     * Total revenue generated
-     */
-    revenue?: number | null;
-  };
   updatedAt: string;
   createdAt: string;
 }
@@ -564,23 +553,6 @@ export interface Category {
      * Image for social media sharing (recommended: 1200x630px)
      */
     ogImage?: (string | null) | Media;
-  };
-  /**
-   * Category statistics and analytics
-   */
-  stats?: {
-    /**
-     * Number of products in this category
-     */
-    productCount?: number | null;
-    /**
-     * Number of times this category page has been viewed
-     */
-    viewCount?: number | null;
-    /**
-     * Last time this category page was viewed
-     */
-    lastViewed?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -753,15 +725,82 @@ export interface Order {
   customer: string | Customer;
   isPaid: boolean;
   orderItems: {
+    category?: string | null;
     product: string;
     quantity: number;
+    unitPrice?: number | null;
+    discountPerItem?: number | null;
+    grossItemAmount?: number | null;
     id?: string | null;
   }[];
+  orderDate?: string | null;
+  grossAmount?: number | null;
+  discountAmount?: number | null;
+  taxAmount?: number | null;
+  shippingAmount?: number | null;
+  netAmount?: number | null;
   /**
    * Checkout session associated with the order.
    */
   razorpayCheckoutSessionId?: string | null;
   razorpayOrderId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "category-sales-summary".
+ */
+export interface CategorySalesSummary {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  category: string | Category;
+  /**
+   * This field is automatically populated based on the selected category
+   */
+  categoryName: string;
+  month: string;
+  year: string;
+  totalOrders: number;
+  grossSales: number;
+  netSales: number;
+  totalItemsSold: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products-monthly-sales".
+ */
+export interface ProductsMonthlySale {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  category: string | Category;
+  product: string | Product;
+  productName: string;
+  month: string;
+  year: string;
+  totalOrders: number;
+  grossSales: number;
+  netSales: number;
+  totalItemsSold: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "monthly-sales-summary".
+ */
+export interface MonthlySalesSummary {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  month: string;
+  year: string;
+  totalOrders: number;
+  grossSales: number;
+  netSales: number;
+  totalItemsSold: number;
+  averageOrderValue: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -815,6 +854,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'orders';
         value: string | Order;
+      } | null)
+    | ({
+        relationTo: 'category-sales-summary';
+        value: string | CategorySalesSummary;
+      } | null)
+    | ({
+        relationTo: 'products-monthly-sales';
+        value: string | ProductsMonthlySale;
+      } | null)
+    | ({
+        relationTo: 'monthly-sales-summary';
+        value: string | MonthlySalesSummary;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1027,13 +1078,6 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   refundPolicy?: T;
   status?: T;
-  analytics?:
-    | T
-    | {
-        views?: T;
-        sales?: T;
-        revenue?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1081,13 +1125,6 @@ export interface CategoriesSelect<T extends boolean = true> {
         description?: T;
         keywords?: T;
         ogImage?: T;
-      };
-  stats?:
-    | T
-    | {
-        productCount?: T;
-        viewCount?: T;
-        lastViewed?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1187,12 +1224,73 @@ export interface OrdersSelect<T extends boolean = true> {
   orderItems?:
     | T
     | {
+        category?: T;
         product?: T;
         quantity?: T;
+        unitPrice?: T;
+        discountPerItem?: T;
+        grossItemAmount?: T;
         id?: T;
       };
+  orderDate?: T;
+  grossAmount?: T;
+  discountAmount?: T;
+  taxAmount?: T;
+  shippingAmount?: T;
+  netAmount?: T;
   razorpayCheckoutSessionId?: T;
   razorpayOrderId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "category-sales-summary_select".
+ */
+export interface CategorySalesSummarySelect<T extends boolean = true> {
+  tenant?: T;
+  category?: T;
+  categoryName?: T;
+  month?: T;
+  year?: T;
+  totalOrders?: T;
+  grossSales?: T;
+  netSales?: T;
+  totalItemsSold?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products-monthly-sales_select".
+ */
+export interface ProductsMonthlySalesSelect<T extends boolean = true> {
+  tenant?: T;
+  category?: T;
+  product?: T;
+  productName?: T;
+  month?: T;
+  year?: T;
+  totalOrders?: T;
+  grossSales?: T;
+  netSales?: T;
+  totalItemsSold?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "monthly-sales-summary_select".
+ */
+export interface MonthlySalesSummarySelect<T extends boolean = true> {
+  tenant?: T;
+  month?: T;
+  year?: T;
+  totalOrders?: T;
+  grossSales?: T;
+  netSales?: T;
+  totalItemsSold?: T;
+  averageOrderValue?: T;
   updatedAt?: T;
   createdAt?: T;
 }

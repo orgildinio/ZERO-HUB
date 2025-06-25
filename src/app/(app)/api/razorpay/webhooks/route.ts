@@ -4,7 +4,7 @@ import { handleSubscriptionActivated } from './_utils';
 
 const secret = process.env.RAZORPAY_WEBHOOK_SECRET as string;
 
-export type SubscriptionPayload = {
+export type Payload = {
     event: string;
     payload: {
         subscription: {
@@ -25,6 +25,19 @@ export type SubscriptionPayload = {
                 }
             }
         };
+        payment: {
+            entity: {
+                email: string;
+                amount: number;
+                contact: string;
+                order_id: string;
+                id: string;
+                description: string;
+                notes: {
+                    orderId: string;
+                }
+            };
+        };
     };
 };
 
@@ -32,7 +45,7 @@ export async function POST(req: NextRequest) {
     try {
         const signature = req.headers.get('x-razorpay-signature') as string;
         const body = await req.json();
-        const payload: SubscriptionPayload = body;
+        const payload: Payload = body;
 
         const expectedSignature = crypto
             .createHmac('sha256', secret)
@@ -47,7 +60,7 @@ export async function POST(req: NextRequest) {
                 await handleSubscriptionActivated(payload);
                 break;
             case 'account.rejected':
-                return NextResponse.json({ status: 400, message: "Something went wrong" })
+                return NextResponse.json({ status: 400, message: "Something went wrong" });
             default:
                 console.log('Unhandled webhook event:', payload.event);
         }

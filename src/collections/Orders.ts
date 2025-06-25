@@ -38,6 +38,10 @@ export const Orders: CollectionConfig = {
             required: true,
             fields: [
                 {
+                    name: "category",
+                    type: "text",
+                },
+                {
                     name: "product",
                     type: "text",
                     required: true,
@@ -46,8 +50,49 @@ export const Orders: CollectionConfig = {
                     name: "quantity",
                     type: "number",
                     required: true
-                }
+                },
+                {
+                    name: "unitPrice",
+                    type: "number",
+                },
+                {
+                    name: "discountPerItem",
+                    type: "number",
+                    defaultValue: 0,
+                },
+                {
+                    name: "grossItemAmount",
+                    type: "number",
+                },
             ]
+        },
+        {
+            name: 'orderDate',
+            type: 'date',
+        },
+        {
+            name: 'grossAmount',
+            type: 'number',
+        },
+        {
+            name: 'discountAmount',
+            type: 'number',
+            defaultValue: 0
+        },
+        {
+            name: 'taxAmount',
+            type: 'number',
+            defaultValue: 0
+        },
+        {
+            name: 'shippingAmount',
+            type: 'number',
+            defaultValue: 0
+        },
+        {
+            name: 'netAmount',
+            type: 'number',
+            defaultValue: 0
         },
         {
             name: "razorpayCheckoutSessionId",

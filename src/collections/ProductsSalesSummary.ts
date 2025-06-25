@@ -1,0 +1,65 @@
+import { isSuperAdmin } from "@/lib/access";
+import { CollectionConfig } from "payload";
+
+export const ProductsSalesSummary: CollectionConfig = {
+    slug: 'products-monthly-sales',
+    access: {
+        create: ({ req }) => isSuperAdmin(req.user),
+        read: ({ req }) => isSuperAdmin(req.user),
+        update: ({ req }) => isSuperAdmin(req.user),
+        delete: ({ req }) => isSuperAdmin(req.user),
+    },
+    admin: {
+        useAsTitle: "productName",
+        hidden: ({ user }) => !isSuperAdmin(user)
+    },
+    fields: [
+        {
+            name: 'category',
+            type: "relationship",
+            relationTo: 'categories',
+            required: true,
+        },
+        {
+            name: 'product',
+            type: "relationship",
+            relationTo: 'products',
+            required: true,
+        },
+        {
+            name: 'productName',
+            type: "text",
+            required: true,
+        },
+        {
+            name: 'month',
+            type: 'text',
+            required: true
+        },
+        {
+            name: 'year',
+            type: 'text',
+            required: true
+        },
+        {
+            name: 'totalOrders',
+            type: 'number',
+            required: true,
+        },
+        {
+            name: 'grossSales',
+            type: 'number',
+            required: true,
+        },
+        {
+            name: 'netSales',
+            type: 'number',
+            required: true,
+        },
+        {
+            name: 'totalItemsSold',
+            type: 'number',
+            required: true,
+        },
+    ]
+}

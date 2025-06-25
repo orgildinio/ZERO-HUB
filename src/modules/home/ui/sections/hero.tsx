@@ -1,6 +1,6 @@
 "use client"
 
-import { memo, useCallback, useEffect, useMemo, useState, useRef } from "react"
+import { memo, useEffect, useMemo, useState, useRef } from "react"
 import { ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -193,17 +193,17 @@ export const HeroSection = () => {
     const router = useRouter();
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const handleFeatureChange = useCallback((index: number) => {
+    const handleFeatureChange = (index: number) => {
         setActiveFeature(index);
-    }, []);
+    }
 
-    const handleGetStarted = useCallback(() => {
+    const handleGetStarted = () => {
         router.push("/sign-up");
-    }, [router]);
+    }
 
-    const handleViewDemo = useCallback(() => {
-        console.log("View Demo clicked");
-    }, []);
+    const handleViewDemo = () => {
+        router.push('/docs/get-started/account-setup')
+    }
 
     useEffect(() => {
         intervalRef.current = setInterval(() => {

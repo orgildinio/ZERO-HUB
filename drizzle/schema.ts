@@ -226,9 +226,6 @@ export const products = pgTable("products", {
 	shippingShippingCost: numeric("shipping_shipping_cost"),
 	refundPolicy: enumProductsRefundPolicy("refund_policy").default('30-day').notNull(),
 	status: enumProductsStatus().default('draft').notNull(),
-	analyticsViews: numeric("analytics_views").default('0'),
-	analyticsSales: numeric("analytics_sales").default('0'),
-	analyticsRevenue: numeric("analytics_revenue").default('0'),
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	tenantSlug: varchar("tenant_slug").notNull(),
@@ -377,6 +374,18 @@ export const payloadLockedDocuments = pgTable("payload_locked_documents", {
 	index("payload_locked_documents_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
 ]);
 
+export const payloadPreferences = pgTable("payload_preferences", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	key: varchar(),
+	value: jsonb(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("payload_preferences_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("payload_preferences_key_idx").using("btree", table.key.asc().nullsLast().op("text_ops")),
+	index("payload_preferences_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+]);
+
 export const payloadLockedDocumentsRels = pgTable("payload_locked_documents_rels", {
 	id: serial().primaryKey().notNull(),
 	order: integer(),
@@ -393,15 +402,21 @@ export const payloadLockedDocumentsRels = pgTable("payload_locked_documents_rels
 	subscriptionsId: uuid("subscriptions_id"),
 	customersId: uuid("customers_id"),
 	ordersId: uuid("orders_id"),
+	categorySalesSummaryId: uuid("category_sales_summary_id"),
+	productsMonthlySalesId: uuid("products_monthly_sales_id"),
+	monthlySalesSummaryId: uuid("monthly_sales_summary_id"),
 }, (table) => [
 	index("payload_locked_documents_rels_categories_id_idx").using("btree", table.categoriesId.asc().nullsLast().op("uuid_ops")),
+	index("payload_locked_documents_rels_category_sales_summary_id_idx").using("btree", table.categorySalesSummaryId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_customers_id_idx").using("btree", table.customersId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_media_id_idx").using("btree", table.mediaId.asc().nullsLast().op("uuid_ops")),
+	index("payload_locked_documents_rels_monthly_sales_summary_id_idx").using("btree", table.monthlySalesSummaryId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
 	index("payload_locked_documents_rels_orders_id_idx").using("btree", table.ordersId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_parent_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_path_idx").using("btree", table.path.asc().nullsLast().op("text_ops")),
 	index("payload_locked_documents_rels_products_id_idx").using("btree", table.productsId.asc().nullsLast().op("uuid_ops")),
+	index("payload_locked_documents_rels_products_monthly_sales_id_idx").using("btree", table.productsMonthlySalesId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_reviews_id_idx").using("btree", table.reviewsId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_subscription_plans_id_idx").using("btree", table.subscriptionPlansId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_subscriptions_id_idx").using("btree", table.subscriptionsId.asc().nullsLast().op("uuid_ops")),
@@ -468,18 +483,21 @@ export const payloadLockedDocumentsRels = pgTable("payload_locked_documents_rels
 			foreignColumns: [orders.id],
 			name: "payload_locked_documents_rels_orders_fk"
 		}).onDelete("cascade"),
-]);
-
-export const payloadPreferences = pgTable("payload_preferences", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	key: varchar(),
-	value: jsonb(),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("payload_preferences_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("payload_preferences_key_idx").using("btree", table.key.asc().nullsLast().op("text_ops")),
-	index("payload_preferences_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.categorySalesSummaryId],
+			foreignColumns: [categorySalesSummary.id],
+			name: "payload_locked_documents_rels_category_sales_summary_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.productsMonthlySalesId],
+			foreignColumns: [productsMonthlySales.id],
+			name: "payload_locked_documents_rels_products_monthly_sales_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.monthlySalesSummaryId],
+			foreignColumns: [monthlySalesSummary.id],
+			name: "payload_locked_documents_rels_monthly_sales_summary_fk"
+		}).onDelete("cascade"),
 ]);
 
 export const categories = pgTable("categories", {
@@ -497,8 +515,6 @@ export const categories = pgTable("categories", {
 	seoDescription: varchar("seo_description"),
 	seoKeywords: varchar("seo_keywords"),
 	seoOgImageId: uuid("seo_og_image_id"),
-	statsViewCount: numeric("stats_view_count").default('0'),
-	statsLastViewed: timestamp("stats_last_viewed", { precision: 3, withTimezone: true, mode: 'string' }),
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
@@ -653,6 +669,12 @@ export const orders = pgTable("orders", {
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	razorpayOrderId: varchar("razorpay_order_id"),
+	orderDate: timestamp("order_date", { precision: 3, withTimezone: true, mode: 'string' }).notNull(),
+	grossAmount: numeric("gross_amount").notNull(),
+	discountAmount: numeric("discount_amount").default('0'),
+	taxAmount: numeric("tax_amount").default('0'),
+	shippingAmount: numeric("shipping_amount").default('0'),
+	netAmount: numeric("net_amount").default('0'),
 }, (table) => [
 	index("orders_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	index("orders_customer_idx").using("btree", table.customerId.asc().nullsLast().op("uuid_ops")),
@@ -670,12 +692,106 @@ export const orders = pgTable("orders", {
 		}).onDelete("set null"),
 ]);
 
+export const categorySalesSummary = pgTable("category_sales_summary", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	categoryId: uuid("category_id").notNull(),
+	categoryName: varchar("category_name").notNull(),
+	month: varchar().notNull(),
+	year: varchar().notNull(),
+	totalOrders: numeric("total_orders").notNull(),
+	grossSales: numeric("gross_sales").notNull(),
+	netSales: numeric("net_sales").notNull(),
+	totalItemsSold: numeric("total_items_sold").notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("category_sales_summary_category_idx").using("btree", table.categoryId.asc().nullsLast().op("uuid_ops")),
+	index("category_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("category_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("category_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "category_sales_summary_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.categoryId],
+			foreignColumns: [categories.id],
+			name: "category_sales_summary_category_id_categories_id_fk"
+		}).onDelete("set null"),
+]);
+
+export const productsMonthlySales = pgTable("products_monthly_sales", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	categoryId: uuid("category_id").notNull(),
+	productId: uuid("product_id").notNull(),
+	productName: varchar("product_name").notNull(),
+	month: varchar().notNull(),
+	year: varchar().notNull(),
+	totalOrders: numeric("total_orders").notNull(),
+	grossSales: numeric("gross_sales").notNull(),
+	netSales: numeric("net_sales").notNull(),
+	totalItemsSold: numeric("total_items_sold").notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("products_monthly_sales_category_idx").using("btree", table.categoryId.asc().nullsLast().op("uuid_ops")),
+	index("products_monthly_sales_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("products_monthly_sales_product_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
+	index("products_monthly_sales_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("products_monthly_sales_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "products_monthly_sales_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.categoryId],
+			foreignColumns: [categories.id],
+			name: "products_monthly_sales_category_id_categories_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.productId],
+			foreignColumns: [products.id],
+			name: "products_monthly_sales_product_id_products_id_fk"
+		}).onDelete("set null"),
+]);
+
+export const monthlySalesSummary = pgTable("monthly_sales_summary", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	month: varchar().notNull(),
+	year: varchar().notNull(),
+	totalOrders: numeric("total_orders").notNull(),
+	grossSales: numeric("gross_sales").notNull(),
+	netSales: numeric("net_sales").notNull(),
+	totalItemsSold: numeric("total_items_sold").notNull(),
+	averageOrderValue: numeric("average_order_value").notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("monthly_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("monthly_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("monthly_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "monthly_sales_summary_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+]);
+
 export const ordersOrderItems = pgTable("orders_order_items", {
 	order: integer("_order").notNull(),
 	parentId: uuid("_parent_id").notNull(),
 	id: varchar().primaryKey().notNull(),
 	product: varchar().notNull(),
 	quantity: numeric().notNull(),
+	category: varchar().notNull(),
+	unitPrice: numeric("unit_price").notNull(),
+	discountPerItem: numeric("discount_per_item").default('0'),
+	grossItemAmount: numeric("gross_item_amount").notNull(),
 }, (table) => [
 	index("orders_order_items_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
 	index("orders_order_items_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),

@@ -21,6 +21,9 @@ import { SubscriptionPlans } from './collections/SubscriptionPlans';
 import { Subscriptions } from './collections/Subscriptions';
 import { Customers } from './collections/Customers';
 import { Orders } from './collections/Orders';
+import { CategorySalesSummary } from './collections/CategorySalesSummary';
+import { ProductsSalesSummary } from './collections/ProductsSalesSummary';
+import { MonthlySalesSummary } from './collections/MonthlySalesSummary';
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -43,9 +46,9 @@ export default buildConfig({
         '@/components/payload/razorpay-change-subscription#SubscriptionUpgradeButton',
         '@/components/payload/razorpay-verification#TenantBankVerifyButton',
       ],
-    }
+    },
   },
-  collections: [Users, Media, Tenants, Products, Tags, Categories, Reviews, SubscriptionPlans, Subscriptions, Customers, Orders],
+  collections: [Users, Media, Tenants, Products, Tags, Categories, Reviews, SubscriptionPlans, Subscriptions, Customers, Orders, CategorySalesSummary, ProductsSalesSummary, MonthlySalesSummary],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -68,7 +71,10 @@ export default buildConfig({
         media: {},
         reviews: {},
         orders: {},
-        customers: {}
+        customers: {},
+        "monthly-sales-summary": {},
+        "products-monthly-sales": {},
+        "category-sales-summary": {},
       },
       tenantsArrayField: {
         includeDefaultField: false
