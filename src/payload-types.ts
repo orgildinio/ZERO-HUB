@@ -725,8 +725,8 @@ export interface Order {
   customer: string | Customer;
   isPaid: boolean;
   orderItems: {
-    category?: string | null;
     product: string;
+    category?: string | null;
     quantity: number;
     unitPrice?: number | null;
     discountPerItem?: number | null;
@@ -738,7 +738,7 @@ export interface Order {
   discountAmount?: number | null;
   taxAmount?: number | null;
   shippingAmount?: number | null;
-  netAmount?: number | null;
+  saleAmount?: number | null;
   /**
    * Checkout session associated with the order.
    */
@@ -1224,8 +1224,8 @@ export interface OrdersSelect<T extends boolean = true> {
   orderItems?:
     | T
     | {
-        category?: T;
         product?: T;
+        category?: T;
         quantity?: T;
         unitPrice?: T;
         discountPerItem?: T;
@@ -1237,7 +1237,7 @@ export interface OrdersSelect<T extends boolean = true> {
   discountAmount?: T;
   taxAmount?: T;
   shippingAmount?: T;
-  netAmount?: T;
+  saleAmount?: T;
   razorpayCheckoutSessionId?: T;
   razorpayOrderId?: T;
   updatedAt?: T;

@@ -1,6 +1,5 @@
 import { z } from "zod";
 import crypto from 'crypto'
-import { NextResponse } from "next/server";
 import { checkoutSchema } from "../schema";
 
 import { TRPCError } from "@trpc/server";
@@ -98,7 +97,7 @@ export const checkoutRouter = createTRPCRouter({
                             apartment: input.apartment,
                             city: input.city,
                             postalCode: input.zip,
-                            state: input.city,
+                            state: input.state,
                             country: input.country
                         },
                         deliveryOption: input.deliveryOption,
@@ -115,7 +114,11 @@ export const checkoutRouter = createTRPCRouter({
                         isPaid: false,
                         orderItems: input.products.map(product => ({
                             product: product.name,
-                            quantity: product.quantity
+                            category: product.category,
+                            quantity: product.quantity,
+                            unitPrice: product.compareAtPrice ? product.compareAtPrice : product.price,
+                            discountPerItem: product.price - product.compareAtPrice,
+                            grossItemAmount: product.price * product.quantity,
                         })),
                         tenant: tenant.docs[0].id
                     }
@@ -154,7 +157,7 @@ export const checkoutRouter = createTRPCRouter({
             z.object({
                 razorpay_order_id: z.string().optional(),
                 amount: z.union([z.number(), z.string()]).optional(),
-                uniqueId: z.string().optional(),
+                uniqueId: z.string(),
                 razorpay_payment_id: z.string().optional(),
                 razorpay_signature: z.string().optional(),
             })
@@ -169,7 +172,7 @@ export const checkoutRouter = createTRPCRouter({
                 .digest('hex');
 
             if (expectedSignature !== input.razorpay_signature) {
-                return new NextResponse("Invalid transaction", { status: 401 });
+                throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid transaction signature" });
             }
 
             await ctx.db.update({
@@ -182,8 +185,10 @@ export const checkoutRouter = createTRPCRouter({
                 data: {
                     isPaid: true,
                     razorpayCheckoutSessionId: input.razorpay_payment_id,
-                    razorpayOrderId: input.razorpay_order_id
+                    razorpayOrderId: input.razorpay_order_id,
+                    orderDate: new Date().toISOString()
                 }
             });
+            // Add logic for redis to store analytics
         })
 })

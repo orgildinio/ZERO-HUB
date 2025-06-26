@@ -79,8 +79,20 @@ export const instructionSchema = z.object({
 
 export const order = z.object({
     finalAmount: z.number(),
-    products: z.array(z.object({ productId: z.string(), name: z.string(), quantity: z.number(), price: z.number() })),
+    products: z.array(z.object({
+        productId: z.string(),
+        name: z.string(),
+        quantity: z.number(),
+        price: z.number(),
+        compareAtPrice: z.number(),
+        category: z.string()
+    })),
     tenant: z.string(),
+    grossAmount: z.number(),
+    discountAmount: z.number(),
+    taxAmount: z.number(),
+    shippingAmount: z.number(),
+    saleAmount: z.number()
 })
 
 export const checkoutSchema = contactSchema.merge(shippingSchema).merge(deliverySchema).merge(instructionSchema).merge(order)

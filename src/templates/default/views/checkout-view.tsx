@@ -56,15 +56,25 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
     const trpc = useTRPC();
     const { data } = useSuspenseQuery(trpc.checkout.getMany.queryOptions({ productIds: productIds }));
 
-    const totalPrice = data?.docs.reduce((acc, product) => {
+    const grossAmount = data?.docs.reduce((acc, product) => {
         const quantity = getProductQuantity(product.id);
-        const unitPrice = (product.pricing?.compareAtPrice ? product.pricing.compareAtPrice : product.pricing.price) || 0;
+        const unitPrice = product.pricing.price;
         return acc + unitPrice * quantity;
     }, 0);
 
-    const shippingPrice = form.watch('deliveryOption')
+    const saleAmount = data?.docs.reduce((acc, product) => {
+        const quantity = getProductQuantity(product.id);
+        const unitPrice = product.pricing.compareAtPrice ? product.pricing.compareAtPrice : product.pricing.price;
+        return acc + unitPrice * quantity
+    }, 0);
 
-    const finalPrice = totalPrice + (totalPrice * 0.14) + (shippingPrice === 'express' ? 25 : 15);
+    const discountedAmount = grossAmount - saleAmount;
+
+    const shippingAmount = form.watch('deliveryOption') === 'express' ? 25 : 15;
+
+    const taxAmount = saleAmount * 0.18
+
+    const finalAmount = saleAmount + taxAmount + shippingAmount;
 
     const verifyOrderMutation = useMutation(trpc.checkout.verifyOrder.mutationOptions({
         onSuccess: () => { },
@@ -122,13 +132,16 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
         const products = cartItems.map(item => ({
             productId: item.productId,
             name: data?.docs.find(product => product.id === item.productId)?.name || '',
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            category: data?.docs.find(product => product.id === item.productId)?.category.name!,
             quantity: item.quantity,
-            price: data?.docs.find(product => product.id === item.productId)?.pricing?.compareAtPrice ||
-                data?.docs.find(product => product.id === item.productId)?.pricing?.price || 0,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            price: data?.docs.find(product => product.id === item.productId)?.pricing.price!,
+            compareAtPrice: data?.docs.find(product => product.id === item.productId)?.pricing?.compareAtPrice || 0,
         }));
         createOrderMutation.mutate({
             ...values,
-            finalAmount: finalPrice,
+            finalAmount: finalAmount,
             products: products,
             tenant: slug
         })
@@ -182,20 +195,28 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-600">Subtotal</span>
-                                                    <span>{formatPrice(totalPrice)}</span>
+                                                    <span>{formatPrice(grossAmount)}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Discount Amount</span>
+                                                    <span>{formatPrice(discountedAmount)}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">Sale Price</span>
+                                                    <span>{formatPrice(saleAmount)}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-600">Shipping</span>
-                                                    <span>{formatPrice(shippingPrice === 'express' ? 25 : 15)}</span>
+                                                    <span>{formatPrice(shippingAmount)}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-600">Tax</span>
-                                                    <span>{formatPrice(totalPrice * 0.14)}</span>
+                                                    <span>{formatPrice(taxAmount)}</span>
                                                 </div>
                                                 <Separator />
                                                 <div className="flex justify-between font-bold text-lg">
                                                     <span>Total</span>
-                                                    <span>{formatPrice(totalPrice + (totalPrice * 0.14) + (shippingPrice === 'express' ? 25 : 15))}</span>
+                                                    <span>{formatPrice(finalAmount)}</span>
                                                 </div>
                                             </div>
                                         </div>

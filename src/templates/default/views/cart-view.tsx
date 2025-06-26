@@ -23,20 +23,23 @@ export const CartView = ({ slug }: { slug: string }) => {
     const trpc = useTRPC();
     const { data } = useSuspenseQuery(trpc.checkout.getMany.queryOptions({ productIds: productIds }))
 
-    const { totalPrice, taxAmount, finalTotal } = useMemo(() => {
-        const total = data?.docs.reduce((acc, product) => {
-            const quantity = getProductQuantity(product.id)
-            const unitPrice = (product.pricing?.compareAtPrice || product.pricing.price) || 0
-            return acc + unitPrice * quantity
-        }, 0) || 0
+    const grossAmount = data?.docs.reduce((acc, product) => {
+        const quantity = getProductQuantity(product.id)
+        const unitPrice = product.pricing.price
+        return acc + unitPrice * quantity
+    }, 0)
 
-        const tax = total * 0.14
-        return {
-            totalPrice: total,
-            taxAmount: tax,
-            finalTotal: total + tax
-        }
-    }, [data?.docs, getProductQuantity])
+    const saleAmount = data.docs.reduce((acc, product) => {
+        const quantity = getProductQuantity(product.id)
+        const unitPrice = product.pricing.compareAtPrice ? product.pricing.compareAtPrice : product.pricing.price
+        return acc + unitPrice * quantity
+    }, 0)
+
+    const discountedAmount = grossAmount - saleAmount
+
+    const taxAmount = saleAmount * 0.18;
+
+    const finalAmount = saleAmount + taxAmount;
 
     const isEmpty = totalItems === 0
 
@@ -132,7 +135,15 @@ export const CartView = ({ slug }: { slug: string }) => {
                             <div className="space-y-3">
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Subtotal</span>
-                                    <span className="text-stone-900">{formatPrice(totalPrice)}</span>
+                                    <span className="text-stone-900">{formatPrice(grossAmount)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Discount</span>
+                                    <span className="text-stone-900">{formatPrice(discountedAmount)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Sale Price</span>
+                                    <span className="text-stone-900">{formatPrice(saleAmount)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Shipping</span>
@@ -145,7 +156,7 @@ export const CartView = ({ slug }: { slug: string }) => {
                                 <Separator className="my-3" />
                                 <div className="flex justify-between font-medium">
                                     <span className="text-stone-900">Total</span>
-                                    <span className="text-xl font-bold text-stone-900">{formatPrice(finalTotal)}</span>
+                                    <span className="text-xl font-bold text-stone-900">{formatPrice(finalAmount)}</span>
                                 </div>
                             </div>
                             <Button

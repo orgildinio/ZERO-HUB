@@ -38,13 +38,13 @@ export const Orders: CollectionConfig = {
             required: true,
             fields: [
                 {
-                    name: "category",
-                    type: "text",
-                },
-                {
                     name: "product",
                     type: "text",
                     required: true,
+                },
+                {
+                    name: "category",
+                    type: "text",
                 },
                 {
                     name: "quantity",
@@ -90,7 +90,7 @@ export const Orders: CollectionConfig = {
             defaultValue: 0
         },
         {
-            name: 'netAmount',
+            name: 'saleAmount',
             type: 'number',
             defaultValue: 0
         },
