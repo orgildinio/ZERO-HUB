@@ -6,7 +6,6 @@ import { db } from "@/db";
 import { categories, media } from "../../../../drizzle/schema";
 import { and, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { redis } from "@/lib/redis";
 
 const constructMediaURL = (filename: string) => {
     if (!filename) return null;
@@ -246,10 +245,38 @@ export const categoriesRouter = createTRPCRouter({
         )
         .query(async ({ input }) => {
             const { slug } = input
-            const cacheKey = `categories:${slug}:getFeatured:`
+            const categoriesData = await db
+                .select({
+                    id: categories.id,
+                    name: categories.name,
+                    slug: categories.slug,
+                    stats: categories.slug,
+                    featured: categories.featured,
+                    thumbnailId: categories.thumbnailId,
+                    parentId: categories.parentId,
+                    description: categories.description,
+                    updatedAt: categories.updatedAt,
+                    thumbnailFilename: media.filename,
+                    productCount: sql<number>`(
+                            SELECT COUNT(*)
+                            FROM products
+                            WHERE category_id=${categories.id}
+                            )`.as('product_count'),
+                })
+                .from(categories)
+                .leftJoin(media, eq(media.id, categories.thumbnailId))
+                .where(and(
+                    eq(categories.tenantSlug, slug),
+                    isNull(categories.parentId),
+                    eq(categories.featured, true)
+                ))
+                .orderBy(categories.updatedAt, categories.id)
+                .limit(8);
 
-            const fetchFeaturedCategories = async () => {
-                const categoriesData = await db
+            const categoryIds = categoriesData.map(c => c.id)
+
+            const subcategoriesData = categoryIds.length > 0
+                ? await db
                     .select({
                         id: categories.id,
                         name: categories.name,
@@ -262,95 +289,47 @@ export const categoriesRouter = createTRPCRouter({
                         updatedAt: categories.updatedAt,
                         thumbnailFilename: media.filename,
                         productCount: sql<number>`(
-                            SELECT COUNT(*)
-                            FROM products
-                            WHERE category_id=${categories.id}
-                            )`.as('product_count'),
-                    })
-                    .from(categories)
-                    .leftJoin(media, eq(media.id, categories.thumbnailId))
-                    .where(and(
-                        eq(categories.tenantSlug, slug),
-                        isNull(categories.parentId),
-                        eq(categories.featured, true)
-                    ))
-                    .orderBy(categories.updatedAt, categories.id)
-                    .limit(8);
-
-                const categoryIds = categoriesData.map(c => c.id)
-
-                const subcategoriesData = categoryIds.length > 0
-                    ? await db
-                        .select({
-                            id: categories.id,
-                            name: categories.name,
-                            slug: categories.slug,
-                            stats: categories.slug,
-                            featured: categories.featured,
-                            thumbnailId: categories.thumbnailId,
-                            parentId: categories.parentId,
-                            description: categories.description,
-                            updatedAt: categories.updatedAt,
-                            thumbnailFilename: media.filename,
-                            productCount: sql<number>`(
                     SELECT COUNT(*)
                     FROM products
                     WHERE category_id=${categories.id}
                 )`.as('product_count'),
-                        })
-                        .from(categories)
-                        .leftJoin(media, eq(media.id, categories.thumbnailId))
-                        .where(
-                            and(
-                                eq(categories.tenantSlug, slug),
-                                inArray(categories.parentId, categoryIds),
-                                eq(categories.featured, true)
-                            )
+                    })
+                    .from(categories)
+                    .leftJoin(media, eq(media.id, categories.thumbnailId))
+                    .where(
+                        and(
+                            eq(categories.tenantSlug, slug),
+                            inArray(categories.parentId, categoryIds),
+                            eq(categories.featured, true)
                         )
-                        .orderBy(categories.name)
-                    : [];
+                    )
+                    .orderBy(categories.name)
+                : [];
 
-                const subcategoriesByParent = subcategoriesData.reduce((acc, subcat) => {
-                    if (!acc[subcat.parentId!]) {
-                        acc[subcat.parentId!] = [];
-                    }
-                    acc[subcat.parentId!].push(subcat);
-                    return acc;
-                }, {} as Record<string, typeof subcategoriesData>);
-
-                const data = categoriesData.map((category) => ({
-                    ...category,
-                    thumbnail: category.thumbnailFilename ? {
-                        filename: category.thumbnailFilename,
-                        url: constructMediaURL(category.thumbnailFilename)
-                    } : null,
-                    subcategories: (subcategoriesByParent[category.id] || []).map((subcat) => ({
-                        ...subcat,
-                        thumbnail: subcat.thumbnailFilename ? {
-                            filename: subcat.thumbnailFilename,
-                            url: constructMediaURL(subcat.thumbnailFilename)
-                        } : null,
-                    })),
-                }))
-
-                return data
-            }
-
-            try {
-                const cacheData = await redis.get(cacheKey)
-                if (cacheData) {
-                    return JSON.parse(cacheData)
+            const subcategoriesByParent = subcategoriesData.reduce((acc, subcat) => {
+                if (!acc[subcat.parentId!]) {
+                    acc[subcat.parentId!] = [];
                 }
-                const result = await fetchFeaturedCategories();
-                redis.setex(
-                    cacheKey,
-                    60 * 60,
-                    JSON.stringify(result)
-                )
-                return result
-            } catch {
-                return await fetchFeaturedCategories()
-            }
+                acc[subcat.parentId!].push(subcat);
+                return acc;
+            }, {} as Record<string, typeof subcategoriesData>);
+
+            const data = categoriesData.map((category) => ({
+                ...category,
+                thumbnail: category.thumbnailFilename ? {
+                    filename: category.thumbnailFilename,
+                    url: constructMediaURL(category.thumbnailFilename)
+                } : null,
+                subcategories: (subcategoriesByParent[category.id] || []).map((subcat) => ({
+                    ...subcat,
+                    thumbnail: subcat.thumbnailFilename ? {
+                        filename: subcat.thumbnailFilename,
+                        url: constructMediaURL(subcat.thumbnailFilename)
+                    } : null,
+                })),
+            }))
+
+            return data
         }),
     getMany: baseProcedure
         .input(
@@ -366,20 +345,51 @@ export const categoriesRouter = createTRPCRouter({
         .query(async ({ input }) => {
             const { slug, cursor, limit } = input
 
-            const cacheKey = `categories:${slug}:getMany:${cursor ? `${cursor.updatedAt}:${cursor.id}` : 'initial'}:${limit}`
-
-            const fetchCategoriesData = async () => {
-                const cursorCondition = cursor
-                    ? or(
-                        gt(categories.updatedAt, cursor.updatedAt),
-                        and(
-                            eq(categories.updatedAt, cursor.updatedAt),
-                            gt(categories.id, cursor.id)
-                        )
+            const cursorCondition = cursor
+                ? or(
+                    gt(categories.updatedAt, cursor.updatedAt),
+                    and(
+                        eq(categories.updatedAt, cursor.updatedAt),
+                        gt(categories.id, cursor.id)
                     )
-                    : undefined;
+                )
+                : undefined;
 
-                const categoriesData = await db
+            const categoriesData = await db
+                .select({
+                    id: categories.id,
+                    name: categories.name,
+                    slug: categories.slug,
+                    stats: categories.slug,
+                    featured: categories.featured,
+                    thumbnailId: categories.thumbnailId,
+                    parentId: categories.parentId,
+                    description: categories.description,
+                    updatedAt: categories.updatedAt,
+                    thumbnailFilename: media.filename,
+                    productCount: sql<number>`(
+                            SELECT COUNT(*)
+                            FROM products
+                            WHERE category_id=${categories.id}
+                        )`.as('product_count'),
+                })
+                .from(categories)
+                .leftJoin(media, eq(media.id, categories.thumbnailId))
+                .where(and(
+                    eq(categories.tenantSlug, slug),
+                    isNull(categories.parentId),
+                    cursorCondition
+                ))
+                .orderBy(categories.updatedAt, categories.id)
+                .limit(limit + 1)
+
+            const hasNextPage = categoriesData.length > limit;
+            const actualCategories = hasNextPage ? categoriesData.slice(0, limit) : categoriesData;
+
+            const categoryIds = actualCategories.map(c => c.id)
+
+            const subcategoriesData = categoryIds.length > 0
+                ? await db
                     .select({
                         id: categories.id,
                         name: categories.name,
@@ -392,110 +402,57 @@ export const categoriesRouter = createTRPCRouter({
                         updatedAt: categories.updatedAt,
                         thumbnailFilename: media.filename,
                         productCount: sql<number>`(
-                            SELECT COUNT(*)
-                            FROM products
-                            WHERE category_id=${categories.id}
-                        )`.as('product_count'),
-                    })
-                    .from(categories)
-                    .leftJoin(media, eq(media.id, categories.thumbnailId))
-                    .where(and(
-                        eq(categories.tenantSlug, slug),
-                        isNull(categories.parentId),
-                        cursorCondition
-                    ))
-                    .orderBy(categories.updatedAt, categories.id)
-                    .limit(limit + 1)
-
-                const hasNextPage = categoriesData.length > limit;
-                const actualCategories = hasNextPage ? categoriesData.slice(0, limit) : categoriesData;
-
-                const categoryIds = actualCategories.map(c => c.id)
-
-                const subcategoriesData = categoryIds.length > 0
-                    ? await db
-                        .select({
-                            id: categories.id,
-                            name: categories.name,
-                            slug: categories.slug,
-                            stats: categories.slug,
-                            featured: categories.featured,
-                            thumbnailId: categories.thumbnailId,
-                            parentId: categories.parentId,
-                            description: categories.description,
-                            updatedAt: categories.updatedAt,
-                            thumbnailFilename: media.filename,
-                            productCount: sql<number>`(
                                 SELECT COUNT(*)
                                 FROM products
                                 WHERE category_id=${categories.id}
                             )`.as('product_count'),
-                        })
-                        .from(categories)
-                        .leftJoin(media, eq(media.id, categories.thumbnailId))
-                        .where(
-                            and(
-                                eq(categories.tenantSlug, slug),
-                                inArray(categories.parentId, categoryIds)
-                            )
+                    })
+                    .from(categories)
+                    .leftJoin(media, eq(media.id, categories.thumbnailId))
+                    .where(
+                        and(
+                            eq(categories.tenantSlug, slug),
+                            inArray(categories.parentId, categoryIds)
                         )
-                        .orderBy(categories.name)
-                    : [];
+                    )
+                    .orderBy(categories.name)
+                : [];
 
-                const subcategoriesByParent = subcategoriesData.reduce((acc, subcat) => {
-                    if (!acc[subcat.parentId!]) {
-                        acc[subcat.parentId!] = [];
-                    }
-                    acc[subcat.parentId!].push(subcat);
-                    return acc;
-                }, {} as Record<string, typeof subcategoriesData>);
-
-                const transformedData = actualCategories.map((category) => ({
-                    ...category,
-                    thumbnail: category.thumbnailFilename ? {
-                        filename: category.thumbnailFilename,
-                        url: constructMediaURL(category.thumbnailFilename)
-                    } : null,
-                    subcategories: (subcategoriesByParent[category.id] || []).map((subcat) => ({
-                        ...subcat,
-                        thumbnail: subcat.thumbnailFilename ? {
-                            filename: subcat.thumbnailFilename,
-                            url: constructMediaURL(subcat.thumbnailFilename)
-                        } : null,
-                    })),
-                }))
-
-                const nextCursor = hasNextPage && actualCategories.length > 0
-                    ? {
-                        id: actualCategories[actualCategories.length - 1].id,
-                        updatedAt: actualCategories[actualCategories.length - 1].updatedAt
-                    }
-                    : null;
-
-                return {
-                    data: transformedData,
-                    hasNextPage,
-                    nextCursor,
-                    totalDocs: actualCategories.length,
+            const subcategoriesByParent = subcategoriesData.reduce((acc, subcat) => {
+                if (!acc[subcat.parentId!]) {
+                    acc[subcat.parentId!] = [];
                 }
-            }
+                acc[subcat.parentId!].push(subcat);
+                return acc;
+            }, {} as Record<string, typeof subcategoriesData>);
 
-            try {
-                const cacheData = await redis.get(cacheKey)
-                if (cacheData) return JSON.parse(cacheData)
+            const transformedData = actualCategories.map((category) => ({
+                ...category,
+                thumbnail: category.thumbnailFilename ? {
+                    filename: category.thumbnailFilename,
+                    url: constructMediaURL(category.thumbnailFilename)
+                } : null,
+                subcategories: (subcategoriesByParent[category.id] || []).map((subcat) => ({
+                    ...subcat,
+                    thumbnail: subcat.thumbnailFilename ? {
+                        filename: subcat.thumbnailFilename,
+                        url: constructMediaURL(subcat.thumbnailFilename)
+                    } : null,
+                })),
+            }))
 
-                const result = await fetchCategoriesData()
+            const nextCursor = hasNextPage && actualCategories.length > 0
+                ? {
+                    id: actualCategories[actualCategories.length - 1].id,
+                    updatedAt: actualCategories[actualCategories.length - 1].updatedAt
+                }
+                : null;
 
-                await redis.setex(
-                    cacheKey,
-                    60 * 60,
-                    JSON.stringify(result)
-                )
-
-                return result
-
-            } catch {
-                return await fetchCategoriesData()
+            return {
+                data: transformedData,
+                hasNextPage,
+                nextCursor,
+                totalDocs: actualCategories.length,
             }
         })
 })

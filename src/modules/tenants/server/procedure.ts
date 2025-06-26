@@ -5,7 +5,6 @@ import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
 import { tenants } from "../../../../drizzle/schema";
 import { eq } from "drizzle-orm";
-import { redis } from "@/lib/redis";
 
 export const tenantsRouter = createTRPCRouter({
     getOneByPayload: baseProcedure
@@ -41,49 +40,17 @@ export const tenantsRouter = createTRPCRouter({
             })
         )
         .query(async ({ input }) => {
+            const [data] = await db
+                .select({
+                    storeName: tenants.store,
+                    activeTemplate: tenants.activeTemplate
+                })
+                .from(tenants)
+                .where(eq(tenants.slug, input.slug))
+                .limit(1)
 
-            const cacheKey = `tenant:${input.slug}`
+            if (!data) throw new TRPCError({ code: "NOT_FOUND", message: "Tenant not found!" });
 
-            try {
-                const cacheData = await redis.get(cacheKey);
-                if (cacheData) {
-                    return cacheData
-                }
-                const [data] = await db
-                    .select({
-                        storeName: tenants.store,
-                        activeTemplate: tenants.activeTemplate
-                    })
-                    .from(tenants)
-                    .where(eq(tenants.slug, input.slug))
-                    .limit(1)
-
-                if (!data) throw new TRPCError({ code: "NOT_FOUND", message: "Tenant not found!" });
-
-                await redis.setex(
-                    cacheKey,
-                    60 * 60,
-                    JSON.stringify(data)
-                );
-                return data
-            } catch {
-                const [data] = await db
-                    .select({
-                        storeName: tenants.store,
-                        activeTemplate: tenants.activeTemplate
-                    })
-                    .from(tenants)
-                    .where(eq(tenants.slug, input.slug))
-                    .limit(1);
-
-                if (!data) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Tenant not found!"
-                    });
-                }
-
-                return data;
-            }
+            return data
         })
 })

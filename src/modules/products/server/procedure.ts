@@ -8,7 +8,6 @@ import { db } from "@/db";
 
 import { categories, media, products, productsImages, reviews } from "../../../../drizzle/schema";
 import { and, or, gt, eq, inArray, gte, lte } from 'drizzle-orm';
-import { redis } from "@/lib/redis";
 
 export const productsRouter = createTRPCRouter({
     getManyByPayload: baseProcedure
@@ -401,230 +400,183 @@ export const productsRouter = createTRPCRouter({
         .query(async ({ input }) => {
             const { slug, cursor, limit, minPrice, maxPrice, category } = input;
 
-            const generateCacheKey = (): string => {
-                const filters = {
-                    slug,
-                    cursor: cursor ? `${cursor.updatedAt}:${cursor.id}` : 'initial',
-                    limit,
-                    minPrice: minPrice || 'none',
-                    maxPrice: maxPrice || 'none',
-                    category: category?.sort().join(',') || 'none'
+            const baseCondition = eq(products.tenantSlug, slug);
+            const whereConditions = [baseCondition];
+
+            if (cursor) {
+                const cursorCondition = or(
+                    gt(products.updatedAt, cursor.updatedAt),
+                    and(
+                        eq(products.updatedAt, cursor.updatedAt),
+                        gt(products.id, cursor.id)
+                    )
+                );
+                if (cursorCondition) {
+                    whereConditions.push(cursorCondition);
+                }
+            }
+
+            if (minPrice && maxPrice) {
+                const priceCondition = and(
+                    gte(products.pricingPrice, minPrice),
+                    lte(products.pricingPrice, maxPrice)
+                );
+                if (priceCondition) {
+                    whereConditions.push(priceCondition);
+                }
+            } else if (minPrice) {
+                whereConditions.push(gte(products.pricingPrice, minPrice));
+            } else if (maxPrice) {
+                whereConditions.push(lte(products.pricingPrice, maxPrice));
+            }
+
+            if (category && category.length > 0) {
+                const categoriesData = await db
+                    .select({
+                        id: categories.id,
+                        slug: categories.slug,
+                        parentId: categories.parentId
+                    })
+                    .from(categories)
+                    .where(inArray(categories.slug, category));
+
+                if (categoriesData.length > 0) {
+                    const parentCategoryIds = categoriesData
+                        .filter(cat => !cat.parentId)
+                        .map(cat => cat.id);
+
+                    const allCategoryIds = categoriesData.map(cat => cat.id);
+
+                    if (parentCategoryIds.length > 0) {
+                        const subcategoriesData = await db
+                            .select({
+                                id: categories.id,
+                                slug: categories.slug,
+                                parentId: categories.parentId
+                            })
+                            .from(categories)
+                            .where(inArray(categories.parentId, parentCategoryIds));
+
+                        allCategoryIds.push(...subcategoriesData.map(sub => sub.id));
+                    }
+
+                    const uniqueCategoryIds = [...new Set(allCategoryIds)];
+                    whereConditions.push(inArray(products.categoryId, uniqueCategoryIds));
+                }
+            }
+
+            const validConditions = whereConditions.filter(Boolean);
+            const whereCondition = validConditions.length === 1 ? validConditions[0] : and(...validConditions);
+
+            const productsList = await db
+                .select({
+                    id: products.id,
+                    featured: products.featured,
+                    name: products.name,
+                    slug: products.slug,
+                    categoryId: products.categoryId,
+                    description: products.description,
+                    pricingPrice: products.pricingPrice,
+                    pricingCompareAtPrice: products.pricingCompareAtPrice,
+                    badge: products.badge,
+                    updatedAt: products.updatedAt,
+                    categoryName: categories.name,
+                    categorySlug: categories.slug,
+                })
+                .from(products)
+                .leftJoin(categories, eq(products.categoryId, categories.id))
+                .where(whereCondition)
+                .orderBy(products.updatedAt, products.id)
+                .limit(limit + 1);
+
+            if (!productsList || productsList.length === 0) {
+                return {
+                    data: [],
+                    nextCursor: null,
+                    totalDocs: 0,
+                    hasNextPage: false,
                 };
+            }
 
-                return `products:${filters.slug}:${filters.cursor}:${filters.limit}:${filters.minPrice}:${filters.maxPrice}:${filters.category}`;
-            };
+            const hasNextPage = productsList.length > limit
+            const resultItems = hasNextPage ? productsList.slice(0, limit) : productsList;
 
-            const cacheKey = generateCacheKey();
-
-            const fetchProductsData = async () => {
-                const baseCondition = eq(products.tenantSlug, slug);
-                const whereConditions = [baseCondition];
-
-                if (cursor) {
-                    const cursorCondition = or(
-                        gt(products.updatedAt, cursor.updatedAt),
-                        and(
-                            eq(products.updatedAt, cursor.updatedAt),
-                            gt(products.id, cursor.id)
-                        )
-                    );
-                    if (cursorCondition) {
-                        whereConditions.push(cursorCondition);
-                    }
+            let nextCursor = null;
+            if (hasNextPage && resultItems.length > 0) {
+                const lastItem = resultItems[resultItems.length - 1];
+                nextCursor = {
+                    id: lastItem.id,
+                    updatedAt: lastItem.updatedAt
                 }
+            }
 
-                if (minPrice && maxPrice) {
-                    const priceCondition = and(
-                        gte(products.pricingPrice, minPrice),
-                        lte(products.pricingPrice, maxPrice)
-                    );
-                    if (priceCondition) {
-                        whereConditions.push(priceCondition);
-                    }
-                } else if (minPrice) {
-                    whereConditions.push(gte(products.pricingPrice, minPrice));
-                } else if (maxPrice) {
-                    whereConditions.push(lte(products.pricingPrice, maxPrice));
-                }
+            const productIds = resultItems.map(p => p.id);
 
-                if (category && category.length > 0) {
-                    const categoriesData = await db
-                        .select({
-                            id: categories.id,
-                            slug: categories.slug,
-                            parentId: categories.parentId
-                        })
-                        .from(categories)
-                        .where(inArray(categories.slug, category));
-
-                    if (categoriesData.length > 0) {
-                        const parentCategoryIds = categoriesData
-                            .filter(cat => !cat.parentId)
-                            .map(cat => cat.id);
-
-                        const allCategoryIds = categoriesData.map(cat => cat.id);
-
-                        if (parentCategoryIds.length > 0) {
-                            const subcategoriesData = await db
-                                .select({
-                                    id: categories.id,
-                                    slug: categories.slug,
-                                    parentId: categories.parentId
-                                })
-                                .from(categories)
-                                .where(inArray(categories.parentId, parentCategoryIds));
-
-                            allCategoryIds.push(...subcategoriesData.map(sub => sub.id));
-                        }
-
-                        const uniqueCategoryIds = [...new Set(allCategoryIds)];
-                        whereConditions.push(inArray(products.categoryId, uniqueCategoryIds));
-                    }
-                }
-
-                const validConditions = whereConditions.filter(Boolean);
-                const whereCondition = validConditions.length === 1 ? validConditions[0] : and(...validConditions);
-
-                const productsList = await db
-                    .select({
-                        id: products.id,
-                        featured: products.featured,
-                        name: products.name,
-                        slug: products.slug,
-                        categoryId: products.categoryId,
-                        description: products.description,
-                        pricingPrice: products.pricingPrice,
-                        pricingCompareAtPrice: products.pricingCompareAtPrice,
-                        badge: products.badge,
-                        updatedAt: products.updatedAt,
-                        categoryName: categories.name,
-                        categorySlug: categories.slug,
-                    })
-                    .from(products)
-                    .leftJoin(categories, eq(products.categoryId, categories.id))
-                    .where(whereCondition)
-                    .orderBy(products.updatedAt, products.id)
-                    .limit(limit + 1);
-
-                if (!productsList || productsList.length === 0) {
-                    return {
-                        data: [],
-                        nextCursor: null,
-                        totalDocs: 0,
-                        hasNextPage: false,
-                    };
-                }
-
-                const hasNextPage = productsList.length > limit
-                const resultItems = hasNextPage ? productsList.slice(0, limit) : productsList;
-
-                let nextCursor = null;
-                if (hasNextPage && resultItems.length > 0) {
-                    const lastItem = resultItems[resultItems.length - 1];
-                    nextCursor = {
-                        id: lastItem.id,
-                        updatedAt: lastItem.updatedAt
-                    }
-                }
-
-                const productIds = resultItems.map(p => p.id);
-
-                const productReviews = await db
-                    .select({
-                        id: reviews.id,
-                        name: reviews.name,
-                        rating: reviews.rating,
-                        title: reviews.title,
-                        description: reviews.description,
-                        productId: reviews.productId
-                    })
-                    .from(reviews)
-                    .where(inArray(reviews.productId, productIds))
-
-                const images = await db
-                    .select({
-                        imageId: productsImages.imageId,
-                        parentId: productsImages.parentId,
-                        isPrimary: productsImages.isPrimary,
-                        order: productsImages.order,
-                        url: media.url,
-                        filename: media.filename
-                    })
-                    .from(productsImages)
-                    .leftJoin(media, eq(productsImages.imageId, media.id))
-                    .where(inArray(productsImages.parentId, productIds));
-
-                const imagesByProductId: Record<string, typeof images> = {};
-                const reviewsByProductId: Record<string, typeof productReviews> = {};
-
-                productReviews.forEach(review => {
-                    const productId = review.productId;
-                    if (!reviewsByProductId[productId]) {
-                        reviewsByProductId[productId] = [];
-                    }
-                    reviewsByProductId[productId].push(review)
+            const productReviews = await db
+                .select({
+                    id: reviews.id,
+                    name: reviews.name,
+                    rating: reviews.rating,
+                    title: reviews.title,
+                    description: reviews.description,
+                    productId: reviews.productId
                 })
+                .from(reviews)
+                .where(inArray(reviews.productId, productIds))
 
-                images.forEach(image => {
-                    const productId = image.parentId;
-                    if (!imagesByProductId[productId]) {
-                        imagesByProductId[productId] = [];
-                    }
-                    imagesByProductId[productId].push(image);
-                });
-
-                const data = resultItems.map(item => {
-                    const productImages = imagesByProductId[item.id] || []
-                    const productReviews = reviewsByProductId[item.id] || []
-
-                    const reviewCount = productReviews.length;
-                    const reviewRating = reviewCount === 0 ? 0 :
-                        productReviews.reduce((acc, review) => acc + parseFloat(review.rating), 0) / reviewCount;
-
-                    return {
-                        ...item,
-                        images: productImages,
-                        reviewCount,
-                        reviewRating,
-                    }
+            const images = await db
+                .select({
+                    imageId: productsImages.imageId,
+                    parentId: productsImages.parentId,
+                    isPrimary: productsImages.isPrimary,
+                    order: productsImages.order,
+                    url: media.url,
+                    filename: media.filename
                 })
+                .from(productsImages)
+                .leftJoin(media, eq(productsImages.imageId, media.id))
+                .where(inArray(productsImages.parentId, productIds));
+
+            const imagesByProductId: Record<string, typeof images> = {};
+            const reviewsByProductId: Record<string, typeof productReviews> = {};
+
+            productReviews.forEach(review => {
+                const productId = review.productId;
+                if (!reviewsByProductId[productId]) {
+                    reviewsByProductId[productId] = [];
+                }
+                reviewsByProductId[productId].push(review)
+            })
+
+            images.forEach(image => {
+                const productId = image.parentId;
+                if (!imagesByProductId[productId]) {
+                    imagesByProductId[productId] = [];
+                }
+                imagesByProductId[productId].push(image);
+            });
+
+            const data = resultItems.map(item => {
+                const productImages = imagesByProductId[item.id] || []
+                const productReviews = reviewsByProductId[item.id] || []
+
+                const reviewCount = productReviews.length;
+                const reviewRating = reviewCount === 0 ? 0 :
+                    productReviews.reduce((acc, review) => acc + parseFloat(review.rating), 0) / reviewCount;
 
                 return {
-                    data,
-                    nextCursor,
-                    totalDocs: resultItems.length,
-                    hasNextPage,
-                };
+                    ...item,
+                    images: productImages,
+                    reviewCount,
+                    reviewRating,
+                }
+            })
+
+            return {
+                data,
+                nextCursor,
+                totalDocs: resultItems.length,
+                hasNextPage,
             };
-
-            try {
-                const cachedData = await redis.get(cacheKey);
-                if (cachedData) {
-                    console.log(`Cache hit for products: ${slug} with filters`);
-                    return JSON.parse(cachedData);
-                }
-
-                console.log(`Cache miss for products: ${slug} with filters`);
-
-                const result = await fetchProductsData();
-
-                try {
-                    const ttl = category?.length || minPrice || maxPrice ? 30 * 60 : 60 * 60; 
-                    await redis.setex(
-                        cacheKey,
-                        ttl,
-                        JSON.stringify(result)
-                    );
-                    console.log(`Cached products data for: ${slug} (TTL: ${ttl}s)`);
-                } catch (cacheError) {
-                    console.error('Failed to cache products data:', cacheError);
-                }
-
-                return result;
-
-            } catch (error) {
-                console.error('Redis error for products, falling back to database:', error);
-                return await fetchProductsData();
-            }
         })
 })
