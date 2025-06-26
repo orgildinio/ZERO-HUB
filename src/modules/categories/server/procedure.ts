@@ -339,7 +339,6 @@ export const categoriesRouter = createTRPCRouter({
             try {
                 const cacheData = await redis.get(cacheKey)
                 if (cacheData) {
-                    console.log('cache hit')
                     return JSON.parse(cacheData)
                 }
                 const result = await fetchFeaturedCategories();
