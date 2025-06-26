@@ -46,7 +46,12 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
             safePlace: false,
             finalAmount: 0,
             products: [],
-            tenant: ''
+            tenant: '',
+            grossAmount: 0,
+            discountAmount: 0,
+            taxAmount: 0,
+            shippingAmount: 0,
+            saleAmount: 0,
         }
     });
 
@@ -77,8 +82,10 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
     const finalAmount = saleAmount + taxAmount + shippingAmount;
 
     const verifyOrderMutation = useMutation(trpc.checkout.verifyOrder.mutationOptions({
-        onSuccess: () => { },
-        onError: () => { }
+        onSuccess: () => { toast.success('Payment completed.') },
+        onError: () => {
+            toast.error('Pyament failed.')
+        }
     }))
 
     const createOrderMutation = useMutation(trpc.checkout.createOrder.mutationOptions({
@@ -101,8 +108,8 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
                 handler: async function (response: any) {
                     verifyOrderMutation.mutate({
                         slug: slug,
-                        amount: response.amount,
-                        uniqueId: response.uniqueId,
+                        amount: data.amount,
+                        uniqueId: data.uniqueId,
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_signature: response.razorpay_signature,

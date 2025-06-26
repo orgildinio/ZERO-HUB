@@ -1,6 +1,6 @@
 import { z } from "zod";
 import crypto from 'crypto'
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { checkoutSchema } from "../schema";
 import { monthlySalesSummary, orders, ordersOrderItems, tenants } from "../../../../drizzle/schema";
@@ -120,7 +120,7 @@ export const checkoutRouter = createTRPCRouter({
                         shippingAmount: input.shippingAmount,
                         grossAmount: input.grossAmount,
                         taxAmount: input.taxAmount,
-                        orderDate: ''
+                        orderDate: customer.createdAt
                     }
                 });
                 if (!tenant.docs[0].bankDetails?.razorpayLinkedAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "Tenant not verified" })
@@ -171,88 +171,119 @@ export const checkoutRouter = createTRPCRouter({
             })
         )
         .mutation(async ({ ctx, input }) => {
-            const body = `${input.razorpay_order_id}|${input.razorpay_payment_id}`;
-            const sha = crypto.createHmac('sha256', process.env.RAZOR_PAY_SECRET_KEY as string);
-            sha.update(`${input.razorpay_order_id}|${input.razorpay_payment_id}`);
-            const expectedSignature = crypto
-                .createHmac('sha256', process.env.RAZOR_PAY_SECRET_KEY as string)
-                .update(body)
-                .digest('hex');
+            try {
+                const body = `${input.razorpay_order_id}|${input.razorpay_payment_id}`;
+                const sha = crypto.createHmac('sha256', process.env.RAZOR_PAY_SECRET_KEY as string);
+                sha.update(`${input.razorpay_order_id}|${input.razorpay_payment_id}`);
+                const expectedSignature = crypto
+                    .createHmac('sha256', process.env.RAZOR_PAY_SECRET_KEY as string)
+                    .update(body)
+                    .digest('hex');
 
-            if (expectedSignature !== input.razorpay_signature) {
-                throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid transaction signature" });
-            }
-
-            const [tenant] = await db
-                .select({
-                    id: tenants.id
-                })
-                .from(tenants)
-                .where(eq(tenants.slug, input.slug))
-                .limit(1)
-
-            if (!tenant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Tenant not found!' });
-
-            const [order] = await db
-                .select({
-                    id: orders.id,
-                    createdAt: orders.createdAt,
-                    grossAmount: orders.grossAmount,
-                    discountAmount: orders.discountAmount,
-                    saleAmount: orders.saleAmount,
-                    totalItemsSold: sql<number>`COALESCE(SUM(${ordersOrderItems.quantity}), 0)`
-                })
-                .from(orders)
-                .leftJoin(ordersOrderItems, (eq(orders.id, ordersOrderItems.parentId)))
-                .where(eq(orders.id, input.uniqueId))
-                .groupBy(orders.id, orders.createdAt, orders.grossAmount, orders.discountAmount, orders.saleAmount)
-                .limit(1)
-
-            if (!order) throw new TRPCError({ code: 'NOT_FOUND', message: 'Associated order not found!' })
-
-            const orderDateTime = new Date(order.createdAt)
-            const month = (orderDateTime.getMonth() + 1).toString().padStart(2, '0');
-            const year = orderDateTime.getFullYear().toString();
-            const saleAmount = parseFloat(order.saleAmount)
-            const grossAmount = parseFloat(order.grossAmount)
-            const netSales = Number(monthlySalesSummary.netSales)
-            const monthlySales = Number(monthlySalesSummary.totalOrders)
-            const average_order_value = (netSales + saleAmount) / (monthlySales + 1)
-
-            await db.execute(sql`
-                INSERT INTO monthly_sales_summary (
-                    tenant_id, month, year, total_orders, gross_sales, net_sales, total_items_sold, average_order_value
-                )
-                VALUES (
-                    ${tenant.id}, ${month}, ${year}, 1, ${order.grossAmount}, ${order.saleAmount}, ${order.totalItemsSold}, ${order.saleAmount}
-                )
-                ON CONFLICT (tenant_id, month, year)
-                DO UPDATE SET
-                    total_orders = monthly_sales_summary.total_orders + 1,
-                    gross_sales = monthly_sales_summary.gross_sales + ${grossAmount},
-                    net_sales = monthly_sales_summary.net_sales + ${saleAmount},
-                    total_items_sold = monthly_sales_summary.total_items_sold + ${order.totalItemsSold},
-                    average_order_value = ${average_order_value},
-                    updated_at = NOW()
-            `)
-
-            await ctx.db.update({
-                collection: "orders",
-                where: {
-                    id: {
-                        equals: input.uniqueId
-                    },
-                },
-                data: {
-                    isPaid: true,
-                    razorpayCheckoutSessionId: input.razorpay_payment_id,
-                    razorpayOrderId: input.razorpay_order_id,
-                    orderDate: new Date().toISOString(),
-                    grossAmount: input.grossAmount,
-                    discountAmount: input.discountAmount,
-                    saleAmount: input.saleAmount,
+                if (expectedSignature !== input.razorpay_signature) {
+                    throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid transaction signature" });
                 }
-            });
-            // Add logic for redis to store analytics
+
+                const [tenant] = await db
+                    .select({
+                        id: tenants.id
+                    })
+                    .from(tenants)
+                    .where(eq(tenants.slug, input.slug))
+                    .limit(1)
+
+                if (!tenant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Tenant not found!' });
+
+                const [order] = await db
+                    .select({
+                        id: orders.id,
+                        createdAt: orders.createdAt,
+                        grossAmount: orders.grossAmount,
+                        discountAmount: orders.discountAmount,
+                        saleAmount: orders.saleAmount,
+                        totalItemsSold: sql<string>`COALESCE(SUM(${ordersOrderItems.quantity}), 0)`
+                    })
+                    .from(orders)
+                    .leftJoin(ordersOrderItems, (eq(orders.id, ordersOrderItems.parentId)))
+                    .where(eq(orders.id, input.uniqueId))
+                    .groupBy(orders.id, orders.createdAt, orders.grossAmount, orders.discountAmount, orders.saleAmount)
+                    .limit(1)
+
+                if (!order) throw new TRPCError({ code: 'NOT_FOUND', message: 'Associated order not found!' })
+
+                const orderDateTime = new Date(order.createdAt)
+                const month = (orderDateTime.getMonth() + 1).toString().padStart(2, '0');
+                const year = orderDateTime.getFullYear().toString();
+                const saleAmount = parseFloat(order.saleAmount)
+                const grossAmount = parseFloat(order.grossAmount)
+
+                const [existingSummary] = await db
+                    .select({
+                        netSales: monthlySalesSummary.netSales,
+                        totalOrders: monthlySalesSummary.totalOrders
+                    })
+                    .from(monthlySalesSummary)
+                    .where(
+                        and(
+                            eq(monthlySalesSummary.tenantId, tenant.id),
+                            eq(monthlySalesSummary.month, month),
+                            eq(monthlySalesSummary.year, year)
+                        )
+                    )
+                    .limit(1);
+
+                const netSales = existingSummary ? Number(existingSummary.netSales) : 0;
+                const monthlySales = existingSummary ? Number(existingSummary.totalOrders) : 0;
+                const average_order_value = (netSales + saleAmount) / (monthlySales + 1);
+                const totalItemsSold = parseInt(order.totalItemsSold);
+
+                await db
+                    .insert(monthlySalesSummary)
+                    .values({
+                        tenantId: tenant.id,
+                        month: month,
+                        year: year,
+                        totalOrders: "1",
+                        grossSales: grossAmount.toString(),
+                        netSales: saleAmount.toString(),
+                        totalItemsSold: totalItemsSold.toString(),
+                        averageOrderValue: average_order_value.toString()
+                    })
+                    .onConflictDoUpdate({
+                        target: [monthlySalesSummary.tenantId, monthlySalesSummary.month, monthlySalesSummary.year],
+                        set: {
+                            totalOrders: sql`${monthlySalesSummary.totalOrders} + 1`,
+                            grossSales: sql`${monthlySalesSummary.grossSales} + ${grossAmount}`,
+                            netSales: sql`${monthlySalesSummary.netSales} + ${saleAmount}`,
+                            totalItemsSold: sql`${monthlySalesSummary.totalItemsSold} + ${totalItemsSold}`,
+                            averageOrderValue: average_order_value.toString(),
+                            updatedAt: sql`NOW()`
+                        }
+                    });
+
+                await ctx.db.update({
+                    collection: "orders",
+                    where: {
+                        id: {
+                            equals: input.uniqueId
+                        },
+                    },
+                    data: {
+                        isPaid: true,
+                        razorpayCheckoutSessionId: input.razorpay_payment_id,
+                        razorpayOrderId: input.razorpay_order_id,
+                        orderDate: new Date().toISOString(),
+                        grossAmount: input.grossAmount,
+                        discountAmount: input.discountAmount,
+                        saleAmount: input.saleAmount,
+                    }
+                });
+            } catch (error) {
+                console.log(error)
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to create order"
+                })
+            }
         })
 })

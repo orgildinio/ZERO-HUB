@@ -1,4 +1,4 @@
-import { pgTable, index, uniqueIndex, foreignKey, uuid, varchar, timestamp, numeric, boolean, integer, serial, jsonb, pgView, bigint, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, index, uniqueIndex, foreignKey, uuid, varchar, timestamp, numeric, boolean, integer, serial, jsonb, unique, pgView, bigint, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const enumCategoriesStatus = pgEnum("enum_categories_status", ['active', 'inactive', 'draft'])
@@ -780,6 +780,7 @@ export const monthlySalesSummary = pgTable("monthly_sales_summary", {
 			foreignColumns: [tenants.id],
 			name: "monthly_sales_summary_tenant_id_tenants_id_fk"
 		}).onDelete("set null"),
+	unique("unique_tenant_year_month").on(table.tenantId, table.month, table.year),
 ]);
 
 export const ordersOrderItems = pgTable("orders_order_items", {
