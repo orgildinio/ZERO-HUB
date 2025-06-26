@@ -54,6 +54,7 @@ export const Orders: CollectionConfig = {
                 {
                     name: "unitPrice",
                     type: "number",
+                    required: true
                 },
                 {
                     name: "discountPerItem",
@@ -63,36 +64,41 @@ export const Orders: CollectionConfig = {
                 {
                     name: "grossItemAmount",
                     type: "number",
+                    required: true
                 },
             ]
         },
         {
             name: 'orderDate',
             type: 'date',
+            required: true
         },
         {
             name: 'grossAmount',
             type: 'number',
+            required: true
         },
         {
             name: 'discountAmount',
             type: 'number',
-            defaultValue: 0
+            defaultValue: 0,
         },
         {
             name: 'taxAmount',
             type: 'number',
-            defaultValue: 0
+            defaultValue: 0,
+            required: true
         },
         {
             name: 'shippingAmount',
             type: 'number',
-            defaultValue: 0
+            defaultValue: 0,
         },
         {
             name: 'saleAmount',
             type: 'number',
-            defaultValue: 0
+            defaultValue: 0,
+            required: true
         },
         {
             name: "razorpayCheckoutSessionId",

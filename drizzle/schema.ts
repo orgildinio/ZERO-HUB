@@ -1,4 +1,4 @@
-import { pgTable, index, uniqueIndex, foreignKey, uuid, varchar, timestamp, numeric, boolean, integer, serial, jsonb, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, index, uniqueIndex, foreignKey, uuid, varchar, timestamp, numeric, boolean, integer, serial, jsonb, pgView, bigint, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const enumCategoriesStatus = pgEnum("enum_categories_status", ['active', 'inactive', 'draft'])
@@ -669,12 +669,12 @@ export const orders = pgTable("orders", {
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	razorpayOrderId: varchar("razorpay_order_id"),
-	orderDate: timestamp("order_date", { precision: 3, withTimezone: true, mode: 'string' }),
-	grossAmount: numeric("gross_amount"),
+	orderDate: timestamp("order_date", { precision: 3, withTimezone: true, mode: 'string' }).notNull(),
+	grossAmount: numeric("gross_amount").notNull(),
 	discountAmount: numeric("discount_amount").default('0'),
-	taxAmount: numeric("tax_amount").default('0'),
+	taxAmount: numeric("tax_amount").default('0').notNull(),
 	shippingAmount: numeric("shipping_amount").default('0'),
-	saleAmount: numeric("sale_amount").default('0'),
+	saleAmount: numeric("sale_amount").default('0').notNull(),
 }, (table) => [
 	index("orders_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	index("orders_customer_idx").using("btree", table.customerId.asc().nullsLast().op("uuid_ops")),
@@ -789,9 +789,9 @@ export const ordersOrderItems = pgTable("orders_order_items", {
 	product: varchar().notNull(),
 	quantity: numeric().notNull(),
 	category: varchar(),
-	unitPrice: numeric("unit_price"),
+	unitPrice: numeric("unit_price").notNull(),
 	discountPerItem: numeric("discount_per_item").default('0'),
-	grossItemAmount: numeric("gross_item_amount"),
+	grossItemAmount: numeric("gross_item_amount").notNull(),
 }, (table) => [
 	index("orders_order_items_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
 	index("orders_order_items_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
@@ -801,3 +801,21 @@ export const ordersOrderItems = pgTable("orders_order_items", {
 			name: "orders_order_items_parent_id_fk"
 		}).onDelete("cascade"),
 ]);
+export const vTenantMonthlySales = pgView("v_tenant_monthly_sales", {	tenantId: uuid("tenant_id"),
+	year: varchar(),
+	month: varchar(),
+	totalGrossSales: numeric("total_gross_sales"),
+	totalNetSales: numeric("total_net_sales"),
+	totalOrders: numeric("total_orders"),
+	averageOrderValue: numeric("average_order_value"),
+}).as(sql`SELECT tenant_id, year, month, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_orders) AS total_orders, avg(average_order_value) AS average_order_value FROM monthly_sales_summary GROUP BY tenant_id, year, month`);
+
+export const vTopCategoriesByTenant = pgView("v_top_categories_by_tenant", {	tenantId: uuid("tenant_id"),
+	categoryId: uuid("category_id"),
+	categoryName: varchar("category_name"),
+	totalGrossSales: numeric("total_gross_sales"),
+	totalNetSales: numeric("total_net_sales"),
+	totalItemsSold: numeric("total_items_sold"),
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	categoryRank: bigint("category_rank", { mode: "number" }),
+}).as(sql`SELECT tenant_id, category_id, category_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS category_rank FROM category_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, category_id, category_name`);

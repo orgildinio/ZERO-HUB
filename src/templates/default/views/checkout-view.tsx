@@ -100,11 +100,15 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 handler: async function (response: any) {
                     verifyOrderMutation.mutate({
+                        slug: slug,
                         amount: response.amount,
                         uniqueId: response.uniqueId,
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_signature: response.razorpay_signature,
+                        grossAmount: grossAmount,
+                        saleAmount: saleAmount,
+                        discountAmount: 0
                     })
                 },
                 prefill: {
@@ -142,6 +146,11 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
         createOrderMutation.mutate({
             ...values,
             finalAmount: finalAmount,
+            discountAmount: 0,
+            grossAmount: grossAmount,
+            taxAmount: taxAmount,
+            shippingAmount: shippingAmount,
+            saleAmount: saleAmount,
             products: products,
             tenant: slug
         })

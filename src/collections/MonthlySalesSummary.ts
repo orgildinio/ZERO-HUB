@@ -3,12 +3,6 @@ import { CollectionConfig } from "payload";
 
 export const MonthlySalesSummary: CollectionConfig = {
     slug: 'monthly-sales-summary',
-    access: {
-        create: ({ req }) => isSuperAdmin(req.user),
-        read: ({ req }) => isSuperAdmin(req.user),
-        update: ({ req }) => isSuperAdmin(req.user),
-        delete: ({ req }) => isSuperAdmin(req.user),
-    },
     admin: {
         useAsTitle: "month",
         hidden: ({ user }) => !isSuperAdmin(user)

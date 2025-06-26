@@ -728,17 +728,17 @@ export interface Order {
     product: string;
     category?: string | null;
     quantity: number;
-    unitPrice?: number | null;
+    unitPrice: number;
     discountPerItem?: number | null;
-    grossItemAmount?: number | null;
+    grossItemAmount: number;
     id?: string | null;
   }[];
-  orderDate?: string | null;
-  grossAmount?: number | null;
+  orderDate: string;
+  grossAmount: number;
   discountAmount?: number | null;
-  taxAmount?: number | null;
+  taxAmount: number;
   shippingAmount?: number | null;
-  saleAmount?: number | null;
+  saleAmount: number;
   /**
    * Checkout session associated with the order.
    */

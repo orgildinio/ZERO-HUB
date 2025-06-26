@@ -3,12 +3,6 @@ import { CollectionConfig } from "payload";
 
 export const CategorySalesSummary: CollectionConfig = {
     slug: 'category-sales-summary',
-    access: {
-        create: ({ req }) => isSuperAdmin(req.user),
-        read: ({ req }) => isSuperAdmin(req.user),
-        update: ({ req }) => isSuperAdmin(req.user),
-        delete: ({ req }) => isSuperAdmin(req.user),
-    },
     admin: {
         useAsTitle: "categoryName",
         hidden: ({ user }) => !isSuperAdmin(user)

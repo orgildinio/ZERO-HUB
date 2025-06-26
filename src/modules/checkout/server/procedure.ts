@@ -1,11 +1,15 @@
 import { z } from "zod";
 import crypto from 'crypto'
+import { eq, sql } from "drizzle-orm";
+
 import { checkoutSchema } from "../schema";
+import { monthlySalesSummary, orders, ordersOrderItems, tenants } from "../../../../drizzle/schema";
 
 import { TRPCError } from "@trpc/server";
 import { Category, Media } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { razorpay } from "@/lib/razorpay";
+import { db } from "@/db";
 
 export const checkoutRouter = createTRPCRouter({
     getMany: baseProcedure
@@ -72,17 +76,7 @@ export const checkoutRouter = createTRPCRouter({
                         }
                     },
                     select: {
-                        name: false,
-                        slug: false,
-                        image: false,
-                        phone: false,
-                        store: false,
-                        activeTemplate: false,
-                        subscription: false,
-                        maxProducts: false,
-                        analytics: false,
-                        createdAt: false,
-                        updatedAt: false
+                        bankDetails: true
                     }
                 })
                 const customer = await ctx.db.create({
@@ -120,7 +114,13 @@ export const checkoutRouter = createTRPCRouter({
                             discountPerItem: product.price - product.compareAtPrice,
                             grossItemAmount: product.price * product.quantity,
                         })),
-                        tenant: tenant.docs[0].id
+                        tenant: tenant.docs[0].id,
+                        discountAmount: input.discountAmount,
+                        saleAmount: input.saleAmount,
+                        shippingAmount: input.shippingAmount,
+                        grossAmount: input.grossAmount,
+                        taxAmount: input.taxAmount,
+                        orderDate: ''
                     }
                 });
                 if (!tenant.docs[0].bankDetails?.razorpayLinkedAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "Tenant not verified" })
@@ -150,6 +150,10 @@ export const checkoutRouter = createTRPCRouter({
                 }
             } catch (error) {
                 console.log(error)
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to create order"
+                })
             }
         }),
     verifyOrder: baseProcedure
@@ -160,6 +164,10 @@ export const checkoutRouter = createTRPCRouter({
                 uniqueId: z.string(),
                 razorpay_payment_id: z.string().optional(),
                 razorpay_signature: z.string().optional(),
+                slug: z.string(),
+                saleAmount: z.number(),
+                discountAmount: z.number(),
+                grossAmount: z.number()
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -175,6 +183,59 @@ export const checkoutRouter = createTRPCRouter({
                 throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid transaction signature" });
             }
 
+            const [tenant] = await db
+                .select({
+                    id: tenants.id
+                })
+                .from(tenants)
+                .where(eq(tenants.slug, input.slug))
+                .limit(1)
+
+            if (!tenant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Tenant not found!' });
+
+            const [order] = await db
+                .select({
+                    id: orders.id,
+                    createdAt: orders.createdAt,
+                    grossAmount: orders.grossAmount,
+                    discountAmount: orders.discountAmount,
+                    saleAmount: orders.saleAmount,
+                    totalItemsSold: sql<number>`COALESCE(SUM(${ordersOrderItems.quantity}), 0)`
+                })
+                .from(orders)
+                .leftJoin(ordersOrderItems, (eq(orders.id, ordersOrderItems.parentId)))
+                .where(eq(orders.id, input.uniqueId))
+                .groupBy(orders.id, orders.createdAt, orders.grossAmount, orders.discountAmount, orders.saleAmount)
+                .limit(1)
+
+            if (!order) throw new TRPCError({ code: 'NOT_FOUND', message: 'Associated order not found!' })
+
+            const orderDateTime = new Date(order.createdAt)
+            const month = (orderDateTime.getMonth() + 1).toString().padStart(2, '0');
+            const year = orderDateTime.getFullYear().toString();
+            const saleAmount = parseFloat(order.saleAmount)
+            const grossAmount = parseFloat(order.grossAmount)
+            const netSales = Number(monthlySalesSummary.netSales)
+            const monthlySales = Number(monthlySalesSummary.totalOrders)
+            const average_order_value = (netSales + saleAmount) / (monthlySales + 1)
+
+            await db.execute(sql`
+                INSERT INTO monthly_sales_summary (
+                    tenant_id, month, year, total_orders, gross_sales, net_sales, total_items_sold, average_order_value
+                )
+                VALUES (
+                    ${tenant.id}, ${month}, ${year}, 1, ${order.grossAmount}, ${order.saleAmount}, ${order.totalItemsSold}, ${order.saleAmount}
+                )
+                ON CONFLICT (tenant_id, month, year)
+                DO UPDATE SET
+                    total_orders = monthly_sales_summary.total_orders + 1,
+                    gross_sales = monthly_sales_summary.gross_sales + ${grossAmount},
+                    net_sales = monthly_sales_summary.net_sales + ${saleAmount},
+                    total_items_sold = monthly_sales_summary.total_items_sold + ${order.totalItemsSold},
+                    average_order_value = ${average_order_value},
+                    updated_at = NOW()
+            `)
+
             await ctx.db.update({
                 collection: "orders",
                 where: {
@@ -186,7 +247,10 @@ export const checkoutRouter = createTRPCRouter({
                     isPaid: true,
                     razorpayCheckoutSessionId: input.razorpay_payment_id,
                     razorpayOrderId: input.razorpay_order_id,
-                    orderDate: new Date().toISOString()
+                    orderDate: new Date().toISOString(),
+                    grossAmount: input.grossAmount,
+                    discountAmount: input.discountAmount,
+                    saleAmount: input.saleAmount,
                 }
             });
             // Add logic for redis to store analytics
