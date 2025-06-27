@@ -5,12 +5,22 @@ import { ThemeProvider } from '@/providers/theme-provider'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/modules/tenants/ui/components/app-sidebar'
 import { SiteHeader } from '@/modules/tenants/ui/components/site-header'
+import { caller } from '@/trpc/server'
+import { redirect } from 'next/navigation'
+import { Tenant } from '@/payload-types'
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+export const dynamic = 'force-dynamic'
+
+const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
+
+    const session = await caller.auth.session();
+    if (!session.user) redirect('/login');
+    const tenant = session.user.tenants?.[0].tenant as Tenant
+
     return (
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <SidebarProvider>
-                <AppSidebar variant="inset" />
+                <AppSidebar variant="inset" storeName={tenant.store}/>
                 <SidebarInset>
                     <SiteHeader />
                     <div className="flex flex-1 flex-col">

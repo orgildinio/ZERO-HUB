@@ -1,7 +1,7 @@
 "use client"
 
-import { Pie, PieChart } from "recharts"
-
+import React from "react"
+import { LabelList, Pie, PieChart } from "recharts"
 import {
     Card,
     CardContent,
@@ -16,49 +16,44 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { useTRPC } from "@/trpc/client"
+import { formatPrice } from "@/lib/utils"
 
 export const description = "A pie chart with a label"
 
-const chartData = [
-    { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-    { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-    { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
-    { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-    { browser: "other", visitors: 90, fill: "var(--color-other)" },
-]
-
 const chartConfig = {
-    visitors: {
-        label: "Visitors",
+    totalNetSales: {
+        label: "Net Sales",
     },
-    chrome: {
-        label: "Chrome",
-        color: "var(--chart-1)",
-    },
-    safari: {
-        label: "Safari",
-        color: "var(--chart-2)",
-    },
-    firefox: {
-        label: "Firefox",
-        color: "var(--chart-3)",
-    },
-    edge: {
-        label: "Edge",
-        color: "var(--chart-4)",
-    },
-    other: {
-        label: "Other",
-        color: "var(--chart-5)",
+    categoryName: {
+        label: 'Category Name',
+        color: "var(--chart-2)"
     },
 } satisfies ChartConfig
 
-export function CategoryChart() {
+export function CategoryChart({ tenantId }: { tenantId: string }) {
+    const currentYear = new Date().getFullYear()
+
+    const trpc = useTRPC();
+    const { data } = useSuspenseQuery(trpc.analytics.getTenantTopCategories.queryOptions({
+        tenantId: tenantId
+    }));
+
+    if (!data || data.length === 0) return <div>No data available</div>;
+
+    const chartData = data.map((item, index) => ({
+        categoryName: item.categoryName || 'Unknown',
+        totalNetSales: parseFloat(item.totalNetSales || '0'),
+        totalNetSalesFormatted: formatPrice(parseFloat(item.totalNetSales || '0')),
+        fill: `var(--chart-${index + 1})`,
+    }));
+
     return (
         <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
-                <CardTitle>Top Categories</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
+                <CardTitle>Top Categories by Net Sales</CardTitle>
+                <CardDescription>January - December {currentYear}</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 pb-0">
                 <ChartContainer
@@ -66,14 +61,28 @@ export function CategoryChart() {
                     className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[250px] pb-0"
                 >
                     <PieChart>
-                        <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-                        <Pie data={chartData} dataKey="visitors" label nameKey="browser" />
+                        <ChartTooltip
+                            content={<ChartTooltipContent hideLabel />}
+                            formatter={(value) => [formatPrice(value as number), ' Net Sales']}
+                        />
+                        <Pie
+                            data={chartData}
+                            dataKey="totalNetSales"
+                            nameKey="categoryName"
+                        >
+                            <LabelList
+                                fontStretch={2}
+                                fontSize={12}
+                                dataKey="categoryName"
+                                color="#000"
+                            />
+                        </Pie>
                     </PieChart>
                 </ChartContainer>
             </CardContent>
             <CardFooter className="text-sm text-center">
                 <div className="text-muted-foreground leading-none">
-                    Top categories for the last 6 months
+                    Showing top categories for {currentYear}
                 </div>
             </CardFooter>
         </Card>

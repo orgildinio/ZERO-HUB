@@ -695,7 +695,6 @@ export const orders = pgTable("orders", {
 export const categorySalesSummary = pgTable("category_sales_summary", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	tenantId: uuid("tenant_id"),
-	categoryId: uuid("category_id").notNull(),
 	categoryName: varchar("category_name").notNull(),
 	month: varchar().notNull(),
 	year: varchar().notNull(),
@@ -706,7 +705,6 @@ export const categorySalesSummary = pgTable("category_sales_summary", {
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("category_sales_summary_category_idx").using("btree", table.categoryId.asc().nullsLast().op("uuid_ops")),
 	index("category_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	index("category_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
 	index("category_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
@@ -715,18 +713,12 @@ export const categorySalesSummary = pgTable("category_sales_summary", {
 			foreignColumns: [tenants.id],
 			name: "category_sales_summary_tenant_id_tenants_id_fk"
 		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.categoryId],
-			foreignColumns: [categories.id],
-			name: "category_sales_summary_category_id_categories_id_fk"
-		}).onDelete("set null"),
+	unique("unique_tenant_category_year_month").on(table.tenantId, table.categoryName, table.month, table.year),
 ]);
 
 export const productsMonthlySales = pgTable("products_monthly_sales", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	tenantId: uuid("tenant_id"),
-	categoryId: uuid("category_id").notNull(),
-	productId: uuid("product_id").notNull(),
 	productName: varchar("product_name").notNull(),
 	month: varchar().notNull(),
 	year: varchar().notNull(),
@@ -737,25 +729,13 @@ export const productsMonthlySales = pgTable("products_monthly_sales", {
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("products_monthly_sales_category_idx").using("btree", table.categoryId.asc().nullsLast().op("uuid_ops")),
 	index("products_monthly_sales_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("products_monthly_sales_product_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
 	index("products_monthly_sales_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
 	index("products_monthly_sales_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
 	foreignKey({
 			columns: [table.tenantId],
 			foreignColumns: [tenants.id],
 			name: "products_monthly_sales_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.categoryId],
-			foreignColumns: [categories.id],
-			name: "products_monthly_sales_category_id_categories_id_fk"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.productId],
-			foreignColumns: [products.id],
-			name: "products_monthly_sales_product_id_products_id_fk"
 		}).onDelete("set null"),
 ]);
 
@@ -812,11 +792,10 @@ export const vTenantMonthlySales = pgView("v_tenant_monthly_sales", {	tenantId: 
 }).as(sql`SELECT tenant_id, year, month, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_orders) AS total_orders, avg(average_order_value) AS average_order_value FROM monthly_sales_summary GROUP BY tenant_id, year, month`);
 
 export const vTopCategoriesByTenant = pgView("v_top_categories_by_tenant", {	tenantId: uuid("tenant_id"),
-	categoryId: uuid("category_id"),
 	categoryName: varchar("category_name"),
 	totalGrossSales: numeric("total_gross_sales"),
 	totalNetSales: numeric("total_net_sales"),
 	totalItemsSold: numeric("total_items_sold"),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	categoryRank: bigint("category_rank", { mode: "number" }),
-}).as(sql`SELECT tenant_id, category_id, category_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS category_rank FROM category_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, category_id, category_name`);
+}).as(sql`SELECT tenant_id, category_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS category_rank FROM category_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, category_name`);

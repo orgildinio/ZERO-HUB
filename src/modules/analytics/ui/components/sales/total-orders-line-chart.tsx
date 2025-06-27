@@ -16,35 +16,42 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { useTRPC } from "@/trpc/client"
 
 export const description = "A line chart with a label"
 
-const chartData = [
-    { month: "January", desktop: 186, mobile: 80 },
-    { month: "February", desktop: 305, mobile: 200 },
-    { month: "March", desktop: 237, mobile: 120 },
-    { month: "April", desktop: 73, mobile: 190 },
-    { month: "May", desktop: 209, mobile: 130 },
-    { month: "June", desktop: 214, mobile: 140 },
-]
-
 const chartConfig = {
-    desktop: {
-        label: "Desktop",
-        color: "var(--chart-1)",
-    },
-    mobile: {
-        label: "Mobile",
-        color: "var(--chart-2)",
+    totalOrders: {
+        label: "Total Orders",
+        color: "oklch(0.7715 0.2086 136)",
     },
 } satisfies ChartConfig
 
-export function TotalSalesLineChart() {
+const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+]
+
+export function TotalOrdersLineChart({ tenantId }: { tenantId: string }) {
+
+    const currentYear = new Date().getFullYear();
+
+    const trpc = useTRPC();
+    const { data } = useSuspenseQuery(trpc.analytics.getTenantMonthlySales.queryOptions({
+        tenantId: tenantId,
+    }))
+
+    const chartData = data?.map((item) => ({
+        month: monthNames[parseInt(item.month) - 1],
+        totalOrders: Number(item.totalOrders) || 0,
+    }))
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Total Sales</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
+                <CardTitle>Total Orders</CardTitle>
+                <CardDescription>January - December {currentYear}</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="max-h-[250px] pb-0 w-full">
@@ -70,12 +77,12 @@ export function TotalSalesLineChart() {
                             content={<ChartTooltipContent indicator="line" />}
                         />
                         <Line
-                            dataKey="desktop"
-                            type="natural"
-                            stroke="var(--color-desktop)"
+                            dataKey="totalOrders"
+                            type="linear"
+                            stroke="var(--color-totalOrders)"
                             strokeWidth={2}
                             dot={{
-                                fill: "var(--color-desktop)",
+                                fill: "var(--color-totalOrders)",
                             }}
                             activeDot={{
                                 r: 6,
@@ -93,7 +100,7 @@ export function TotalSalesLineChart() {
             </CardContent>
             <CardFooter className="text-sm">
                 <div className="text-muted-foreground leading-none">
-                    Showing sales for the last 6 months
+                    Showing total orders for {currentYear}
                 </div>
             </CardFooter>
         </Card>

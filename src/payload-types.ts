@@ -754,7 +754,6 @@ export interface Order {
 export interface CategorySalesSummary {
   id: string;
   tenant?: (string | null) | Tenant;
-  category: string | Category;
   /**
    * This field is automatically populated based on the selected category
    */
@@ -775,8 +774,6 @@ export interface CategorySalesSummary {
 export interface ProductsMonthlySale {
   id: string;
   tenant?: (string | null) | Tenant;
-  category: string | Category;
-  product: string | Product;
   productName: string;
   month: string;
   year: string;
@@ -1249,7 +1246,6 @@ export interface OrdersSelect<T extends boolean = true> {
  */
 export interface CategorySalesSummarySelect<T extends boolean = true> {
   tenant?: T;
-  category?: T;
   categoryName?: T;
   month?: T;
   year?: T;
@@ -1266,8 +1262,6 @@ export interface CategorySalesSummarySelect<T extends boolean = true> {
  */
 export interface ProductsMonthlySalesSelect<T extends boolean = true> {
   tenant?: T;
-  category?: T;
-  product?: T;
   productName?: T;
   month?: T;
   year?: T;

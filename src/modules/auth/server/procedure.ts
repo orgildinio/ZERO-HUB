@@ -5,6 +5,9 @@ import { checkOtpRestrictions, sendOtp, trackOtpRequests, verifyOtp } from '../l
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from '@trpc/server';
+import { db } from '@/db';
+import { users } from '../../../../drizzle/schema';
+import { and, eq } from 'drizzle-orm';
 
 export const authRouter = createTRPCRouter({
     session: baseProcedure.query(async ({ ctx }) => {
@@ -16,15 +19,15 @@ export const authRouter = createTRPCRouter({
     login: baseProcedure
         .input(loginSchema)
         .mutation(async ({ ctx, input }) => {
-            const data = await ctx.db.find({
-                collection: "users",
-                where: {
-                    email: {
-                        equals: input.email
-                    }
-                }
-            })
-            if (data.totalDocs === 0) {
+            const [data] = await db
+                .select({
+                    email: users.email,
+                })
+                .from(users)
+                .where(eq(users.email, input.email))
+                .limit(1);
+
+            if (!data) {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: "Email does not exists!."
@@ -51,20 +54,24 @@ export const authRouter = createTRPCRouter({
         }),
     register: baseProcedure
         .input(registerSchema)
-        .mutation(async ({ ctx, input }) => {
-            const existingUser = await ctx.db.find({
-                collection: "users",
-                limit: 1,
-                where: {
-                    or: [
-                        { username: { equals: input.username } },
-                        { email: { equals: input.email } },
-                        { phone: { equals: input.phone } }
-                    ]
-                }
-            });
-            if (existingUser.totalDocs > 0) {
-                const match = existingUser.docs[0];
+        .mutation(async ({ input }) => {
+            const [existingUser] = await db
+                .select({
+                    username: users.username,
+                    email: users.email,
+                    phone: users.phone
+                })
+                .from(users)
+                .where(
+                    and(
+                        eq(users.username, input.username),
+                        eq(users.email, input.email),
+                        eq(users.phone, input.phone),
+                    )
+                )
+                .limit(1);
+            if (existingUser) {
+                const match = { ...existingUser };
                 if (match.username === input.username) throw new TRPCError({ code: "BAD_REQUEST", message: "Username already taken" });
                 if (match.email === input.email) throw new TRPCError({ code: "BAD_REQUEST", message: "Email is already registered." });
                 if (match.phone === input.phone) throw new TRPCError({ code: "BAD_REQUEST", message: "Phone number already in use" });

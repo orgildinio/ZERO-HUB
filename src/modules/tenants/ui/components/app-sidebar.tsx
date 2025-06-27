@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import {
-    ArrowUpCircleIcon,
     BarChart3,
     PackageSearch,
     Users,
@@ -17,21 +16,21 @@ import {
     HelpCircleIcon,
     SearchIcon,
     SettingsIcon,
+    LayoutDashboardIcon,
+    ArrowUpCircleIcon,
 } from "lucide-react"
 
 import {
     Sidebar,
     SidebarContent,
-    SidebarFooter,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { NavUser } from "./nav-user"
 import { NavSecondary } from "./nav-secondary"
-import { NavDocuments } from "./nav-documents"
 import { NavAnalytics } from "./nav-analytics"
+import { NavMain } from "./nav-main"
 
 const data = {
     user: {
@@ -39,6 +38,13 @@ const data = {
         email: "m@example.com",
         avatar: "/avatars/shadcn.jpg",
     },
+    navMain: [
+        {
+            title: "Dashboard",
+            url: "#",
+            icon: LayoutDashboardIcon,
+        },
+    ],
     navSecondary: [
         {
             title: "Settings",
@@ -117,7 +123,11 @@ const data = {
     ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+    storeName: string
+}
+
+export function AppSidebar({ storeName, ...props }: AppSidebarProps) {
     return (
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader>
@@ -129,20 +139,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         >
                             <a href="#">
                                 <ArrowUpCircleIcon className="h-5 w-5" />
-                                <span className="text-base font-semibold">Acme Inc.</span>
+                                <span className="text-base font-semibold">{storeName}</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent className="hide-scrollbar">
+                <NavMain items={data.navMain} />
                 <NavAnalytics items={data.analytics} />
-                <NavDocuments items={data.documents} />
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
-            <SidebarFooter>
-                <NavUser user={data.user} />
-            </SidebarFooter>
         </Sidebar>
     )
 }

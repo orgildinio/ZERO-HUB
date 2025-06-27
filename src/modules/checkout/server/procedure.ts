@@ -3,7 +3,7 @@ import crypto from 'crypto'
 import { and, eq, sql } from "drizzle-orm";
 
 import { checkoutSchema } from "../schema";
-import { monthlySalesSummary, orders, ordersOrderItems, tenants } from "../../../../drizzle/schema";
+import { categorySalesSummary, monthlySalesSummary, orders, ordersOrderItems, tenants } from "../../../../drizzle/schema";
 
 import { TRPCError } from "@trpc/server";
 import { Category, Media } from "@/payload-types";
@@ -125,14 +125,16 @@ export const checkoutRouter = createTRPCRouter({
                 });
                 if (!tenant.docs[0].bankDetails?.razorpayLinkedAccountId) throw new TRPCError({ code: "BAD_REQUEST", message: "Tenant not verified" })
 
+                const razorpay_amount = parseInt((input.finalAmount * 100).toFixed(0))
+
                 const razorpayOrder = await razorpay.orders.create({
-                    amount: input.finalAmount * 100,
+                    amount: razorpay_amount,
                     currency: 'INR',
                     receipt: `order-${order.id.substring(0, 30)}`,
                     transfers: [
                         {
                             account: tenant.docs[0].bankDetails.razorpayLinkedAccountId,
-                            amount: input.finalAmount * 100,
+                            amount: razorpay_amount,
                             currency: 'INR',
                             on_hold: false,
                         },
@@ -167,7 +169,15 @@ export const checkoutRouter = createTRPCRouter({
                 slug: z.string(),
                 saleAmount: z.number(),
                 discountAmount: z.number(),
-                grossAmount: z.number()
+                grossAmount: z.number(),
+                products: z.array(z.object({
+                    productId: z.string(),
+                    name: z.string(),
+                    quantity: z.number(),
+                    price: z.number(),
+                    compareAtPrice: z.number(),
+                    category: z.string()
+                })),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -260,6 +270,59 @@ export const checkoutRouter = createTRPCRouter({
                             updatedAt: sql`NOW()`
                         }
                     });
+
+                const categoryData = input.products.reduce((acc, product) => {
+                    const { category, quantity, price, compareAtPrice } = product;
+
+                    if (!acc[category]) {
+                        acc[category] = {
+                            totalOrders: 0,
+                            grossSales: 0,
+                            netSales: 0,
+                            totalItemsSold: 0
+                        };
+                    }
+
+                    acc[category].totalOrders += 1;
+                    acc[category].grossSales += price * quantity;
+                    acc[category].netSales += (compareAtPrice ? compareAtPrice : price) * quantity;
+                    acc[category].totalItemsSold += quantity;
+
+                    return acc;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                }, {} as Record<string, any>);
+
+                const upsertPromises = Object.entries(categoryData).map(([categoryName, data]) => {
+                    return db
+                        .insert(categorySalesSummary)
+                        .values({
+                            tenantId: tenant.id,
+                            categoryName,
+                            month,
+                            year,
+                            totalOrders: data.totalOrders.toString(),
+                            grossSales: data.grossSales.toFixed(2),
+                            netSales: data.netSales.toFixed(2),
+                            totalItemsSold: data.totalItemsSold.toString(),
+                        })
+                        .onConflictDoUpdate({
+                            target: [
+                                categorySalesSummary.tenantId,
+                                categorySalesSummary.categoryName,
+                                categorySalesSummary.month,
+                                categorySalesSummary.year
+                            ],
+                            set: {
+                                totalOrders: data.totalOrders.toString(),
+                                grossSales: data.grossSales.toFixed(2),
+                                netSales: data.netSales.toFixed(2),
+                                totalItemsSold: data.totalItemsSold.toString(),
+                                updatedAt: new Date().toISOString(),
+                            },
+                        });
+                });
+
+                await Promise.all(upsertPromises);
 
                 await ctx.db.update({
                     collection: "orders",

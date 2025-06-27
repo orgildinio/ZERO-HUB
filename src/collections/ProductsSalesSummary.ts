@@ -9,18 +9,6 @@ export const ProductsSalesSummary: CollectionConfig = {
     },
     fields: [
         {
-            name: 'category',
-            type: "relationship",
-            relationTo: 'categories',
-            required: true,
-        },
-        {
-            name: 'product',
-            type: "relationship",
-            relationTo: 'products',
-            required: true,
-        },
-        {
             name: 'productName',
             type: "text",
             required: true,

@@ -45,7 +45,9 @@ export default buildConfig({
         '@/components/payload/razorpay-subscription#SubscriptionVerifyButton',
         '@/components/payload/razorpay-change-subscription#SubscriptionUpgradeButton',
         '@/components/payload/razorpay-verification#TenantBankVerifyButton',
+        '@/components/payload/dashboard#DashboardLink',
       ],
+      
     },
   },
   collections: [Users, Media, Tenants, Products, Tags, Categories, Reviews, SubscriptionPlans, Subscriptions, Customers, Orders, CategorySalesSummary, ProductsSalesSummary, MonthlySalesSummary],

@@ -89,7 +89,7 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
     }))
 
     const createOrderMutation = useMutation(trpc.checkout.createOrder.mutationOptions({
-        onSuccess: async (data) => {
+        onSuccess: async (createOrderData) => {
 
             const isScriptLoaded = await loadRazorpayScript();
             if (!isScriptLoaded) {
@@ -99,29 +99,40 @@ export const CheckoutView = ({ slug }: { slug: string }) => {
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: data?.amount,
+                amount: createOrderData?.amount,
                 currency: 'INR',
                 name: 'ZERO | HUB',
                 image: '/logo/logo.svg',
-                order_id: data?.razorpay_order_id,
+                order_id: createOrderData?.razorpay_order_id,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 handler: async function (response: any) {
+                    const products = cartItems.map(item => ({
+                        productId: item.productId,
+                        name: data?.docs.find(product => product.id === item.productId)?.name || '',
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                        category: data?.docs.find(product => product.id === item.productId)?.category.name!,
+                        quantity: item.quantity,
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                        price: data?.docs.find(product => product.id === item.productId)?.pricing.price!,
+                        compareAtPrice: data?.docs.find(product => product.id === item.productId)?.pricing?.compareAtPrice || 0,
+                    }));
                     verifyOrderMutation.mutate({
                         slug: slug,
-                        amount: data.amount,
-                        uniqueId: data.uniqueId,
+                        amount: createOrderData.amount,
+                        uniqueId: createOrderData.uniqueId,
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_signature: response.razorpay_signature,
                         grossAmount: grossAmount,
                         saleAmount: saleAmount,
-                        discountAmount: 0
+                        discountAmount: 0,
+                        products: products,
                     })
                 },
                 prefill: {
-                    name: data?.customerName,
-                    email: data?.customerEmail,
-                    contact: data?.customerPhone
+                    name: createOrderData?.customerName,
+                    email: createOrderData?.customerEmail,
+                    contact: createOrderData?.customerPhone
                 },
             };
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

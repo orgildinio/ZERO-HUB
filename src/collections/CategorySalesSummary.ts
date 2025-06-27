@@ -7,33 +7,7 @@ export const CategorySalesSummary: CollectionConfig = {
         useAsTitle: "categoryName",
         hidden: ({ user }) => !isSuperAdmin(user)
     },
-    hooks: {
-        beforeChange: [
-            async ({ data, req, operation }) => {
-                if (data.category && (!data.categoryName || operation === 'create')) {
-                    try {
-                        const category = await req.payload.findByID({
-                            collection: 'categories',
-                            id: data.category,
-                        });
-                        
-                        data.categoryName = category.name;
-                    } catch (error) {
-                        req.payload.logger.error(`Error fetching category: ${error}`);
-                    }
-                }
-                
-                return data;
-            }
-        ]
-    },
     fields: [
-        {
-            name: 'category',
-            type: "relationship",
-            relationTo: 'categories',
-            required: true,
-        },
         {
             name: 'categoryName',
             type: "text",

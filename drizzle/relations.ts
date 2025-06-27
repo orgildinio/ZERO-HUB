@@ -58,7 +58,6 @@ export const productsRelations = relations(products, ({one, many}) => ({
 	}),
 	reviews: many(reviews),
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-	productsMonthlySales: many(productsMonthlySales),
 }));
 
 export const productsSpecificationsRelations = relations(productsSpecifications, ({one}) => ({
@@ -139,8 +138,6 @@ export const categoriesRelations = relations(categories, ({one, many}) => ({
 		references: [media.id],
 		relationName: "categories_seoOgImageId_media_id"
 	}),
-	categorySalesSummaries: many(categorySalesSummary),
-	productsMonthlySales: many(productsMonthlySales),
 }));
 
 export const reviewsRelations = relations(reviews, ({one, many}) => ({
@@ -268,10 +265,6 @@ export const categorySalesSummaryRelations = relations(categorySalesSummary, ({o
 		fields: [categorySalesSummary.tenantId],
 		references: [tenants.id]
 	}),
-	category: one(categories, {
-		fields: [categorySalesSummary.categoryId],
-		references: [categories.id]
-	}),
 }));
 
 export const productsMonthlySalesRelations = relations(productsMonthlySales, ({one, many}) => ({
@@ -279,14 +272,6 @@ export const productsMonthlySalesRelations = relations(productsMonthlySales, ({o
 	tenant: one(tenants, {
 		fields: [productsMonthlySales.tenantId],
 		references: [tenants.id]
-	}),
-	category: one(categories, {
-		fields: [productsMonthlySales.categoryId],
-		references: [categories.id]
-	}),
-	product: one(products, {
-		fields: [productsMonthlySales.productId],
-		references: [products.id]
 	}),
 }));
 
