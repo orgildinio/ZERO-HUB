@@ -12,7 +12,7 @@
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "db:fresh": "payload migrate:fresh",
-    "db:seed": "bun run src/seed"
+    "db:seed": "bun run src/seed/seed.ts"
   },
   "dependencies": {
     "@dnd-kit/modifiers": "^9.0.0",

@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 
 export const SignUpView = () => {
 
-    const [showOtp, setShowOtp] = useState(true);
+    const [showOtp, setShowOtp] = useState(false);
     const [userData, setUserData] = useState<z.infer<typeof registerSchema>>({
         email: "",
         phone: "",

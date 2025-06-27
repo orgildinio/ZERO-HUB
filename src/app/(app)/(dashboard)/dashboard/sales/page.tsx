@@ -3,6 +3,7 @@ import React from 'react'
 import { caller, getQueryClient, trpc } from '@/trpc/server'
 import { SalesView } from '@/modules/analytics/ui/views/sales-view'
 import { Tenant } from '@/payload-types';
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 export const dynamic = 'force-dynamic'
 
@@ -26,9 +27,11 @@ const Page = async () => {
     ])
 
     return (
-        <SalesView
-            tenantId={tenant.id}
-        />
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <SalesView
+                tenantId={tenant.id}
+            />
+        </HydrationBoundary>
     )
 }
 
