@@ -137,10 +137,10 @@ export function AppSidebar({ storeName, ...props }: AppSidebarProps) {
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <a href="#">
+                            <div>
                                 <ArrowUpCircleIcon className="h-5 w-5" />
                                 <span className="text-base font-semibold">{storeName}</span>
-                            </a>
+                            </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
