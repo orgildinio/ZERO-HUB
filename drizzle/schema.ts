@@ -782,15 +782,6 @@ export const ordersOrderItems = pgTable("orders_order_items", {
 			name: "orders_order_items_parent_id_fk"
 		}).onDelete("cascade"),
 ]);
-export const vTenantMonthlySales = pgView("v_tenant_monthly_sales", {	tenantId: uuid("tenant_id"),
-	year: varchar(),
-	month: varchar(),
-	totalGrossSales: numeric("total_gross_sales"),
-	totalNetSales: numeric("total_net_sales"),
-	totalOrders: numeric("total_orders"),
-	averageOrderValue: numeric("average_order_value"),
-}).as(sql`SELECT tenant_id, year, month, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_orders) AS total_orders, avg(average_order_value) AS average_order_value FROM monthly_sales_summary GROUP BY tenant_id, year, month`);
-
 export const vTopCategoriesByTenant = pgView("v_top_categories_by_tenant", {	tenantId: uuid("tenant_id"),
 	categoryName: varchar("category_name"),
 	totalGrossSales: numeric("total_gross_sales"),
@@ -799,3 +790,12 @@ export const vTopCategoriesByTenant = pgView("v_top_categories_by_tenant", {	ten
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	categoryRank: bigint("category_rank", { mode: "number" }),
 }).as(sql`SELECT tenant_id, category_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS category_rank FROM category_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, category_name`);
+
+export const vTenantMonthlySales = pgView("v_tenant_monthly_sales", {	tenantId: uuid("tenant_id"),
+	year: varchar(),
+	month: varchar(),
+	totalGrossSales: numeric("total_gross_sales"),
+	totalNetSales: numeric("total_net_sales"),
+	totalOrders: numeric("total_orders"),
+	averageOrderValue: numeric("average_order_value"),
+}).as(sql`SELECT tenant_id, year, month, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_orders) AS total_orders, avg(average_order_value) AS average_order_value FROM monthly_sales_summary GROUP BY tenant_id, year, month`);
