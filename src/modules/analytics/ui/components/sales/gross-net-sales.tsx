@@ -158,3 +158,39 @@ export function GrossNetSales({ tenantId }: { tenantId: string }) {
         </Card>
     )
 }
+
+export function GrossNetSalesLoading() {
+    return (
+        <Card className="@container/card">
+            <CardHeader className="relative flex items-center">
+                <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+            </CardHeader>
+            <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+                <div className="aspect-auto h-[250px] w-full">
+                    <div className="h-full w-full bg-muted/30 animate-pulse rounded-lg flex items-end justify-around p-4">
+                        {Array.from({ length: 12 }).map((_, i) => (
+                            <div
+                                key={i}
+                                className="bg-muted animate-pulse rounded-t"
+                                style={{
+                                    height: `${Math.random() * 60 + 20}%`,
+                                    width: '6%',
+                                    animationDelay: `${i * 100}ms`
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div className="flex justify-around mt-2">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div
+                                key={i}
+                                className="h-3 w-8 bg-muted animate-pulse rounded"
+                                style={{ animationDelay: `${i * 50}ms` }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}

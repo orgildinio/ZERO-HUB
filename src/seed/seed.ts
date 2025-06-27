@@ -1,34 +1,48 @@
-// import { payload } from "@/lib/payload";
+import { payload } from "@/lib/payload";
+import { subscriptionPlans } from "./plans";
 
-import { razorpay } from "../lib/razorpay";
+const seed = async () => {
 
-// const tenant = await payload.create({
-//     collection: "tenants",
-//     data: {
-//         store: 'admin',
-//         phone: '+917400106790',
-//         slug: 'admin',
-//         name: 'admin',
-//         activeTemplate: 'default'
-//     }
-// })
+    // const adminTenant = await payload.create({
+    //     collection: "tenants",
+    //     data: {
+    //         name: "admin",
+    //         slug: "admin",
+    //         phone: "7400106790",
+    //         store: 'admin',
+    //     }
+    // });
 
-// await payload.create({
-//     collection: "users",
-//     data: {
-//         username: 'admin',
-//         phone: '+917400106790',
-//         tenants: [
-//             {
-//                 tenant: tenant.id
-//             }
-//         ],
-//         roles: ['super-admin'],
-//         email: 'ashishjadhav9900@gmail.com',
-//         password: 'Ashish@1022'
-//     }
-// })
+    // await payload.create({
+    //     collection: "users",
+    //     data: {
+    //         email: "ashishjadhav9900@gmail.com",
+    //         password: "Ashish@1022",
+    //         roles: ["super-admin"],
+    //         username: "admin",
+    //         phone: "7400106790",
+    //         tenants: [
+    //             {
+    //                 tenant: adminTenant.id,
+    //             }
+    //         ]
+    //     }
+    // });
 
-// process.exit(0)
+    for (const plan of subscriptionPlans) {
+        try {
+            await payload.create({
+                collection: "subscription-plans",
+                data: plan
+            });
+            console.log(`Created template: ${plan.name}`);
+        } catch (error) {
+            console.error(`Error creating template ${plan.name}:`, error);
+        }
+    }
+    
+    console.log('🎉 All seeding operations completed successfully!');
+}
 
-await razorpay.accounts.delete('acc_QluExPLD565ir2');
+await seed();
+process.exit(0);
