@@ -5,8 +5,6 @@ import { checkOtpRestrictions, sendOtp, trackOtpRequests, verifyOtp } from '../l
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from '@trpc/server';
-import { users } from '../../../../drizzle/schema';
-import { and, eq } from 'drizzle-orm';
 
 export const authRouter = createTRPCRouter({
     session: baseProcedure.query(async ({ ctx }) => {
