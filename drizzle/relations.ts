@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { tenants, media, productsImages, products, productsSpecifications, usersTenants, users, productsRels, tags, productsVariants, categories, reviews, subscriptions, subscriptionPlans, payloadLockedDocuments, payloadLockedDocumentsRels, customers, orders, categorySalesSummary, productsMonthlySales, monthlySalesSummary, usersRoles, productsVariantsOptions, subscriptionPlansFeatures, payloadPreferences, payloadPreferencesRels, ordersOrderItems } from "./schema";
+import { tenants, media, productsImages, products, categories, productsSpecifications, productsVariants, productsVariantsOptions, usersTenants, users, reviews, productsRels, tags, customers, orders, categorySalesSummary, productsSalesSummary, monthlySalesSummary, subscriptions, subscriptionPlans, payloadLockedDocuments, payloadLockedDocumentsRels, payloadPreferences, payloadPreferencesRels, usersRoles, subscriptionPlansFeatures, ordersOrderItems } from "./schema";
 
 export const mediaRelations = relations(media, ({one, many}) => ({
 	tenant: one(tenants, {
@@ -7,29 +7,29 @@ export const mediaRelations = relations(media, ({one, many}) => ({
 		references: [tenants.id]
 	}),
 	productsImages: many(productsImages),
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 	categories_thumbnailId: many(categories, {
 		relationName: "categories_thumbnailId_media_id"
 	}),
 	categories_seoOgImageId: many(categories, {
 		relationName: "categories_seoOgImageId_media_id"
 	}),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 }));
 
 export const tenantsRelations = relations(tenants, ({many}) => ({
 	media: many(media),
-	usersTenants: many(usersTenants),
 	products: many(products),
-	tags: many(tags),
+	usersTenants: many(usersTenants),
 	reviews: many(reviews),
-	subscriptions: many(subscriptions),
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 	categories: many(categories),
+	tags: many(tags),
 	customers: many(customers),
 	orders: many(orders),
 	categorySalesSummaries: many(categorySalesSummary),
-	productsMonthlySales: many(productsMonthlySales),
+	productsSalesSummaries: many(productsSalesSummary),
 	monthlySalesSummaries: many(monthlySalesSummary),
+	subscriptions: many(subscriptions),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 }));
 
 export const productsImagesRelations = relations(productsImages, ({one}) => ({
@@ -45,9 +45,6 @@ export const productsImagesRelations = relations(productsImages, ({one}) => ({
 
 export const productsRelations = relations(products, ({one, many}) => ({
 	productsImages: many(productsImages),
-	productsSpecifications: many(productsSpecifications),
-	productsRels: many(productsRels),
-	productsVariants: many(productsVariants),
 	tenant: one(tenants, {
 		fields: [products.tenantId],
 		references: [tenants.id]
@@ -56,66 +53,15 @@ export const productsRelations = relations(products, ({one, many}) => ({
 		fields: [products.categoryId],
 		references: [categories.id]
 	}),
+	productsSpecifications: many(productsSpecifications),
+	productsVariants: many(productsVariants),
 	reviews: many(reviews),
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-}));
-
-export const productsSpecificationsRelations = relations(productsSpecifications, ({one}) => ({
-	product: one(products, {
-		fields: [productsSpecifications.parentId],
-		references: [products.id]
-	}),
-}));
-
-export const usersTenantsRelations = relations(usersTenants, ({one}) => ({
-	tenant: one(tenants, {
-		fields: [usersTenants.tenantId],
-		references: [tenants.id]
-	}),
-	user: one(users, {
-		fields: [usersTenants.parentId],
-		references: [users.id]
-	}),
-}));
-
-export const usersRelations = relations(users, ({many}) => ({
-	usersTenants: many(usersTenants),
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-	usersRoles: many(usersRoles),
-	payloadPreferencesRels: many(payloadPreferencesRels),
-}));
-
-export const productsRelsRelations = relations(productsRels, ({one}) => ({
-	product: one(products, {
-		fields: [productsRels.parentId],
-		references: [products.id]
-	}),
-	tag: one(tags, {
-		fields: [productsRels.tagsId],
-		references: [tags.id]
-	}),
-}));
-
-export const tagsRelations = relations(tags, ({one, many}) => ({
 	productsRels: many(productsRels),
-	tenant: one(tenants, {
-		fields: [tags.tenantId],
-		references: [tenants.id]
-	}),
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-}));
-
-export const productsVariantsRelations = relations(productsVariants, ({one, many}) => ({
-	product: one(products, {
-		fields: [productsVariants.parentId],
-		references: [products.id]
-	}),
-	productsVariantsOptions: many(productsVariantsOptions),
 }));
 
 export const categoriesRelations = relations(categories, ({one, many}) => ({
 	products: many(products),
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 	tenant: one(tenants, {
 		fields: [categories.tenantId],
 		references: [tenants.id]
@@ -138,6 +84,47 @@ export const categoriesRelations = relations(categories, ({one, many}) => ({
 		references: [media.id],
 		relationName: "categories_seoOgImageId_media_id"
 	}),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
+}));
+
+export const productsSpecificationsRelations = relations(productsSpecifications, ({one}) => ({
+	product: one(products, {
+		fields: [productsSpecifications.parentId],
+		references: [products.id]
+	}),
+}));
+
+export const productsVariantsRelations = relations(productsVariants, ({one, many}) => ({
+	product: one(products, {
+		fields: [productsVariants.parentId],
+		references: [products.id]
+	}),
+	productsVariantsOptions: many(productsVariantsOptions),
+}));
+
+export const productsVariantsOptionsRelations = relations(productsVariantsOptions, ({one}) => ({
+	productsVariant: one(productsVariants, {
+		fields: [productsVariantsOptions.parentId],
+		references: [productsVariants.id]
+	}),
+}));
+
+export const usersTenantsRelations = relations(usersTenants, ({one}) => ({
+	tenant: one(tenants, {
+		fields: [usersTenants.tenantId],
+		references: [tenants.id]
+	}),
+	user: one(users, {
+		fields: [usersTenants.parentId],
+		references: [users.id]
+	}),
+}));
+
+export const usersRelations = relations(users, ({many}) => ({
+	usersTenants: many(usersTenants),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
+	payloadPreferencesRels: many(payloadPreferencesRels),
+	usersRoles: many(usersRoles),
 }));
 
 export const reviewsRelations = relations(reviews, ({one, many}) => ({
@@ -148,6 +135,72 @@ export const reviewsRelations = relations(reviews, ({one, many}) => ({
 	product: one(products, {
 		fields: [reviews.productId],
 		references: [products.id]
+	}),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
+}));
+
+export const productsRelsRelations = relations(productsRels, ({one}) => ({
+	product: one(products, {
+		fields: [productsRels.parentId],
+		references: [products.id]
+	}),
+	tag: one(tags, {
+		fields: [productsRels.tagsId],
+		references: [tags.id]
+	}),
+}));
+
+export const tagsRelations = relations(tags, ({one, many}) => ({
+	productsRels: many(productsRels),
+	tenant: one(tenants, {
+		fields: [tags.tenantId],
+		references: [tenants.id]
+	}),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
+}));
+
+export const customersRelations = relations(customers, ({one, many}) => ({
+	tenant: one(tenants, {
+		fields: [customers.tenantId],
+		references: [tenants.id]
+	}),
+	orders: many(orders),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
+}));
+
+export const ordersRelations = relations(orders, ({one, many}) => ({
+	tenant: one(tenants, {
+		fields: [orders.tenantId],
+		references: [tenants.id]
+	}),
+	customer: one(customers, {
+		fields: [orders.customerId],
+		references: [customers.id]
+	}),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
+	ordersOrderItems: many(ordersOrderItems),
+}));
+
+export const categorySalesSummaryRelations = relations(categorySalesSummary, ({one, many}) => ({
+	tenant: one(tenants, {
+		fields: [categorySalesSummary.tenantId],
+		references: [tenants.id]
+	}),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
+}));
+
+export const productsSalesSummaryRelations = relations(productsSalesSummary, ({one, many}) => ({
+	tenant: one(tenants, {
+		fields: [productsSalesSummary.tenantId],
+		references: [tenants.id]
+	}),
+	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
+}));
+
+export const monthlySalesSummaryRelations = relations(monthlySalesSummary, ({one, many}) => ({
+	tenant: one(tenants, {
+		fields: [monthlySalesSummary.tenantId],
+		references: [tenants.id]
 	}),
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 }));
@@ -223,9 +276,9 @@ export const payloadLockedDocumentsRelsRelations = relations(payloadLockedDocume
 		fields: [payloadLockedDocumentsRels.categorySalesSummaryId],
 		references: [categorySalesSummary.id]
 	}),
-	productsMonthlySale: one(productsMonthlySales, {
-		fields: [payloadLockedDocumentsRels.productsMonthlySalesId],
-		references: [productsMonthlySales.id]
+	productsSalesSummary: one(productsSalesSummary, {
+		fields: [payloadLockedDocumentsRels.productsSalesSummaryId],
+		references: [productsSalesSummary.id]
 	}),
 	monthlySalesSummary: one(monthlySalesSummary, {
 		fields: [payloadLockedDocumentsRels.monthlySalesSummaryId],
@@ -235,73 +288,6 @@ export const payloadLockedDocumentsRelsRelations = relations(payloadLockedDocume
 
 export const payloadLockedDocumentsRelations = relations(payloadLockedDocuments, ({many}) => ({
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-}));
-
-export const customersRelations = relations(customers, ({one, many}) => ({
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-	tenant: one(tenants, {
-		fields: [customers.tenantId],
-		references: [tenants.id]
-	}),
-	orders: many(orders),
-}));
-
-export const ordersRelations = relations(orders, ({one, many}) => ({
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-	tenant: one(tenants, {
-		fields: [orders.tenantId],
-		references: [tenants.id]
-	}),
-	customer: one(customers, {
-		fields: [orders.customerId],
-		references: [customers.id]
-	}),
-	ordersOrderItems: many(ordersOrderItems),
-}));
-
-export const categorySalesSummaryRelations = relations(categorySalesSummary, ({one, many}) => ({
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-	tenant: one(tenants, {
-		fields: [categorySalesSummary.tenantId],
-		references: [tenants.id]
-	}),
-}));
-
-export const productsMonthlySalesRelations = relations(productsMonthlySales, ({one, many}) => ({
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-	tenant: one(tenants, {
-		fields: [productsMonthlySales.tenantId],
-		references: [tenants.id]
-	}),
-}));
-
-export const monthlySalesSummaryRelations = relations(monthlySalesSummary, ({one, many}) => ({
-	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
-	tenant: one(tenants, {
-		fields: [monthlySalesSummary.tenantId],
-		references: [tenants.id]
-	}),
-}));
-
-export const usersRolesRelations = relations(usersRoles, ({one}) => ({
-	user: one(users, {
-		fields: [usersRoles.parentId],
-		references: [users.id]
-	}),
-}));
-
-export const productsVariantsOptionsRelations = relations(productsVariantsOptions, ({one}) => ({
-	productsVariant: one(productsVariants, {
-		fields: [productsVariantsOptions.parentId],
-		references: [productsVariants.id]
-	}),
-}));
-
-export const subscriptionPlansFeaturesRelations = relations(subscriptionPlansFeatures, ({one}) => ({
-	subscriptionPlan: one(subscriptionPlans, {
-		fields: [subscriptionPlansFeatures.parentId],
-		references: [subscriptionPlans.id]
-	}),
 }));
 
 export const payloadPreferencesRelsRelations = relations(payloadPreferencesRels, ({one}) => ({
@@ -317,6 +303,20 @@ export const payloadPreferencesRelsRelations = relations(payloadPreferencesRels,
 
 export const payloadPreferencesRelations = relations(payloadPreferences, ({many}) => ({
 	payloadPreferencesRels: many(payloadPreferencesRels),
+}));
+
+export const usersRolesRelations = relations(usersRoles, ({one}) => ({
+	user: one(users, {
+		fields: [usersRoles.parentId],
+		references: [users.id]
+	}),
+}));
+
+export const subscriptionPlansFeaturesRelations = relations(subscriptionPlansFeatures, ({one}) => ({
+	subscriptionPlan: one(subscriptionPlans, {
+		fields: [subscriptionPlansFeatures.parentId],
+		references: [subscriptionPlans.id]
+	}),
 }));
 
 export const ordersOrderItemsRelations = relations(ordersOrderItems, ({one}) => ({

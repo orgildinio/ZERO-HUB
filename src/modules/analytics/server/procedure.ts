@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { z } from "zod";
-import { vTenantMonthlySales, vTopCategoriesByTenant } from "../../../../drizzle/schema";
+import { vProductPerformanceByTenant, vTenantMonthlySales, vTopCategoriesByTenant } from "../../../../drizzle/schema";
 import { and, asc, eq, lte, sql } from "drizzle-orm";
 
 export const analyticsRouter = createTRPCRouter({
@@ -67,13 +67,43 @@ export const analyticsRouter = createTRPCRouter({
                 .orderBy(asc(vTopCategoriesByTenant.categoryRank));
             return categoriesAnalytics
         }),
-    updateProductSalesSummary: baseProcedure
+    getTenantTopProducts: baseProcedure
         .input(
             z.object({
-
+                tenantId: z.string()
             })
         )
-        .query(async () => {
+        .query(async ({ input }) => {
+            const { tenantId } = input;
+            const productsAnalytics = await db
+                .select()
+                .from(vProductPerformanceByTenant)
+                .where(and(
+                    eq(vProductPerformanceByTenant.tenantId, tenantId),
+                    lte(sql`${vProductPerformanceByTenant.productRankHigh}`, 10)
+                ))
+                .orderBy(asc(vProductPerformanceByTenant.productRankHigh));
 
+            return productsAnalytics
+        }),
+    getTenantLowProducts: baseProcedure
+        .input(
+            z.object({
+                tenantId: z.string()
+            })
+        )
+        .query(async ({ input }) => {
+            const { tenantId } = input;
+            const productsAnalytics = await db
+                .select()
+                .from(vProductPerformanceByTenant)
+                .where(and(
+                    eq(vProductPerformanceByTenant.tenantId, tenantId),
+                    lte(sql`${vProductPerformanceByTenant.productRankLow}`, 10),
+                    sql`${vProductPerformanceByTenant.totalNetSales} > 0`
+                ))
+                .orderBy(asc(vProductPerformanceByTenant.productRankLow));
+
+            return productsAnalytics
         }),
 })

@@ -3,7 +3,7 @@ import crypto from 'crypto'
 import { and, eq, sql } from "drizzle-orm";
 
 import { checkoutSchema } from "../schema";
-import { categorySalesSummary, monthlySalesSummary, orders, ordersOrderItems, tenants } from "../../../../drizzle/schema";
+import { categorySalesSummary, monthlySalesSummary, orders, ordersOrderItems, productsSalesSummary, tenants } from "../../../../drizzle/schema";
 
 import { TRPCError } from "@trpc/server";
 import { Category, Media } from "@/payload-types";
@@ -292,7 +292,7 @@ export const checkoutRouter = createTRPCRouter({
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 }, {} as Record<string, any>);
 
-                const upsertPromises = Object.entries(categoryData).map(([categoryName, data]) => {
+                const upsertCategoryPromises = Object.entries(categoryData).map(([categoryName, data]) => {
                     return db
                         .insert(categorySalesSummary)
                         .values({
@@ -322,7 +322,60 @@ export const checkoutRouter = createTRPCRouter({
                         });
                 });
 
-                await Promise.all(upsertPromises);
+                await Promise.all(upsertCategoryPromises);
+
+                const productData = input.products.reduce((acc, product) => {
+                    const { name, quantity, price, compareAtPrice } = product;
+
+                    if (!acc[name]) {
+                        acc[name] = {
+                            totalOrders: 0,
+                            grossSales: 0,
+                            netSales: 0,
+                            totalItemsSold: 0
+                        };
+                    }
+
+                    acc[name].totalOrders += 1;
+                    acc[name].grossSales += price * quantity;
+                    acc[name].netSales += (compareAtPrice ? compareAtPrice : price) * quantity;
+                    acc[name].totalItemsSold += quantity;
+
+                    return acc;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                }, {} as Record<string, any>);
+
+                const upsertProductPromises = Object.entries(productData).map(([productName, data]) => {
+                    return db
+                        .insert(productsSalesSummary)
+                        .values({
+                            tenantId: tenant.id,
+                            productName: productName,
+                            month: month,
+                            year: year,
+                            totalOrders: data.totalOrders.toString(),
+                            grossSales: data.grossSales.toFixed(2),
+                            netSales: data.netSales.toFixed(2),
+                            totalItemsSold: data.totalItemsSold.toString(),
+                        })
+                        .onConflictDoUpdate({
+                            target: [
+                                productsSalesSummary.tenantId,
+                                productsSalesSummary.productName,
+                                productsSalesSummary.month,
+                                productsSalesSummary.year
+                            ],
+                            set: {
+                                totalOrders: data.totalOrders.toString(),
+                                grossSales: data.grossSales.toFixed(2),
+                                netSales: data.netSales.toFixed(2),
+                                totalItemsSold: data.totalItemsSold.toString(),
+                                updatedAt: new Date().toISOString(),
+                            },
+                        })
+                });
+
+                await Promise.all(upsertProductPromises);
 
                 await ctx.db.update({
                     collection: "orders",

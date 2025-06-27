@@ -12,12 +12,18 @@ const Page = async () => {
     const tenant = session.user?.tenants?.[0].tenant as Tenant;
 
     const queryClient = getQueryClient();
-    void queryClient.prefetchQuery(trpc.analytics.getTenantMonthlySales.queryOptions({
-        tenantId: tenant.id,
-    }));
-    void queryClient.prefetchQuery(trpc.analytics.getTenantTopCategories.queryOptions({
-        tenantId: tenant.id,
-    }))
+
+    await Promise.allSettled([
+        void queryClient.prefetchQuery(trpc.analytics.getTenantMonthlySales.queryOptions({
+            tenantId: tenant.id,
+        })),
+        void queryClient.prefetchQuery(trpc.analytics.getTenantTopCategories.queryOptions({
+            tenantId: tenant.id,
+        })),
+        void queryClient.prefetchQuery(trpc.analytics.getTenantTopProducts.queryOptions({
+            tenantId: tenant.id
+        })),
+    ])
 
     return (
         <SalesView

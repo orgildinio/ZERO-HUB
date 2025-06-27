@@ -74,6 +74,8 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { useTRPC } from "@/trpc/client"
 
 export const schema = z.object({
     id: z.number(),
@@ -205,9 +207,17 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 
 export function ProductsOverview({
     data,
+    tenantId
 }: {
-    data: z.infer<typeof schema>[]
+    data: z.infer<typeof schema>[];
+    tenantId: string
 }) {
+
+    const trpc = useTRPC();
+    const { data: productData } = useSuspenseQuery(trpc.analytics.getTenantTopProducts.queryOptions({ tenantId: tenantId }));
+
+    console.log(productData)
+
     const [rowSelection, setRowSelection] = React.useState({})
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})

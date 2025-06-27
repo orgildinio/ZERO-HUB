@@ -1,4 +1,4 @@
-import { pgTable, index, uniqueIndex, foreignKey, uuid, varchar, timestamp, numeric, boolean, integer, serial, jsonb, unique, pgView, bigint, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, index, uniqueIndex, foreignKey, uuid, varchar, timestamp, numeric, boolean, integer, jsonb, serial, unique, pgView, bigint, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const enumCategoriesStatus = pgEnum("enum_categories_status", ['active', 'inactive', 'draft'])
@@ -48,6 +48,7 @@ export const tenants = pgTable("tenants", {
 	slug: varchar().notNull(),
 	phone: varchar().notNull(),
 	store: varchar().notNull(),
+	activeTemplate: varchar("active_template").default('default').notNull(),
 	subscriptionSubscriptionId: varchar("subscription_subscription_id"),
 	subscriptionSubscriptionDetailsSubmitted: boolean("subscription_subscription_details_submitted").default(false),
 	subscriptionSubscriptionStatus: enumTenantsSubscriptionSubscriptionStatus("subscription_subscription_status").default('none'),
@@ -68,7 +69,6 @@ export const tenants = pgTable("tenants", {
 	analyticsTotalProducts: numeric("analytics_total_products").default('0'),
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	activeTemplate: varchar("active_template").default('default').notNull(),
 }, (table) => [
 	index("tenants_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	uniqueIndex("tenants_phone_idx").using("btree", table.phone.asc().nullsLast().op("text_ops")),
@@ -99,6 +99,64 @@ export const productsImages = pgTable("products_images", {
 		}).onDelete("cascade"),
 ]);
 
+export const products = pgTable("products", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	tenantSlug: varchar("tenant_slug").notNull(),
+	name: varchar().notNull(),
+	slug: varchar().notNull(),
+	description: varchar().notNull(),
+	shortDescription: varchar("short_description"),
+	pricingPrice: numeric("pricing_price").notNull(),
+	pricingCompareAtPrice: numeric("pricing_compare_at_price"),
+	pricingCostPrice: numeric("pricing_cost_price"),
+	pricingTaxable: boolean("pricing_taxable").default(true),
+	inventoryTrackQuantity: boolean("inventory_track_quantity").default(true),
+	inventoryQuantity: numeric("inventory_quantity").default('0'),
+	inventoryLowStockThreshold: numeric("inventory_low_stock_threshold").default('5'),
+	inventoryAllowBackorders: boolean("inventory_allow_backorders").default(false),
+	categoryId: uuid("category_id").notNull(),
+	seoTitle: varchar("seo_title"),
+	seoDescription: varchar("seo_description"),
+	seoKeywords: varchar("seo_keywords"),
+	featured: boolean().default(false),
+	badge: enumProductsBadge(),
+	content: jsonb(),
+	shippingWeight: numeric("shipping_weight"),
+	shippingDimensionsLength: numeric("shipping_dimensions_length"),
+	shippingDimensionsWidth: numeric("shipping_dimensions_width"),
+	shippingDimensionsHeight: numeric("shipping_dimensions_height"),
+	shippingRequiresShipping: boolean("shipping_requires_shipping").default(true),
+	shippingFreeShipping: boolean("shipping_free_shipping").default(false),
+	shippingShippingCost: numeric("shipping_shipping_cost"),
+	refundPolicy: enumProductsRefundPolicy("refund_policy").default('30-day').notNull(),
+	status: enumProductsStatus().default('draft').notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("products_category_idx").using("btree", table.categoryId.asc().nullsLast().op("uuid_ops")),
+	index("products_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("products_featured_idx").using("btree", table.featured.asc().nullsLast().op("bool_ops")),
+	index("products_name_idx").using("btree", table.name.asc().nullsLast().op("text_ops")),
+	uniqueIndex("products_slug_idx").using("btree", table.slug.asc().nullsLast().op("text_ops")),
+	index("products_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	index("products_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("products_tenant_slug_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops")),
+	index("products_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	index("tenantSlug_name_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops"), table.name.asc().nullsLast().op("text_ops")),
+	uniqueIndex("tenantSlug_slug_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops"), table.slug.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "products_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.categoryId],
+			foreignColumns: [categories.id],
+			name: "products_category_id_categories_id_fk"
+		}).onDelete("set null"),
+]);
+
 export const productsSpecifications = pgTable("products_specifications", {
 	order: integer("_order").notNull(),
 	parentId: uuid("_parent_id").notNull(),
@@ -112,6 +170,37 @@ export const productsSpecifications = pgTable("products_specifications", {
 			columns: [table.parentId],
 			foreignColumns: [products.id],
 			name: "products_specifications_parent_id_fk"
+		}).onDelete("cascade"),
+]);
+
+export const productsVariants = pgTable("products_variants", {
+	order: integer("_order").notNull(),
+	parentId: uuid("_parent_id").notNull(),
+	id: varchar().primaryKey().notNull(),
+	name: varchar().notNull(),
+}, (table) => [
+	index("products_variants_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
+	index("products_variants_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.parentId],
+			foreignColumns: [products.id],
+			name: "products_variants_parent_id_fk"
+		}).onDelete("cascade"),
+]);
+
+export const productsVariantsOptions = pgTable("products_variants_options", {
+	order: integer("_order").notNull(),
+	parentId: varchar("_parent_id").notNull(),
+	id: varchar().primaryKey().notNull(),
+	label: varchar().notNull(),
+	priceAdjustment: numeric("price_adjustment").default('0'),
+}, (table) => [
+	index("products_variants_options_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
+	index("products_variants_options_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("text_ops")),
+	foreignKey({
+			columns: [table.parentId],
+			foreignColumns: [productsVariants.id],
+			name: "products_variants_options_parent_id_fk"
 		}).onDelete("cascade"),
 ]);
 
@@ -157,6 +246,34 @@ export const usersTenants = pgTable("users_tenants", {
 		}).onDelete("cascade"),
 ]);
 
+export const reviews = pgTable("reviews", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	name: varchar().notNull(),
+	rating: numeric().notNull(),
+	title: varchar().notNull(),
+	description: varchar().notNull(),
+	email: varchar(),
+	productId: uuid("product_id").notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("reviews_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("reviews_product_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
+	index("reviews_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("reviews_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "reviews_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.productId],
+			foreignColumns: [products.id],
+			name: "reviews_product_id_products_id_fk"
+		}).onDelete("set null"),
+]);
+
 export const productsRels = pgTable("products_rels", {
 	id: serial().primaryKey().notNull(),
 	order: integer(),
@@ -180,76 +297,54 @@ export const productsRels = pgTable("products_rels", {
 		}).onDelete("cascade"),
 ]);
 
-export const productsVariants = pgTable("products_variants", {
-	order: integer("_order").notNull(),
-	parentId: uuid("_parent_id").notNull(),
-	id: varchar().primaryKey().notNull(),
-	name: varchar().notNull(),
-}, (table) => [
-	index("products_variants_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
-	index("products_variants_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.parentId],
-			foreignColumns: [products.id],
-			name: "products_variants_parent_id_fk"
-		}).onDelete("cascade"),
-]);
-
-export const products = pgTable("products", {
+export const categories = pgTable("categories", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	tenantId: uuid("tenant_id"),
+	tenantSlug: varchar("tenant_slug").notNull(),
 	name: varchar().notNull(),
 	slug: varchar().notNull(),
-	description: varchar().notNull(),
-	shortDescription: varchar("short_description"),
-	pricingPrice: numeric("pricing_price").notNull(),
-	pricingCompareAtPrice: numeric("pricing_compare_at_price"),
-	pricingCostPrice: numeric("pricing_cost_price"),
-	pricingTaxable: boolean("pricing_taxable").default(true),
-	inventoryTrackQuantity: boolean("inventory_track_quantity").default(true),
-	inventoryQuantity: numeric("inventory_quantity").default('0'),
-	inventoryLowStockThreshold: numeric("inventory_low_stock_threshold").default('5'),
-	inventoryAllowBackorders: boolean("inventory_allow_backorders").default(false),
-	categoryId: uuid("category_id").notNull(),
+	description: varchar(),
+	status: enumCategoriesStatus().default('active').notNull(),
+	featured: boolean().default(false),
+	parentId: uuid("parent_id"),
+	thumbnailId: uuid("thumbnail_id").notNull(),
 	seoTitle: varchar("seo_title"),
 	seoDescription: varchar("seo_description"),
 	seoKeywords: varchar("seo_keywords"),
-	featured: boolean().default(false),
-	badge: enumProductsBadge(),
-	content: jsonb(),
-	shippingWeight: numeric("shipping_weight"),
-	shippingDimensionsLength: numeric("shipping_dimensions_length"),
-	shippingDimensionsWidth: numeric("shipping_dimensions_width"),
-	shippingDimensionsHeight: numeric("shipping_dimensions_height"),
-	shippingRequiresShipping: boolean("shipping_requires_shipping").default(true),
-	shippingFreeShipping: boolean("shipping_free_shipping").default(false),
-	shippingShippingCost: numeric("shipping_shipping_cost"),
-	refundPolicy: enumProductsRefundPolicy("refund_policy").default('30-day').notNull(),
-	status: enumProductsStatus().default('draft').notNull(),
+	seoOgImageId: uuid("seo_og_image_id"),
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	tenantSlug: varchar("tenant_slug").notNull(),
 }, (table) => [
-	index("products_category_idx").using("btree", table.categoryId.asc().nullsLast().op("uuid_ops")),
-	index("products_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("products_featured_idx").using("btree", table.featured.asc().nullsLast().op("bool_ops")),
-	index("products_name_idx").using("btree", table.name.asc().nullsLast().op("text_ops")),
-	uniqueIndex("products_slug_idx").using("btree", table.slug.asc().nullsLast().op("text_ops")),
-	index("products_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
-	index("products_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("products_tenant_slug_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops")),
-	index("products_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	index("tenantSlug_name_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops"), table.name.asc().nullsLast().op("text_ops")),
-	uniqueIndex("tenantSlug_slug_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops"), table.slug.asc().nullsLast().op("text_ops")),
+	index("categories_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("categories_parent_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
+	index("categories_seo_seo_og_image_idx").using("btree", table.seoOgImageId.asc().nullsLast().op("uuid_ops")),
+	index("categories_slug_idx").using("btree", table.slug.asc().nullsLast().op("text_ops")),
+	index("categories_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
+	index("categories_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("categories_tenant_slug_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops")),
+	index("categories_thumbnail_idx").using("btree", table.thumbnailId.asc().nullsLast().op("uuid_ops")),
+	index("categories_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	index("tenantSlug_featured_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops"), table.featured.asc().nullsLast().op("text_ops")),
+	uniqueIndex("tenantSlug_slug_1_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops"), table.slug.asc().nullsLast().op("text_ops")),
 	foreignKey({
 			columns: [table.tenantId],
 			foreignColumns: [tenants.id],
-			name: "products_tenant_id_tenants_id_fk"
+			name: "categories_tenant_id_tenants_id_fk"
 		}).onDelete("set null"),
 	foreignKey({
-			columns: [table.categoryId],
-			foreignColumns: [categories.id],
-			name: "products_category_id_categories_id_fk"
+			columns: [table.parentId],
+			foreignColumns: [table.id],
+			name: "categories_parent_id_categories_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.thumbnailId],
+			foreignColumns: [media.id],
+			name: "categories_thumbnail_id_media_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.seoOgImageId],
+			foreignColumns: [media.id],
+			name: "categories_seo_og_image_id_media_id_fk"
 		}).onDelete("set null"),
 ]);
 
@@ -280,34 +375,6 @@ export const tags = pgTable("tags", {
 		}).onDelete("set null"),
 ]);
 
-export const reviews = pgTable("reviews", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	tenantId: uuid("tenant_id"),
-	name: varchar().notNull(),
-	rating: numeric().notNull(),
-	title: varchar().notNull(),
-	description: varchar().notNull(),
-	email: varchar(),
-	productId: uuid("product_id").notNull(),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("reviews_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("reviews_product_idx").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
-	index("reviews_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("reviews_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	foreignKey({
-			columns: [table.tenantId],
-			foreignColumns: [tenants.id],
-			name: "reviews_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.productId],
-			foreignColumns: [products.id],
-			name: "reviews_product_id_products_id_fk"
-		}).onDelete("set null"),
-]);
-
 export const subscriptionPlans = pgTable("subscription_plans", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	name: varchar().notNull(),
@@ -326,6 +393,150 @@ export const subscriptionPlans = pgTable("subscription_plans", {
 	uniqueIndex("subscription_plans_name_idx").using("btree", table.name.asc().nullsLast().op("text_ops")),
 	uniqueIndex("subscription_plans_razorpay_plan_id_idx").using("btree", table.razorpayPlanId.asc().nullsLast().op("text_ops")),
 	index("subscription_plans_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+]);
+
+export const customers = pgTable("customers", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	firstname: varchar().notNull(),
+	lastname: varchar().notNull(),
+	email: varchar().notNull(),
+	newsLetter: boolean("news_letter").default(false),
+	shippingAddressStreet: varchar("shipping_address_street").notNull(),
+	shippingAddressApartment: varchar("shipping_address_apartment").notNull(),
+	shippingAddressCity: varchar("shipping_address_city").notNull(),
+	shippingAddressPostalCode: varchar("shipping_address_postal_code").notNull(),
+	shippingAddressState: varchar("shipping_address_state").notNull(),
+	shippingAddressCountry: varchar("shipping_address_country").notNull(),
+	deliveryOption: varchar("delivery_option"),
+	specialInstructions: varchar("special_instructions"),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("customers_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("customers_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("customers_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "customers_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+]);
+
+export const orders = pgTable("orders", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	name: varchar().notNull(),
+	customerId: uuid("customer_id").notNull(),
+	isPaid: boolean("is_paid").default(false).notNull(),
+	orderDate: timestamp("order_date", { precision: 3, withTimezone: true, mode: 'string' }).notNull(),
+	grossAmount: numeric("gross_amount").notNull(),
+	discountAmount: numeric("discount_amount").default('0'),
+	taxAmount: numeric("tax_amount").default('0').notNull(),
+	shippingAmount: numeric("shipping_amount").default('0'),
+	saleAmount: numeric("sale_amount").default('0').notNull(),
+	razorpayCheckoutSessionId: varchar("razorpay_checkout_session_id"),
+	razorpayOrderId: varchar("razorpay_order_id"),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("orders_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("orders_customer_idx").using("btree", table.customerId.asc().nullsLast().op("uuid_ops")),
+	index("orders_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("orders_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "orders_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.customerId],
+			foreignColumns: [customers.id],
+			name: "orders_customer_id_customers_id_fk"
+		}).onDelete("set null"),
+]);
+
+export const categorySalesSummary = pgTable("category_sales_summary", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	categoryName: varchar("category_name").notNull(),
+	month: varchar().notNull(),
+	year: varchar().notNull(),
+	totalOrders: numeric("total_orders").notNull(),
+	grossSales: numeric("gross_sales").notNull(),
+	netSales: numeric("net_sales").notNull(),
+	totalItemsSold: numeric("total_items_sold").notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("category_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("category_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("category_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "category_sales_summary_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	unique("unique_tenant_category_year_month").on(table.tenantId, table.categoryName, table.month, table.year),
+]);
+
+export const productsSalesSummary = pgTable("products_sales_summary", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	productName: varchar("product_name").notNull(),
+	month: varchar().notNull(),
+	year: varchar().notNull(),
+	totalOrders: numeric("total_orders").notNull(),
+	grossSales: numeric("gross_sales").notNull(),
+	netSales: numeric("net_sales").notNull(),
+	totalItemsSold: numeric("total_items_sold").notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("products_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("products_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("products_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "products_sales_summary_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	unique("unique_tenant_product_year_month").on(table.tenantId, table.productName, table.month, table.year),
+]);
+
+export const monthlySalesSummary = pgTable("monthly_sales_summary", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	month: varchar().notNull(),
+	year: varchar().notNull(),
+	totalOrders: numeric("total_orders").notNull(),
+	grossSales: numeric("gross_sales").notNull(),
+	netSales: numeric("net_sales").notNull(),
+	totalItemsSold: numeric("total_items_sold").notNull(),
+	averageOrderValue: numeric("average_order_value").notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("monthly_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("monthly_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("monthly_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "monthly_sales_summary_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	unique("unique_tenant_year_month").on(table.tenantId, table.month, table.year),
+]);
+
+export const payloadLockedDocuments = pgTable("payload_locked_documents", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	globalSlug: varchar("global_slug"),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("payload_locked_documents_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("payload_locked_documents_global_slug_idx").using("btree", table.globalSlug.asc().nullsLast().op("text_ops")),
+	index("payload_locked_documents_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
 ]);
 
 export const subscriptions = pgTable("subscriptions", {
@@ -363,29 +574,6 @@ export const subscriptions = pgTable("subscriptions", {
 		}).onDelete("set null"),
 ]);
 
-export const payloadLockedDocuments = pgTable("payload_locked_documents", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	globalSlug: varchar("global_slug"),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("payload_locked_documents_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("payload_locked_documents_global_slug_idx").using("btree", table.globalSlug.asc().nullsLast().op("text_ops")),
-	index("payload_locked_documents_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-]);
-
-export const payloadPreferences = pgTable("payload_preferences", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	key: varchar(),
-	value: jsonb(),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("payload_preferences_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("payload_preferences_key_idx").using("btree", table.key.asc().nullsLast().op("text_ops")),
-	index("payload_preferences_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-]);
-
 export const payloadLockedDocumentsRels = pgTable("payload_locked_documents_rels", {
 	id: serial().primaryKey().notNull(),
 	order: integer(),
@@ -403,7 +591,7 @@ export const payloadLockedDocumentsRels = pgTable("payload_locked_documents_rels
 	customersId: uuid("customers_id"),
 	ordersId: uuid("orders_id"),
 	categorySalesSummaryId: uuid("category_sales_summary_id"),
-	productsMonthlySalesId: uuid("products_monthly_sales_id"),
+	productsSalesSummaryId: uuid("products_sales_summary_id"),
 	monthlySalesSummaryId: uuid("monthly_sales_summary_id"),
 }, (table) => [
 	index("payload_locked_documents_rels_categories_id_idx").using("btree", table.categoriesId.asc().nullsLast().op("uuid_ops")),
@@ -416,7 +604,7 @@ export const payloadLockedDocumentsRels = pgTable("payload_locked_documents_rels
 	index("payload_locked_documents_rels_parent_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_path_idx").using("btree", table.path.asc().nullsLast().op("text_ops")),
 	index("payload_locked_documents_rels_products_id_idx").using("btree", table.productsId.asc().nullsLast().op("uuid_ops")),
-	index("payload_locked_documents_rels_products_monthly_sales_id_idx").using("btree", table.productsMonthlySalesId.asc().nullsLast().op("uuid_ops")),
+	index("payload_locked_documents_rels_products_sales_summary_id_idx").using("btree", table.productsSalesSummaryId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_reviews_id_idx").using("btree", table.reviewsId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_subscription_plans_id_idx").using("btree", table.subscriptionPlansId.asc().nullsLast().op("uuid_ops")),
 	index("payload_locked_documents_rels_subscriptions_id_idx").using("btree", table.subscriptionsId.asc().nullsLast().op("uuid_ops")),
@@ -489,9 +677,9 @@ export const payloadLockedDocumentsRels = pgTable("payload_locked_documents_rels
 			name: "payload_locked_documents_rels_category_sales_summary_fk"
 		}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.productsMonthlySalesId],
-			foreignColumns: [productsMonthlySales.id],
-			name: "payload_locked_documents_rels_products_monthly_sales_fk"
+			columns: [table.productsSalesSummaryId],
+			foreignColumns: [productsSalesSummary.id],
+			name: "payload_locked_documents_rels_products_sales_summary_fk"
 		}).onDelete("cascade"),
 	foreignKey({
 			columns: [table.monthlySalesSummaryId],
@@ -500,55 +688,39 @@ export const payloadLockedDocumentsRels = pgTable("payload_locked_documents_rels
 		}).onDelete("cascade"),
 ]);
 
-export const categories = pgTable("categories", {
+export const payloadPreferences = pgTable("payload_preferences", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
-	tenantId: uuid("tenant_id"),
-	tenantSlug: varchar("tenant_slug").notNull(),
-	name: varchar().notNull(),
-	slug: varchar().notNull(),
-	description: varchar(),
-	status: enumCategoriesStatus().default('active').notNull(),
-	featured: boolean().default(false),
-	parentId: uuid("parent_id"),
-	thumbnailId: uuid("thumbnail_id").notNull(),
-	seoTitle: varchar("seo_title"),
-	seoDescription: varchar("seo_description"),
-	seoKeywords: varchar("seo_keywords"),
-	seoOgImageId: uuid("seo_og_image_id"),
+	key: varchar(),
+	value: jsonb(),
 	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("categories_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("categories_parent_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
-	index("categories_seo_seo_og_image_idx").using("btree", table.seoOgImageId.asc().nullsLast().op("uuid_ops")),
-	index("categories_slug_idx").using("btree", table.slug.asc().nullsLast().op("text_ops")),
-	index("categories_status_idx").using("btree", table.status.asc().nullsLast().op("enum_ops")),
-	index("categories_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("categories_tenant_slug_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops")),
-	index("categories_thumbnail_idx").using("btree", table.thumbnailId.asc().nullsLast().op("uuid_ops")),
-	index("categories_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	index("tenantSlug_featured_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops"), table.featured.asc().nullsLast().op("text_ops")),
-	uniqueIndex("tenantSlug_slug_1_idx").using("btree", table.tenantSlug.asc().nullsLast().op("text_ops"), table.slug.asc().nullsLast().op("text_ops")),
-	foreignKey({
-			columns: [table.tenantId],
-			foreignColumns: [tenants.id],
-			name: "categories_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
+	index("payload_preferences_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("payload_preferences_key_idx").using("btree", table.key.asc().nullsLast().op("text_ops")),
+	index("payload_preferences_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+]);
+
+export const payloadPreferencesRels = pgTable("payload_preferences_rels", {
+	id: serial().primaryKey().notNull(),
+	order: integer(),
+	parentId: uuid("parent_id").notNull(),
+	path: varchar().notNull(),
+	usersId: uuid("users_id"),
+}, (table) => [
+	index("payload_preferences_rels_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
+	index("payload_preferences_rels_parent_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
+	index("payload_preferences_rels_path_idx").using("btree", table.path.asc().nullsLast().op("text_ops")),
+	index("payload_preferences_rels_users_id_idx").using("btree", table.usersId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
 			columns: [table.parentId],
-			foreignColumns: [table.id],
-			name: "categories_parent_id_categories_id_fk"
-		}).onDelete("set null"),
+			foreignColumns: [payloadPreferences.id],
+			name: "payload_preferences_rels_parent_fk"
+		}).onDelete("cascade"),
 	foreignKey({
-			columns: [table.thumbnailId],
-			foreignColumns: [media.id],
-			name: "categories_thumbnail_id_media_id_fk"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.seoOgImageId],
-			foreignColumns: [media.id],
-			name: "categories_seo_og_image_id_media_id_fk"
-		}).onDelete("set null"),
+			columns: [table.usersId],
+			foreignColumns: [users.id],
+			name: "payload_preferences_rels_users_fk"
+		}).onDelete("cascade"),
 ]);
 
 export const payloadMigrations = pgTable("payload_migrations", {
@@ -577,22 +749,6 @@ export const usersRoles = pgTable("users_roles", {
 		}).onDelete("cascade"),
 ]);
 
-export const productsVariantsOptions = pgTable("products_variants_options", {
-	order: integer("_order").notNull(),
-	parentId: varchar("_parent_id").notNull(),
-	id: varchar().primaryKey().notNull(),
-	label: varchar().notNull(),
-	priceAdjustment: numeric("price_adjustment").default('0'),
-}, (table) => [
-	index("products_variants_options_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
-	index("products_variants_options_parent_id_idx").using("btree", table.parentId.asc().nullsLast().op("text_ops")),
-	foreignKey({
-			columns: [table.parentId],
-			foreignColumns: [productsVariants.id],
-			name: "products_variants_options_parent_id_fk"
-		}).onDelete("cascade"),
-]);
-
 export const subscriptionPlansFeatures = pgTable("subscription_plans_features", {
 	order: integer("_order").notNull(),
 	parentId: uuid("_parent_id").notNull(),
@@ -608,168 +764,13 @@ export const subscriptionPlansFeatures = pgTable("subscription_plans_features", 
 		}).onDelete("cascade"),
 ]);
 
-export const payloadPreferencesRels = pgTable("payload_preferences_rels", {
-	id: serial().primaryKey().notNull(),
-	order: integer(),
-	parentId: uuid("parent_id").notNull(),
-	path: varchar().notNull(),
-	usersId: uuid("users_id"),
-}, (table) => [
-	index("payload_preferences_rels_order_idx").using("btree", table.order.asc().nullsLast().op("int4_ops")),
-	index("payload_preferences_rels_parent_idx").using("btree", table.parentId.asc().nullsLast().op("uuid_ops")),
-	index("payload_preferences_rels_path_idx").using("btree", table.path.asc().nullsLast().op("text_ops")),
-	index("payload_preferences_rels_users_id_idx").using("btree", table.usersId.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.parentId],
-			foreignColumns: [payloadPreferences.id],
-			name: "payload_preferences_rels_parent_fk"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.usersId],
-			foreignColumns: [users.id],
-			name: "payload_preferences_rels_users_fk"
-		}).onDelete("cascade"),
-]);
-
-export const customers = pgTable("customers", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	tenantId: uuid("tenant_id"),
-	firstname: varchar().notNull(),
-	lastname: varchar().notNull(),
-	email: varchar().notNull(),
-	newsLetter: boolean("news_letter").default(false),
-	shippingAddressStreet: varchar("shipping_address_street").notNull(),
-	shippingAddressApartment: varchar("shipping_address_apartment").notNull(),
-	shippingAddressCity: varchar("shipping_address_city").notNull(),
-	shippingAddressPostalCode: varchar("shipping_address_postal_code").notNull(),
-	shippingAddressState: varchar("shipping_address_state").notNull(),
-	shippingAddressCountry: varchar("shipping_address_country").notNull(),
-	deliveryOption: varchar("delivery_option"),
-	specialInstructions: varchar("special_instructions"),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("customers_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("customers_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("customers_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	foreignKey({
-			columns: [table.tenantId],
-			foreignColumns: [tenants.id],
-			name: "customers_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
-]);
-
-export const orders = pgTable("orders", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	tenantId: uuid("tenant_id"),
-	name: varchar().notNull(),
-	customerId: uuid("customer_id").notNull(),
-	isPaid: boolean("is_paid").default(false).notNull(),
-	razorpayCheckoutSessionId: varchar("razorpay_checkout_session_id"),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	razorpayOrderId: varchar("razorpay_order_id"),
-	orderDate: timestamp("order_date", { precision: 3, withTimezone: true, mode: 'string' }).notNull(),
-	grossAmount: numeric("gross_amount").notNull(),
-	discountAmount: numeric("discount_amount").default('0'),
-	taxAmount: numeric("tax_amount").default('0').notNull(),
-	shippingAmount: numeric("shipping_amount").default('0'),
-	saleAmount: numeric("sale_amount").default('0').notNull(),
-}, (table) => [
-	index("orders_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("orders_customer_idx").using("btree", table.customerId.asc().nullsLast().op("uuid_ops")),
-	index("orders_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("orders_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	foreignKey({
-			columns: [table.tenantId],
-			foreignColumns: [tenants.id],
-			name: "orders_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.customerId],
-			foreignColumns: [customers.id],
-			name: "orders_customer_id_customers_id_fk"
-		}).onDelete("set null"),
-]);
-
-export const categorySalesSummary = pgTable("category_sales_summary", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	tenantId: uuid("tenant_id"),
-	categoryName: varchar("category_name").notNull(),
-	month: varchar().notNull(),
-	year: varchar().notNull(),
-	totalOrders: numeric("total_orders").notNull(),
-	grossSales: numeric("gross_sales").notNull(),
-	netSales: numeric("net_sales").notNull(),
-	totalItemsSold: numeric("total_items_sold").notNull(),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("category_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("category_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("category_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	foreignKey({
-			columns: [table.tenantId],
-			foreignColumns: [tenants.id],
-			name: "category_sales_summary_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
-	unique("unique_tenant_category_year_month").on(table.tenantId, table.categoryName, table.month, table.year),
-]);
-
-export const productsMonthlySales = pgTable("products_monthly_sales", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	tenantId: uuid("tenant_id"),
-	productName: varchar("product_name").notNull(),
-	month: varchar().notNull(),
-	year: varchar().notNull(),
-	totalOrders: numeric("total_orders").notNull(),
-	grossSales: numeric("gross_sales").notNull(),
-	netSales: numeric("net_sales").notNull(),
-	totalItemsSold: numeric("total_items_sold").notNull(),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("products_monthly_sales_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("products_monthly_sales_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("products_monthly_sales_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	foreignKey({
-			columns: [table.tenantId],
-			foreignColumns: [tenants.id],
-			name: "products_monthly_sales_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
-]);
-
-export const monthlySalesSummary = pgTable("monthly_sales_summary", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	tenantId: uuid("tenant_id"),
-	month: varchar().notNull(),
-	year: varchar().notNull(),
-	totalOrders: numeric("total_orders").notNull(),
-	grossSales: numeric("gross_sales").notNull(),
-	netSales: numeric("net_sales").notNull(),
-	totalItemsSold: numeric("total_items_sold").notNull(),
-	averageOrderValue: numeric("average_order_value").notNull(),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("monthly_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("monthly_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("monthly_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	foreignKey({
-			columns: [table.tenantId],
-			foreignColumns: [tenants.id],
-			name: "monthly_sales_summary_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
-	unique("unique_tenant_year_month").on(table.tenantId, table.month, table.year),
-]);
-
 export const ordersOrderItems = pgTable("orders_order_items", {
 	order: integer("_order").notNull(),
 	parentId: uuid("_parent_id").notNull(),
 	id: varchar().primaryKey().notNull(),
 	product: varchar().notNull(),
-	quantity: numeric().notNull(),
 	category: varchar(),
+	quantity: numeric().notNull(),
 	unitPrice: numeric("unit_price").notNull(),
 	discountPerItem: numeric("discount_per_item").default('0'),
 	grossItemAmount: numeric("gross_item_amount").notNull(),
@@ -782,6 +783,15 @@ export const ordersOrderItems = pgTable("orders_order_items", {
 			name: "orders_order_items_parent_id_fk"
 		}).onDelete("cascade"),
 ]);
+export const vTenantMonthlySales = pgView("v_tenant_monthly_sales", {	tenantId: uuid("tenant_id"),
+	year: varchar(),
+	month: varchar(),
+	totalGrossSales: numeric("total_gross_sales"),
+	totalNetSales: numeric("total_net_sales"),
+	totalOrders: numeric("total_orders"),
+	averageOrderValue: numeric("average_order_value"),
+}).as(sql`SELECT tenant_id, year, month, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_orders) AS total_orders, avg(average_order_value) AS average_order_value FROM monthly_sales_summary GROUP BY tenant_id, year, month`);
+
 export const vTopCategoriesByTenant = pgView("v_top_categories_by_tenant", {	tenantId: uuid("tenant_id"),
 	categoryName: varchar("category_name"),
 	totalGrossSales: numeric("total_gross_sales"),
@@ -791,11 +801,13 @@ export const vTopCategoriesByTenant = pgView("v_top_categories_by_tenant", {	ten
 	categoryRank: bigint("category_rank", { mode: "number" }),
 }).as(sql`SELECT tenant_id, category_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS category_rank FROM category_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, category_name`);
 
-export const vTenantMonthlySales = pgView("v_tenant_monthly_sales", {	tenantId: uuid("tenant_id"),
-	year: varchar(),
-	month: varchar(),
+export const vProductPerformanceByTenant = pgView("v_product_performance_by_tenant", {	tenantId: uuid("tenant_id"),
+	productName: varchar("product_name"),
 	totalGrossSales: numeric("total_gross_sales"),
 	totalNetSales: numeric("total_net_sales"),
-	totalOrders: numeric("total_orders"),
-	averageOrderValue: numeric("average_order_value"),
-}).as(sql`SELECT tenant_id, year, month, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_orders) AS total_orders, avg(average_order_value) AS average_order_value FROM monthly_sales_summary GROUP BY tenant_id, year, month`);
+	totalItemsSold: numeric("total_items_sold"),
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	productRankHigh: bigint("product_rank_high", { mode: "number" }),
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	productRankLow: bigint("product_rank_low", { mode: "number" }),
+}).as(sql`SELECT tenant_id, product_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS product_rank_high, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales))) AS product_rank_low FROM products_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, product_name`);

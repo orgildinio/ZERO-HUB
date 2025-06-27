@@ -2,7 +2,7 @@ import { isSuperAdmin } from "@/lib/access";
 import { CollectionConfig } from "payload";
 
 export const ProductsSalesSummary: CollectionConfig = {
-    slug: 'products-monthly-sales',
+    slug: 'products-sales-summary',
     admin: {
         useAsTitle: "productName",
         hidden: ({ user }) => !isSuperAdmin(user)

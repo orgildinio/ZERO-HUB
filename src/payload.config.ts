@@ -75,7 +75,7 @@ export default buildConfig({
         orders: {},
         customers: {},
         "monthly-sales-summary": {},
-        "products-monthly-sales": {},
+        "products-sales-summary": {},
         "category-sales-summary": {},
       },
       tenantsArrayField: {

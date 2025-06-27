@@ -79,7 +79,7 @@ export interface Config {
     customers: Customer;
     orders: Order;
     'category-sales-summary': CategorySalesSummary;
-    'products-monthly-sales': ProductsMonthlySale;
+    'products-sales-summary': ProductsSalesSummary;
     'monthly-sales-summary': MonthlySalesSummary;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -103,7 +103,7 @@ export interface Config {
     customers: CustomersSelect<false> | CustomersSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     'category-sales-summary': CategorySalesSummarySelect<false> | CategorySalesSummarySelect<true>;
-    'products-monthly-sales': ProductsMonthlySalesSelect<false> | ProductsMonthlySalesSelect<true>;
+    'products-sales-summary': ProductsSalesSummarySelect<false> | ProductsSalesSummarySelect<true>;
     'monthly-sales-summary': MonthlySalesSummarySelect<false> | MonthlySalesSummarySelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -769,9 +769,9 @@ export interface CategorySalesSummary {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products-monthly-sales".
+ * via the `definition` "products-sales-summary".
  */
-export interface ProductsMonthlySale {
+export interface ProductsSalesSummary {
   id: string;
   tenant?: (string | null) | Tenant;
   productName: string;
@@ -857,8 +857,8 @@ export interface PayloadLockedDocument {
         value: string | CategorySalesSummary;
       } | null)
     | ({
-        relationTo: 'products-monthly-sales';
-        value: string | ProductsMonthlySale;
+        relationTo: 'products-sales-summary';
+        value: string | ProductsSalesSummary;
       } | null)
     | ({
         relationTo: 'monthly-sales-summary';
@@ -1258,9 +1258,9 @@ export interface CategorySalesSummarySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products-monthly-sales_select".
+ * via the `definition` "products-sales-summary_select".
  */
-export interface ProductsMonthlySalesSelect<T extends boolean = true> {
+export interface ProductsSalesSummarySelect<T extends boolean = true> {
   tenant?: T;
   productName?: T;
   month?: T;
