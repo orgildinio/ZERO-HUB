@@ -4,7 +4,8 @@ import { Pool } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URI!,
-  
+
+  min: 2,
   max: 20,  
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 20000,
@@ -14,8 +15,8 @@ const pool = new Pool({
   
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   
-  statement_timeout: 30000,   // 30 second query timeout
-  query_timeout: 30000,       // 30 second total timeout
+  statement_timeout: 30000,
+  query_timeout: 30000,
   
   application_name: 'analytics-api'
 });

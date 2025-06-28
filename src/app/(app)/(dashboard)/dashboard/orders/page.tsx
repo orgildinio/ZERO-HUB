@@ -1,6 +1,15 @@
 import { getQueryClient } from "@/trpc/server"
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
+{/*
+total orders monthly/yearly
+orders region 
+top regions
+--under table
+recent orders
+completed orders
+remain orders    
+*/}
 
 const Page = () => {
 
