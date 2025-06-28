@@ -102,7 +102,7 @@ export function CategoryChartLoading() {
                         <div className="absolute inset-0 rounded-full border-8 border-muted animate-pulse" />
                         <div className="absolute inset-4 rounded-full bg-muted/50 animate-pulse" />
                         <div className="absolute inset-16 rounded-full bg-background border-2 border-muted animate-pulse" />
-                        
+
                         {Array.from({ length: 5 }).map((_, i) => (
                             <div
                                 key={i}

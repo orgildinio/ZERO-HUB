@@ -1,9 +1,25 @@
-import data from '@/modules/tenants/ui/components/data.json'
-import { GrossNetSales, GrossNetSalesLoading } from "../components/sales/gross-net-sales"
-import { CategoryChart, CategoryChartLoading } from "../components/sales/category-chart"
-import { TotalOrdersLineChart, TotalOrdersLineChartLoading } from "../components/sales/total-orders-line-chart"
-import { ProductsOverview } from "../components/sales/products-overview"
-import { Suspense } from 'react'
+import {
+    Suspense
+} from 'react'
+
+import {
+    ProductsOverview
+} from "../components/sales/products-overview"
+
+import {
+    GrossNetSales,
+    GrossNetSalesLoading
+} from "../components/sales/gross-net-sales"
+
+import {
+    CategoryChart,
+    CategoryChartLoading
+} from "../components/sales/category-chart"
+
+import {
+    TotalOrdersLineChart,
+    TotalOrdersLineChartLoading
+} from "../components/sales/total-orders-line-chart"
 
 export const SalesView = ({ tenantId }: { tenantId: string }) => {
     return (
@@ -25,7 +41,7 @@ export const SalesView = ({ tenantId }: { tenantId: string }) => {
                     </Suspense>
                 </div>
             </div>
-            <ProductsOverview data={data} tenantId={tenantId} />
+            <ProductsOverview tenantId={tenantId} />
         </div>
     )
 }
