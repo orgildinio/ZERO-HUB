@@ -108,8 +108,8 @@ export const products = pgTable("products", {
 	description: varchar().notNull(),
 	shortDescription: varchar("short_description"),
 	pricingPrice: numeric("pricing_price").notNull(),
-	pricingCompareAtPrice: numeric("pricing_compare_at_price"),
-	pricingCostPrice: numeric("pricing_cost_price"),
+	pricingCompareAtPrice: numeric("pricing_compare_at_price").notNull(),
+	pricingCostPrice: numeric("pricing_cost_price").notNull(),
 	pricingTaxable: boolean("pricing_taxable").default(true),
 	inventoryTrackQuantity: boolean("inventory_track_quantity").default(true),
 	inventoryQuantity: numeric("inventory_quantity").default('0'),
@@ -480,30 +480,6 @@ export const categorySalesSummary = pgTable("category_sales_summary", {
 	unique("unique_tenant_category_year_month").on(table.tenantId, table.categoryName, table.month, table.year),
 ]);
 
-export const productsSalesSummary = pgTable("products_sales_summary", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	tenantId: uuid("tenant_id"),
-	productName: varchar("product_name").notNull(),
-	month: varchar().notNull(),
-	year: varchar().notNull(),
-	totalOrders: numeric("total_orders").notNull(),
-	grossSales: numeric("gross_sales").notNull(),
-	netSales: numeric("net_sales").notNull(),
-	totalItemsSold: numeric("total_items_sold").notNull(),
-	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("products_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
-	index("products_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
-	index("products_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
-	foreignKey({
-			columns: [table.tenantId],
-			foreignColumns: [tenants.id],
-			name: "products_sales_summary_tenant_id_tenants_id_fk"
-		}).onDelete("set null"),
-	unique("unique_tenant_product_year_month").on(table.tenantId, table.productName, table.month, table.year),
-]);
-
 export const monthlySalesSummary = pgTable("monthly_sales_summary", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	tenantId: uuid("tenant_id"),
@@ -537,6 +513,31 @@ export const payloadLockedDocuments = pgTable("payload_locked_documents", {
 	index("payload_locked_documents_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
 	index("payload_locked_documents_global_slug_idx").using("btree", table.globalSlug.asc().nullsLast().op("text_ops")),
 	index("payload_locked_documents_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+]);
+
+export const productsSalesSummary = pgTable("products_sales_summary", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	tenantId: uuid("tenant_id"),
+	productName: varchar("product_name").notNull(),
+	month: varchar().notNull(),
+	year: varchar().notNull(),
+	totalOrders: numeric("total_orders").notNull(),
+	grossSales: numeric("gross_sales").notNull(),
+	netSales: numeric("net_sales").notNull(),
+	totalItemsSold: numeric("total_items_sold").notNull(),
+	updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { precision: 3, withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	costPrice: numeric("cost_price").default('60'),
+}, (table) => [
+	index("products_sales_summary_created_at_idx").using("btree", table.createdAt.asc().nullsLast().op("timestamptz_ops")),
+	index("products_sales_summary_tenant_idx").using("btree", table.tenantId.asc().nullsLast().op("uuid_ops")),
+	index("products_sales_summary_updated_at_idx").using("btree", table.updatedAt.asc().nullsLast().op("timestamptz_ops")),
+	foreignKey({
+			columns: [table.tenantId],
+			foreignColumns: [tenants.id],
+			name: "products_sales_summary_tenant_id_tenants_id_fk"
+		}).onDelete("set null"),
+	unique("unique_tenant_product_year_month").on(table.tenantId, table.productName, table.month, table.year),
 ]);
 
 export const subscriptions = pgTable("subscriptions", {
@@ -783,6 +784,18 @@ export const ordersOrderItems = pgTable("orders_order_items", {
 			name: "orders_order_items_parent_id_fk"
 		}).onDelete("cascade"),
 ]);
+export const vProductPerformanceByTenant = pgView("v_product_performance_by_tenant", {	tenantId: uuid("tenant_id"),
+	productName: varchar("product_name"),
+	totalGrossSales: numeric("total_gross_sales"),
+	totalNetSales: numeric("total_net_sales"),
+	totalItemsSold: numeric("total_items_sold"),
+	totalCostPrice: numeric("total_cost_price"),
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	productRankHigh: bigint("product_rank_high", { mode: "number" }),
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	productRankLow: bigint("product_rank_low", { mode: "number" }),
+}).as(sql`SELECT tenant_id, product_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, sum(cost_price) AS total_cost_price, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS product_rank_high, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales))) AS product_rank_low FROM products_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, product_name`);
+
 export const vTenantMonthlySales = pgView("v_tenant_monthly_sales", {	tenantId: uuid("tenant_id"),
 	year: varchar(),
 	month: varchar(),
@@ -800,14 +813,3 @@ export const vTopCategoriesByTenant = pgView("v_top_categories_by_tenant", {	ten
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	categoryRank: bigint("category_rank", { mode: "number" }),
 }).as(sql`SELECT tenant_id, category_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS category_rank FROM category_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, category_name`);
-
-export const vProductPerformanceByTenant = pgView("v_product_performance_by_tenant", {	tenantId: uuid("tenant_id"),
-	productName: varchar("product_name"),
-	totalGrossSales: numeric("total_gross_sales"),
-	totalNetSales: numeric("total_net_sales"),
-	totalItemsSold: numeric("total_items_sold"),
-	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
-	productRankHigh: bigint("product_rank_high", { mode: "number" }),
-	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
-	productRankLow: bigint("product_rank_low", { mode: "number" }),
-}).as(sql`SELECT tenant_id, product_name, sum(gross_sales) AS total_gross_sales, sum(net_sales) AS total_net_sales, sum(total_items_sold) AS total_items_sold, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales)) DESC) AS product_rank_high, rank() OVER (PARTITION BY tenant_id ORDER BY (sum(net_sales))) AS product_rank_low FROM products_sales_summary WHERE year::text = EXTRACT(year FROM CURRENT_DATE)::text GROUP BY tenant_id, product_name`);

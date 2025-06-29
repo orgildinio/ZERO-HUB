@@ -121,15 +121,17 @@ export const Products: CollectionConfig = {
                 {
                     name: "compareAtPrice",
                     type: "number",
+                    required: true,
                     min: 0,
                     admin: {
                         step: 0.01,
-                        description: "Original price (for showing discounts)"
+                        description: "Discount price (for showing discounts)"
                     }
                 },
                 {
                     name: "costPrice",
                     type: "number",
+                    required: true,
                     min: 0,
                     admin: {
                         step: 0.01,

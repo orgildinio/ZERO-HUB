@@ -1,7 +1,18 @@
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ChevronRight, Layers, LineChart, Shield, Sparkles, Zap, ArrowRight } from "lucide-react"
-import { memo, ReactNode } from "react"
+import {
+    memo,
+} from "react"
+import {
+    Layers,
+    LineChart,
+    Shield,
+    Sparkles,
+    Zap,
+    ArrowRight
+} from "lucide-react"
+import {
+    Badge
+} from "@/components/ui/badge"
+import Image from "next/image"
 
 type IconComponent = React.ComponentType<{ className?: string }>
 
@@ -147,6 +158,22 @@ const AnimationCircles = memo(() => {
 
 AnimationCircles.displayName = 'AnimationCircles'
 
+const AnalyticsImage = memo(() => (
+    <div className="bg-zinc-950/50 rounded-lg overflow-hidden h-[240px] w-full group-hover:bg-zinc-950/70 transition-all duration-300 relative">
+        <Image
+            src="/docs/sales-analytics.png"
+            alt="Advanced analytics dashboard showing data visualizations and metrics"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            priority={true}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    </div>
+))
+
+AnalyticsImage.displayName = 'AnalyticsImage'
+
 const FeatureCard = memo<FeatureCardProps>(({ feature, className = '' }) => {
     const {
         title,
@@ -159,38 +186,6 @@ const FeatureCard = memo<FeatureCardProps>(({ feature, className = '' }) => {
     } = feature
 
     const baseClasses = "bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-xl overflow-hidden group hover:border-zinc-700 transition-all duration-300"
-
-    const renderImageSection = (): ReactNode => (
-        <div className="mt-auto flex-1 bg-zinc-950/50 rounded-lg p-4 h-[300px] flex items-center justify-center overflow-hidden group-hover:bg-zinc-950/70 transition-all duration-300">
-            <div className="relative w-full h-full">
-                <div className="w-full h-full bg-zinc-800/50 rounded-md flex items-center justify-center">
-                    <LineChart className="h-16 w-16 text-zinc-600" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 to-transparent flex flex-col justify-end p-6">
-                    <h4 className="text-lg font-medium mb-2 group-hover:text-blue-300 transition-colors duration-300">
-                        Real-time Insights
-                    </h4>
-                    <p className="text-sm text-zinc-300">
-                        Interactive dashboards with customizable widgets and real-time data updates
-                    </p>
-                    <div className="mt-4">
-                        <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white">
-                            {ctaText} <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-
-    const renderDefaultCTA = (): ReactNode => (
-        <div className="mt-auto flex justify-end">
-            <Button variant="ghost" className="text-zinc-400 hover:text-white group">
-                {ctaText || 'Learn more'}
-                <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
-        </div>
-    )
 
     return (
         <div className={`${baseClasses} ${className}`}>
@@ -205,7 +200,17 @@ const FeatureCard = memo<FeatureCardProps>(({ feature, className = '' }) => {
 
                 <p className="text-zinc-400 mb-6">{description}</p>
 
-                {hasImage ? renderImageSection() : renderDefaultCTA()}
+                {hasImage && feature.id === 'analytics' && (
+                    <div className="mt-auto">
+                        <AnalyticsImage />
+                        {ctaText && (
+                            <button className="mt-4 flex items-center text-blue-400 hover:text-blue-300 transition-colors duration-200 group/cta">
+                                <span className="text-sm font-medium">{ctaText}</span>
+                                <ArrowRight className="ml-2 h-4 w-4 group-hover/cta:translate-x-1 transition-transform duration-200" />
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     )
@@ -214,7 +219,7 @@ const FeatureCard = memo<FeatureCardProps>(({ feature, className = '' }) => {
 FeatureCard.displayName = 'FeatureCard'
 
 const WideFeatureCard = memo<WideFeatureCardProps>(({ feature }) => {
-    const { title, description, icon, badge, gradient, ctaText } = feature
+    const { title, description, icon, badge, gradient } = feature
 
     return (
         <div className="md:col-span-2 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-xl overflow-hidden group hover:border-zinc-700 transition-all duration-300">
@@ -228,10 +233,6 @@ const WideFeatureCard = memo<WideFeatureCardProps>(({ feature }) => {
                         </div>
                     </div>
                     <p className="text-zinc-400 mb-4">{description}</p>
-                    <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white group">
-                        {ctaText}
-                        <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
                 </div>
                 <div className="md:w-1/2 bg-zinc-950/50 rounded-lg p-4 h-[200px] w-full flex items-center justify-center overflow-hidden group-hover:bg-zinc-950/70 transition-all duration-300">
                     <div className="relative w-full h-full">

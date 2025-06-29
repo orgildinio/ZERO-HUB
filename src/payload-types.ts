@@ -203,7 +203,7 @@ export interface Tenant {
      */
     subscriptionDetailsSubmitted?: boolean | null;
     /**
-     * You cannot create products until your subscription is active.
+     * You cannot create products until your subscription is active or you're in trial period.
      */
     subscriptionStatus?: ('active' | 'paused' | 'cancelled' | 'expired' | 'none' | 'trial' | 'suspended') | null;
     /**
@@ -214,6 +214,30 @@ export interface Tenant {
      * Store will be unavailable after this date if subscription not renewed.
      */
     subscriptionEndDate?: string | null;
+    /**
+     * Date when the 14-day trial period started.
+     */
+    trialStartDate?: string | null;
+    /**
+     * Date when the 14-day trial period ends. Store access will be limited after this date.
+     */
+    trialEndDate?: string | null;
+    /**
+     * Number of trial days remaining (calculated field).
+     */
+    trialDaysRemaining?: number | null;
+    /**
+     * Whether the trial period is currently active.
+     */
+    isTrialActive?: boolean | null;
+    /**
+     * Whether the trial has been extended beyond the standard 14 days.
+     */
+    trialExtended?: boolean | null;
+    /**
+     * Reason for extending the trial period.
+     */
+    trialExtensionReason?: string | null;
   };
   /**
    * Banking and payout information for payment processing
@@ -337,13 +361,13 @@ export interface Product {
      */
     price: number;
     /**
-     * Original price (for showing discounts)
+     * Discount price (for showing discounts)
      */
-    compareAtPrice?: number | null;
+    compareAtPrice: number;
     /**
      * Your cost (for profit calculations)
      */
-    costPrice?: number | null;
+    costPrice: number;
     /**
      * Whether this product is subject to taxes
      */
@@ -778,6 +802,7 @@ export interface ProductsSalesSummary {
   month: string;
   year: string;
   totalOrders: number;
+  costPrice?: number | null;
   grossSales: number;
   netSales: number;
   totalItemsSold: number;
@@ -967,6 +992,12 @@ export interface TenantsSelect<T extends boolean = true> {
         subscriptionStatus?: T;
         subscriptionStartDate?: T;
         subscriptionEndDate?: T;
+        trialStartDate?: T;
+        trialEndDate?: T;
+        trialDaysRemaining?: T;
+        isTrialActive?: T;
+        trialExtended?: T;
+        trialExtensionReason?: T;
       };
   bankDetails?:
     | T
@@ -1266,6 +1297,7 @@ export interface ProductsSalesSummarySelect<T extends boolean = true> {
   month?: T;
   year?: T;
   totalOrders?: T;
+  costPrice?: T;
   grossSales?: T;
   netSales?: T;
   totalItemsSold?: T;

@@ -8,8 +8,6 @@ import {
     Wallet,
     Boxes,
     CreditCard,
-    MousePointerClick,
-    Percent,
     ClipboardListIcon,
     DatabaseIcon,
     FileIcon,
@@ -69,11 +67,6 @@ const data = {
             icon: BarChart3,
         },
         {
-            name: "Traffic Analytics",
-            url: "#",
-            icon: MousePointerClick,
-        },
-        {
             name: "Orders Analytics",
             url: "#",
             icon: PackageSearch,
@@ -92,11 +85,6 @@ const data = {
             name: "Payment Analytics",
             url: "#",
             icon: CreditCard,
-        },
-        {
-            name: "Coupon Analytics",
-            url: "#",
-            icon: Percent,
         },
         {
             name: "Customers Analytics",

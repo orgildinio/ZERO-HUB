@@ -1,6 +1,6 @@
 import { getQueryClient } from "@/trpc/server"
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { OrdersView } from "@/modules/analytics/ui/views/orders-view";
+import { CustomerView } from "@/modules/analytics/ui/views/customer-analytics";
 
 const Page = () => {
 
@@ -8,7 +8,7 @@ const Page = () => {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <OrdersView />
+            <CustomerView />
         </HydrationBoundary>
     )
 }

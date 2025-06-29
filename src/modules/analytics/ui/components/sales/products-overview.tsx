@@ -75,11 +75,12 @@ export const schema = z.object({
     totalGrossSales: z.string().nullable(),
     totalItemsSold: z.string().nullable(),
     totalNetSales: z.string().nullable(),
+    totalCostPrice: z.string().nullable(),
 })
 
 type ProductData = z.infer<typeof schema>
 
-function TableCellViewer({ item }: { item: ProductData; allProducts: ProductData[] }) {
+function TableCellViewer({ item, rankType }: { item: ProductData; rankType: 'high' | 'low' }) {
     const isMobile = useIsMobile()
 
     const chartData = React.useMemo(() => {
@@ -102,6 +103,8 @@ function TableCellViewer({ item }: { item: ProductData; allProducts: ProductData
             color: "hsl(var(--primary))",
         },
     } satisfies ChartConfig
+
+    const displayRank = rankType === 'high' ? item.productRankHigh : item.productRankLow
 
     return (
         <Sheet>
@@ -168,7 +171,7 @@ function TableCellViewer({ item }: { item: ProductData; allProducts: ProductData
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1">
                                 <Label className="text-muted-foreground">Rank</Label>
-                                <div className="text-lg font-semibold">#{item.productRankHigh || "N/A"}</div>
+                                <div className="text-lg font-semibold">#{displayRank || "N/A"}</div>
                             </div>
                             <div className="flex flex-col gap-1">
                                 <Label className="text-muted-foreground">Items Sold</Label>
@@ -206,17 +209,20 @@ function TableCellViewer({ item }: { item: ProductData; allProducts: ProductData
     )
 }
 
-const createColumns = (productData: ProductData[]): ColumnDef<ProductData>[] => [
+const createColumns = (productData: ProductData[], rankType: 'high' | 'low'): ColumnDef<ProductData>[] => [
     {
-        accessorKey: "productRankHigh",
+        accessorKey: rankType === 'high' ? "productRankHigh" : "productRankLow",
         header: () => <div className="text-center">Rank</div>,
-        cell: ({ row }) => (
-            <div className="flex items-center justify-center">
-                <Badge variant="secondary" className="text-sm font-semibold">
-                    #{row.original.productRankHigh || "N/A"}
-                </Badge>
-            </div>
-        ),
+        cell: ({ row }) => {
+            const rank = rankType === 'high' ? row.original.productRankHigh : row.original.productRankLow
+            return (
+                <div className="flex items-center justify-center">
+                    <Badge variant="secondary" className="text-sm font-semibold">
+                        #{rank || "N/A"}
+                    </Badge>
+                </div>
+            )
+        },
         enableHiding: false,
     },
     {
@@ -225,7 +231,7 @@ const createColumns = (productData: ProductData[]): ColumnDef<ProductData>[] => 
         cell: ({ row }) => {
             return (
                 <div className="text-left">
-                    <TableCellViewer item={row.original} allProducts={productData} />
+                    <TableCellViewer item={row.original} rankType={rankType} />
                 </div>
             )
         },
@@ -262,10 +268,20 @@ const createColumns = (productData: ProductData[]): ColumnDef<ProductData>[] => 
         enableHiding: false,
     },
     {
+        accessorKey: "totalCostPrice",
+        header: () => <div className="text-right">Cost Price</div>,
+        cell: ({ row }) => (
+            <div className="text-right font-medium">
+                {formatPrice(parseFloat(row.original.totalCostPrice || "0"))}
+            </div>
+        ),
+        enableHiding: false,
+    },
+    {
         id: "profit",
         header: () => <div className="text-right">Profit</div>,
         cell: ({ row }) => {
-            const profit = parseFloat(row.original.totalGrossSales || "0") - parseFloat(row.original.totalNetSales || "0")
+            const profit = parseFloat(row.original.totalNetSales || "0") - parseFloat(row.original.totalCostPrice || "0")
             const profitColor = profit >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
             return (
                 <div className={`text-right font-medium ${profitColor}`}>
@@ -301,38 +317,107 @@ const createColumns = (productData: ProductData[]): ColumnDef<ProductData>[] => 
     },
 ]
 
+// Separate table component to avoid re-creating columns on every render
+function ProductTable({ 
+    data, 
+    rankType,
+    emptyMessage 
+}: { 
+    data: ProductData[] | undefined
+    rankType: 'high' | 'low'
+    emptyMessage: string
+}) {
+    const columns = React.useMemo(() => createColumns(data || [], rankType), [data, rankType]);
+
+    const table = useReactTable({
+        data: data || [],
+        columns,
+        getRowId: (row) => `${row.tenantId}-${rankType === 'high' ? row.productRankHigh : row.productRankLow}`,
+        getCoreRowModel: getCoreRowModel(),
+    })
+
+    return (
+        <div className="overflow-hidden rounded-lg border">
+            <Table>
+                <TableHeader className="sticky top-0 z-10 bg-muted">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => {
+                                return (
+                                    <TableHead key={header.id} colSpan={header.colSpan}>
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                    </TableHead>
+                                )
+                            })}
+                        </TableRow>
+                    ))}
+                </TableHeader>
+                <TableBody>
+                    {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                            <TableRow
+                                key={row.id}
+                                data-state={row.getIsSelected() && "selected"}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <TableCell key={cell.id}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell
+                                colSpan={columns.length}
+                                className="h-24 text-center"
+                            >
+                                {emptyMessage}
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+        </div>
+    )
+}
+
 export function ProductsOverview({
     tenantId
 }: {
     tenantId: string
 }) {
+    const [selectedTab, setSelectedTab] = React.useState("top")
     const trpc = useTRPC();
-    const { data: productData } = useSuspenseQuery(trpc.analytics.getTenantTopProducts.queryOptions({ tenantId: tenantId }));
-
-    const columns = React.useMemo(() => createColumns(productData || []), [productData]);
-
-    const table = useReactTable({
-        data: productData || [],
-        columns,
-        getRowId: (row) => `${row.tenantId}-${row.productRankHigh}`,
-        getCoreRowModel: getCoreRowModel(),
-    })
+    
+    const { data: topProductData } = useSuspenseQuery(
+        trpc.analytics.getTenantTopProducts.queryOptions({ tenantId: tenantId })
+    );
+    
+    const { data: lowProductData } = useSuspenseQuery(
+        trpc.analytics.getTenantLowProducts.queryOptions({ tenantId: tenantId })
+    );
 
     return (
         <Tabs
-            defaultValue="top"
+            value={selectedTab}
+            onValueChange={setSelectedTab}
             className="flex w-full flex-col justify-start gap-6"
         >
             <div className="flex items-center justify-between px-4 lg:px-6">
                 <Label htmlFor="view-selector" className="sr-only">
                     View
                 </Label>
-                <Select defaultValue="top">
+                <Select value={selectedTab} onValueChange={setSelectedTab}>
                     <SelectTrigger
                         className="@4xl/main:hidden flex w-full"
                         id="view-selector"
                     >
-                        Select a view
                         <SelectValue placeholder="Select a view" />
                     </SelectTrigger>
                     <SelectContent>
@@ -349,71 +434,31 @@ export function ProductsOverview({
                     </TabsTrigger>
                 </TabsList>
             </div>
+            
             <TabsContent
                 value="top"
                 className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
             >
-                <div className="overflow-hidden rounded-lg border">
-                    <Table>
-                        <TableHeader className="sticky top-0 z-10 bg-muted">
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => {
-                                        return (
-                                            <TableHead key={header.id} colSpan={header.colSpan}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
-                                            </TableHead>
-                                        )
-                                    })}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                        <TableBody>
-                            {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row) => (
-                                    <TableRow
-                                        key={row.id}
-                                        data-state={row.getIsSelected() && "selected"}
-                                    >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columns.length}
-                                        className="h-24 text-center"
-                                    >
-                                        No products found.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                <ProductTable 
+                    data={topProductData}
+                    rankType="high"
+                    emptyMessage="No top products found."
+                />
             </TabsContent>
+            
             <TabsContent
                 value="low"
-                className="flex flex-col px-4 lg:px-6"
+                className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
             >
-                <div className="aspect-video w-full flex-1 rounded-lg border border-dashed flex items-center justify-center text-muted-foreground">
-                    Low selling products view - Coming soon
-                </div>
+                <ProductTable 
+                    data={lowProductData}
+                    rankType="low"
+                    emptyMessage="No low performing products found."
+                />
             </TabsContent>
         </Tabs>
     )
 }
-
-// CACLCULTE PROFIT BASED OF COST PRICE - NET SALES
 
 export function ProductsOverviewSkeleton() {
     return (

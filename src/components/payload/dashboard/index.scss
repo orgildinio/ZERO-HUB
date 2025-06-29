@@ -1,0 +1,434 @@
+@import "@payloadcms/ui/scss";
+
+// ====================================
+// DASHBOARD STYLES
+// ====================================
+
+.dashboard .before-dashboard {
+  margin-bottom: base(2);
+
+  &__banner {
+    margin-bottom: base(1.5);
+
+    & h4 {
+      margin: 0 0 base(0.25) 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    & p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+  }
+
+  // Progress section
+  &__progress {
+    margin-bottom: base(2);
+
+    & h5 {
+      margin: 0 0 base(1) 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--theme-text);
+    }
+  }
+
+  &__steps {
+    display: flex;
+    flex-direction: column;
+    gap: base(1);
+  }
+
+  &__step {
+    display: flex;
+    align-items: flex-start;
+    gap: base(1);
+    padding: base(1);
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 6px;
+    background: var(--theme-elevation-50);
+
+    &.completed {
+      border-color: var(--theme-elevation-300);
+      background: var(--theme-elevation-50);
+    }
+
+    &.pending {
+      border-color: var(--theme-elevation-300);
+      background: var(--theme-elevation-50);
+    }
+
+    &.urgent {
+      border-color: var(--theme-elevation-300);
+      background: var(--theme-elevation-50);
+    }
+
+    &.ready {
+      border-color: var(--theme-elevation-300);
+      background: var(--theme-elevation-50);
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      background: var(--theme-elevation-100);
+    }
+  }
+
+  &__step-indicator {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--theme-elevation-200);
+    color: var(--theme-text);
+
+    .completed & {
+      background: var(--theme-elevation-300);
+      color: var(--theme-text);
+    }
+
+    .pending & {
+      background: var(--theme-elevation-300);
+      color: var(--theme-text);
+    }
+
+    .urgent & {
+      background: var(--theme-elevation-300);
+      color: var(--theme-text);
+    }
+
+    .ready & {
+      background: var(--theme-elevation-300);
+      color: var(--theme-text);
+      font-size: 1rem;
+    }
+
+    .disabled & {
+      background: var(--theme-elevation-200);
+      color: var(--theme-text-dim);
+    }
+  }
+
+  &__step-content {
+    flex: 1;
+    min-width: 0;
+
+    & h6 {
+      margin: 0 0 base(0.25) 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--theme-text);
+    }
+
+    & p {
+      margin: 0 0 base(0.75) 0;
+      font-size: 0.9rem;
+      color: var(--theme-text-dim);
+      line-height: 1.4;
+    }
+  }
+
+  &__step-action {
+    margin-top: base(0.5);
+  }
+
+  // Management section
+  &__management {
+    margin-bottom: base(2);
+    padding: base(1);
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 8px;
+    background: var(--theme-elevation-50);
+
+    & h5 {
+      margin: 0 0 base(1) 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--theme-text);
+    }
+  }
+
+  &__management-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: base(1);
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: base(0.75);
+    }
+  }
+
+  &__management-content {
+    flex: 1;
+
+    & h6 {
+      margin: 0 0 base(0.25) 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--theme-text);
+    }
+
+    & p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--theme-text-dim);
+    }
+  }
+
+  &__management-action {
+    flex-shrink: 0;
+  }
+
+  // Quick start guide
+  &__quick-start {
+    margin-bottom: base(2);
+
+    & h5 {
+      margin: 0 0 base(1) 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--theme-text);
+    }
+  }
+
+  &__guide-items {
+    display: flex;
+    flex-direction: column;
+    gap: base(0.75);
+  }
+
+  &__guide-item {
+    display: flex;
+    align-items: flex-start;
+    gap: base(0.75);
+    padding: base(0.75);
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 6px;
+    background: var(--theme-elevation-50);
+
+    .guide-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--theme-elevation-200);
+      color: var(--theme-text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    & strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: base(0.25);
+      color: var(--theme-text);
+    }
+
+    & p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--theme-text-dim);
+      line-height: 1.3;
+    }
+  }
+
+  // Help section
+  &__help {
+    padding-top: base(1);
+    border-top: 1px solid var(--theme-elevation-200);
+    text-align: center;
+
+    & p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--theme-text-dim);
+    }
+
+    & a {
+      color: var(--theme-text);
+      text-decoration: underline;
+      font-weight: 500;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    margin-bottom: base(1.5);
+
+    &__step {
+      padding: base(0.75);
+    }
+
+    &__step-indicator {
+      width: 28px;
+      height: 28px;
+      font-size: 0.8rem;
+    }
+
+    &__management {
+      padding: base(0.75);
+    }
+  }
+}
+
+// ====================================
+// BUTTON STYLES (Simplified)
+// ====================================
+
+.subscription-button-wrapper {
+  display: inline-block;
+}
+
+.subscription-button-link {
+  text-decoration: none;
+  display: inline-block;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.subscription-button {
+  display: flex;
+  align-items: center;
+  gap: base(0.5);
+  padding: base(0.75) base(1.25);
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  background: var(--theme-button-background);
+  color: var(--theme-button-text);
+
+  &:hover:not(:disabled) {
+    background: var(--theme-button-background-hover);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  // Icon styling
+  &__icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  // Text container
+  &__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  &__main {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  &__sub {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  // Button variants
+  &--primary {
+    background: var(--theme-elevation-300);
+    color: var(--theme-text);
+    border-color: var(--theme-elevation-400);
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-400);
+    }
+  }
+
+  &--upgrade {
+    background: var(--theme-elevation-200);
+    color: var(--theme-text);
+    border-color: var(--theme-elevation-300);
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-300);
+    }
+  }
+
+  &--verify {
+    background: var(--theme-elevation-300);
+    color: var(--theme-text);
+    border-color: var(--theme-elevation-400);
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-400);
+    }
+  }
+
+  &--ready {
+    background: var(--theme-elevation-300);
+    color: var(--theme-text);
+    border-color: var(--theme-elevation-400);
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-400);
+    }
+  }
+
+  &--completed {
+    background: var(--theme-elevation-100);
+    color: var(--theme-text-dim);
+    border-color: var(--theme-elevation-200);
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: base(0.5) base(1);
+
+    &__main {
+      font-size: 0.9rem;
+    }
+
+    &__sub {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+// Focus states for accessibility
+.subscription-button:focus {
+  outline: 2px solid var(--theme-elevation-400);
+  outline-offset: 2px;
+}
+
+.subscription-button:focus:not(:focus-visible) {
+  outline: none;
+}

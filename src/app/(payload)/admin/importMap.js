@@ -24,10 +24,8 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_468452e575ad66e753c7045adde05940 } from '@/components/payload/login'
-import { SubscriptionVerifyButton as SubscriptionVerifyButton_2fc0dcea9c8a0d66e31d84a41ca803de } from '@/components/payload/razorpay-subscription'
-import { SubscriptionUpgradeButton as SubscriptionUpgradeButton_d8e3f712eb956f72681ea5dfa7b597b9 } from '@/components/payload/razorpay-change-subscription'
-import { TenantBankVerifyButton as TenantBankVerifyButton_d8fa5c4a94460e33c6a3c268f6fe22bb } from '@/components/payload/razorpay-verification'
-import { DashboardLink as DashboardLink_6a699ffea98b3b87e8eb1dd600d3b8fc } from '@/components/payload/dashboard'
+import { default as default_6a699ffea98b3b87e8eb1dd600d3b8fc } from '@/components/payload/dashboard'
+import { DashboardLink as DashboardLink_e9a0004ca2b0f806755904e3eb03e4e8 } from '@/components/payload/dashboard-button'
 import { TenantSelector as TenantSelector_1d0591e3cf4f332c83a86da13a0de59a } from '@payloadcms/plugin-multi-tenant/client'
 import { TenantSelectionProvider as TenantSelectionProvider_d6d5f193a167989e2ee7d14202901e62 } from '@payloadcms/plugin-multi-tenant/rsc'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
@@ -59,10 +57,8 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/payload/login#default": default_468452e575ad66e753c7045adde05940,
-  "@/components/payload/razorpay-subscription#SubscriptionVerifyButton": SubscriptionVerifyButton_2fc0dcea9c8a0d66e31d84a41ca803de,
-  "@/components/payload/razorpay-change-subscription#SubscriptionUpgradeButton": SubscriptionUpgradeButton_d8e3f712eb956f72681ea5dfa7b597b9,
-  "@/components/payload/razorpay-verification#TenantBankVerifyButton": TenantBankVerifyButton_d8fa5c4a94460e33c6a3c268f6fe22bb,
-  "@/components/payload/dashboard#DashboardLink": DashboardLink_6a699ffea98b3b87e8eb1dd600d3b8fc,
+  "@/components/payload/dashboard#default": default_6a699ffea98b3b87e8eb1dd600d3b8fc,
+  "@/components/payload/dashboard-button#DashboardLink": DashboardLink_e9a0004ca2b0f806755904e3eb03e4e8,
   "@payloadcms/plugin-multi-tenant/client#TenantSelector": TenantSelector_1d0591e3cf4f332c83a86da13a0de59a,
   "@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider": TenantSelectionProvider_d6d5f193a167989e2ee7d14202901e62,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e

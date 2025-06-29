@@ -29,6 +29,11 @@ export const ProductsSalesSummary: CollectionConfig = {
             required: true,
         },
         {
+            name: 'costPrice',
+            type: 'number',
+            defaultValue: 60
+        },
+        {
             name: 'grossSales',
             type: 'number',
             required: true,

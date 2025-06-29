@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { tenants, media, productsImages, products, categories, productsSpecifications, productsVariants, productsVariantsOptions, usersTenants, users, reviews, productsRels, tags, customers, orders, categorySalesSummary, productsSalesSummary, monthlySalesSummary, subscriptions, subscriptionPlans, payloadLockedDocuments, payloadLockedDocumentsRels, payloadPreferences, payloadPreferencesRels, usersRoles, subscriptionPlansFeatures, ordersOrderItems } from "./schema";
+import { tenants, media, productsImages, products, categories, productsSpecifications, productsVariants, productsVariantsOptions, usersTenants, users, reviews, productsRels, tags, customers, orders, categorySalesSummary, monthlySalesSummary, productsSalesSummary, subscriptions, subscriptionPlans, payloadLockedDocuments, payloadLockedDocumentsRels, payloadPreferences, payloadPreferencesRels, usersRoles, subscriptionPlansFeatures, ordersOrderItems } from "./schema";
 
 export const mediaRelations = relations(media, ({one, many}) => ({
 	tenant: one(tenants, {
@@ -26,8 +26,8 @@ export const tenantsRelations = relations(tenants, ({many}) => ({
 	customers: many(customers),
 	orders: many(orders),
 	categorySalesSummaries: many(categorySalesSummary),
-	productsSalesSummaries: many(productsSalesSummary),
 	monthlySalesSummaries: many(monthlySalesSummary),
+	productsSalesSummaries: many(productsSalesSummary),
 	subscriptions: many(subscriptions),
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 }));
@@ -189,17 +189,17 @@ export const categorySalesSummaryRelations = relations(categorySalesSummary, ({o
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 }));
 
-export const productsSalesSummaryRelations = relations(productsSalesSummary, ({one, many}) => ({
+export const monthlySalesSummaryRelations = relations(monthlySalesSummary, ({one, many}) => ({
 	tenant: one(tenants, {
-		fields: [productsSalesSummary.tenantId],
+		fields: [monthlySalesSummary.tenantId],
 		references: [tenants.id]
 	}),
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),
 }));
 
-export const monthlySalesSummaryRelations = relations(monthlySalesSummary, ({one, many}) => ({
+export const productsSalesSummaryRelations = relations(productsSalesSummary, ({one, many}) => ({
 	tenant: one(tenants, {
-		fields: [monthlySalesSummary.tenantId],
+		fields: [productsSalesSummary.tenantId],
 		references: [tenants.id]
 	}),
 	payloadLockedDocumentsRels: many(payloadLockedDocumentsRels),

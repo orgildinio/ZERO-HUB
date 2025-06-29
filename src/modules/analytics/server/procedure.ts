@@ -82,7 +82,6 @@ export const analyticsRouter = createTRPCRouter({
 
             return categoriesAnalytics;
         }),
-
     getTenantTopProducts: baseProcedure
         .input(
             z.object({
@@ -93,7 +92,16 @@ export const analyticsRouter = createTRPCRouter({
             const { tenantId } = input;
 
             const productsAnalytics = await db
-                .select()
+                .select({
+                    tenantId: vProductPerformanceByTenant.tenantId,
+                    productName: vProductPerformanceByTenant.productName,
+                    totalGrossSales: vProductPerformanceByTenant.totalGrossSales,
+                    totalItemsSold: vProductPerformanceByTenant.totalItemsSold,
+                    totalNetSales: vProductPerformanceByTenant.totalNetSales,
+                    productRankHigh: vProductPerformanceByTenant.productRankHigh,
+                    totalCostPrice:vProductPerformanceByTenant.totalCostPrice,
+                    productRankLow: vProductPerformanceByTenant.productRankLow,
+                })
                 .from(vProductPerformanceByTenant)
                 .where(and(
                     eq(vProductPerformanceByTenant.tenantId, tenantId),
@@ -103,7 +111,6 @@ export const analyticsRouter = createTRPCRouter({
 
             return productsAnalytics;
         }),
-
     getTenantLowProducts: baseProcedure
         .input(
             z.object({
@@ -114,15 +121,22 @@ export const analyticsRouter = createTRPCRouter({
             const { tenantId } = input;
 
             const productsAnalytics = await db
-                .select()
+                .select({
+                    tenantId: vProductPerformanceByTenant.tenantId,
+                    productName: vProductPerformanceByTenant.productName,
+                    totalGrossSales: vProductPerformanceByTenant.totalGrossSales,
+                    totalItemsSold: vProductPerformanceByTenant.totalItemsSold,
+                    totalNetSales: vProductPerformanceByTenant.totalNetSales,
+                    productRankHigh: vProductPerformanceByTenant.productRankHigh,
+                    totalCostPrice:vProductPerformanceByTenant.totalCostPrice,
+                    productRankLow: vProductPerformanceByTenant.productRankLow
+                })
                 .from(vProductPerformanceByTenant)
                 .where(and(
                     eq(vProductPerformanceByTenant.tenantId, tenantId),
-                    lte(sql`${vProductPerformanceByTenant.productRankLow}`, 10),
-                    sql`${vProductPerformanceByTenant.totalNetSales} > 0`
+                    lte(sql`${vProductPerformanceByTenant.productRankLow}`, 10)
                 ))
                 .orderBy(asc(vProductPerformanceByTenant.productRankLow));
-
             return productsAnalytics;
         }),
 });

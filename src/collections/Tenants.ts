@@ -16,6 +16,37 @@ export const Tenants: CollectionConfig = {
             return `https://${doc.slug}.zerohub.site`
         }
     },
+    hooks: {
+        beforeChange: [
+            ({ data, operation }) => {
+                if (operation === 'create') {
+                    const now = new Date();
+                    const trialEndDate = new Date(now);
+                    trialEndDate.setDate(now.getDate() + 14);
+
+                    if (!data.subscription?.trialStartDate) {
+                        data.subscription = {
+                            ...data.subscription,
+                            trialStartDate: now,
+                            trialEndDate: trialEndDate,
+                            subscriptionStatus: 'trial'
+                        };
+                    }
+                }
+
+                if (data.subscription?.trialEndDate) {
+                    const now = new Date();
+                    const trialEnd = new Date(data.subscription.trialEndDate);
+
+                    if (data.subscription.subscriptionStatus === 'trial' && now > trialEnd) {
+                        data.subscription.subscriptionStatus = 'expired';
+                    }
+                }
+
+                return data;
+            }
+        ]
+    },
     fields: [
         {
             name: "name",
@@ -127,9 +158,9 @@ export const Tenants: CollectionConfig = {
                         { label: 'Trial', value: 'trial' },
                         { label: 'Suspended', value: 'suspended' }
                     ],
-                    defaultValue: 'none',
+                    defaultValue: 'trial',
                     admin: {
-                        description: "You cannot create products until your subscription is active."
+                        description: "You cannot create products until your subscription is active or you're in trial period."
                     },
                     access: {
                         read: () => true,
@@ -161,6 +192,85 @@ export const Tenants: CollectionConfig = {
                     },
                     access: {
                         read: () => true,
+                        update: ({ req }) => isSuperAdmin(req.user)
+                    }
+                },
+                {
+                    name: 'trialStartDate',
+                    type: 'date',
+                    admin: {
+                        description: "Date when the 14-day trial period started.",
+                        date: {
+                            pickerAppearance: 'dayAndTime'
+                        },
+                        readOnly: true
+                    },
+                    access: {
+                        read: () => true,
+                        update: ({ req }) => isSuperAdmin(req.user)
+                    }
+                },
+                {
+                    name: 'trialEndDate',
+                    type: 'date',
+                    admin: {
+                        description: "Date when the 14-day trial period ends. Store access will be limited after this date.",
+                        date: {
+                            pickerAppearance: 'dayAndTime'
+                        },
+                        readOnly: true
+                    },
+                    access: {
+                        read: () => true,
+                        update: ({ req }) => isSuperAdmin(req.user)
+                    }
+                },
+                {
+                    name: 'trialDaysRemaining',
+                    type: 'number',
+                    admin: {
+                        description: "Number of trial days remaining (calculated field).",
+                        readOnly: true
+                    },
+                    access: {
+                        read: () => true,
+                        update: () => false
+                    }
+                },
+                {
+                    name: 'isTrialActive',
+                    type: 'checkbox',
+                    admin: {
+                        description: "Whether the trial period is currently active.",
+                        readOnly: true
+                    },
+                    access: {
+                        read: () => true,
+                        update: () => false
+                    }
+                },
+                {
+                    name: 'trialExtended',
+                    type: 'checkbox',
+                    defaultValue: false,
+                    admin: {
+                        description: "Whether the trial has been extended beyond the standard 14 days.",
+                        condition: (data) => isSuperAdmin(data?.user)
+                    },
+                    access: {
+                        read: ({ req }) => isSuperAdmin(req.user),
+                        update: ({ req }) => isSuperAdmin(req.user)
+                    }
+                },
+                {
+                    name: 'trialExtensionReason',
+                    type: 'textarea',
+                    admin: {
+                        description: "Reason for extending the trial period.",
+                        condition: (data) => data?.trialExtended === true
+                    },
+                    access: {
+                        read: ({ req }) => isSuperAdmin(req.user),
                         update: ({ req }) => isSuperAdmin(req.user)
                     }
                 }
@@ -350,6 +460,5 @@ export const Tenants: CollectionConfig = {
                 },
             ]
         },
-        // TODO: Add personal settings field
     ]
 }
