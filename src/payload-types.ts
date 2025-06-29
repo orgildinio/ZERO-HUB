@@ -504,7 +504,7 @@ export interface Product {
   createdAt: string;
 }
 /**
- * Manage product categories. You must verify your account before creating categories.
+ * Manage product categories. You can create categories during your trial period or after verifying your account.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".

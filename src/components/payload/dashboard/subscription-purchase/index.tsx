@@ -1,45 +1,39 @@
-import { Tenant } from '@/payload-types';
-import { caller } from '@/trpc/server';
-import { Button, Link } from '@payloadcms/ui';
-import '../index.scss'
+import type { Tenant } from "@/payload-types"
+import { caller } from "@/trpc/server"
+import { Button, Link } from "@payloadcms/ui"
+import "../index.scss"
 
 export const dynamic = "force-dynamic"
 
 export const SubscriptionVerifyButton = async () => {
-    const session = await caller.auth.session();
+    const session = await caller.auth.session()
     const tenant = session.user?.tenants?.[0].tenant as Tenant
 
     if (tenant.subscription?.subscriptionDetailsSubmitted) {
         return (
-            <div className="subscription-button-wrapper">
-                <Button
-                    disabled
-                    className="subscription-button subscription-button--completed"
-                >
-                    <span className="subscription-button__icon">✓</span>
-                    <span className="subscription-button__text">
-                        <span className="subscription-button__main">Subscription Active</span>
-                        <span className="subscription-button__sub">Ready to use</span>
-                    </span>
-                </Button>
-            </div>
+            <Button disabled className="minimal-button complete">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginRight: "6px" }}>
+                    <path
+                        d="M13.5 4.5L6 12L2.5 8.5"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                </svg>
+                Subscription Active
+            </Button>
         )
     }
 
     return (
-        <div className="subscription-button-wrapper">
-            <Link href='/subscription' className="subscription-button-link">
-                <Button
-                    className="subscription-button subscription-button--primary"
-                    buttonStyle="primary"
-                >
-                    <span className="subscription-button__icon">💳</span>
-                    <span className="subscription-button__text">
-                        <span className="subscription-button__main">Purchase Subscription</span>
-                        <span className="subscription-button__sub">Get full access</span>
-                    </span>
-                </Button>
-            </Link>
-        </div>
+        <Link href="/subscription">
+            <Button className="minimal-button primary">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginRight: "6px" }}>
+                    <path d="M8 1V15M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                Purchase Plan
+            </Button>
+        </Link>
     )
 }

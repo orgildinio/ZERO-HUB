@@ -1,28 +1,22 @@
-import { Tenant } from '@/payload-types';
-import { caller } from '@/trpc/server';
-import { Button } from '@payloadcms/ui';
-import '../index.scss'
+import type { Tenant } from "@/payload-types"
+import { caller } from "@/trpc/server"
+import { Button } from "@payloadcms/ui"
+import "../index.scss"
 
 export const dynamic = "force-dynamic"
 
 export const SubscriptionUpgradeButton = async () => {
-    const session = await caller.auth.session();
+    const session = await caller.auth.session()
     const tenant = session.user?.tenants?.[0].tenant as Tenant
 
     if (tenant.subscription?.subscriptionDetailsSubmitted) {
         return (
-            <div className="subscription-button-wrapper">
-                <Button
-                    className="subscription-button subscription-button--upgrade"
-                    buttonStyle="secondary"
-                >
-                    <span className="subscription-button__icon">⚙️</span>
-                    <span className="subscription-button__text">
-                        <span className="subscription-button__main">Manage Plan</span>
-                        <span className="subscription-button__sub">Upgrade or modify</span>
-                    </span>
-                </Button>
-            </div>
+            <Button className="minimal-button secondary">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginRight: "6px" }}>
+                    <path d="M8 1V15M1 8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                Manage Subscription
+            </Button>
         )
     }
     return null
