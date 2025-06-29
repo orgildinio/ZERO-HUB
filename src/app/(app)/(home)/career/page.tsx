@@ -87,7 +87,7 @@ const CareersPage: React.FC = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                            {job.requirements.slice(0, 2).map((req: string, i: number) => (
+                            {job.requirements.slice(0, 1).map((req: string, i: number) => (
                                 <Badge key={i} variant="secondary" className="bg-zinc-700/50 text-xs overflow-hidden">
                                     {req}
                                 </Badge>

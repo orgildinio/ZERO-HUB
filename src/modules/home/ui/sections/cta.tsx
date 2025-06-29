@@ -1,8 +1,14 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export const CTASection = () => {
+
+    const router = useRouter();
+
     return (
         <section className="py-12 relative">
             <div className="container px-2 md:px-6 mx-auto">
@@ -46,6 +52,7 @@ export const CTASection = () => {
                         <Button
                             size="lg"
                             className="bg-white text-black hover:bg-zinc-100 transition-all duration-200 group px-6 py-3 text-base font-medium"
+                            onClick={() => router.push('/sign-up')}
                         >
                             Start free trial
                             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
@@ -54,8 +61,9 @@ export const CTASection = () => {
                             size="lg"
                             variant="outline"
                             className="border-zinc-700 text-zinc-300 hover:bg-zinc-900 hover:text-white transition-all duration-200 px-6 py-3 text-base"
+                            onClick={() => router.push('/docs')}
                         >
-                            View demo
+                            View docs
                         </Button>
                     </div>
                 </div>

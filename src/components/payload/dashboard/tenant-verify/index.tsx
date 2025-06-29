@@ -42,7 +42,7 @@ export const TenantBankVerifyButton = async () => {
     }
 
     return (
-        <Link href="/bank-details">
+        <Link href="/verify-bank">
             <Button className="minimal-button primary">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginRight: "6px" }}>
                     <path

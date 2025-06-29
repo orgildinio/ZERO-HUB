@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Star, Zap, ArrowRight, Sparkles } from "lucide-react"
 import { plans } from "@/constants"
 import { formatPrice } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 type BillingPeriod = "monthly" | "yearly"
 
@@ -34,6 +35,8 @@ interface BillingToggleProps {
 const PlanCard: React.FC<PlanCardProps> = ({ plan, billingPeriod, isPopular }) => {
     const price = billingPeriod === "monthly" ? plan.monthlyPrice : plan.yearlyPrice
     const savings = billingPeriod === "yearly" ? plan.monthlyPrice * 12 - plan.yearlyPrice : 0
+
+    const router = useRouter();
 
     return (
         <div
@@ -77,6 +80,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, billingPeriod, isPopular }) =
                             ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
                             : "bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 hover:border-zinc-600"
                             }`}
+                            onClick={()=>router.push('/sign-up')}
                     >
                         {plan.cta}
                         <ArrowRight className="ml-2 h-4 w-4" />
