@@ -65,6 +65,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useTRPC } from "@/trpc/client"
 import { formatPrice } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export const schema = z.object({
     productName: z.string().nullable(),
@@ -413,3 +414,143 @@ export function ProductsOverview({
 }
 
 // CACLCULTE PROFIT BASED OF COST PRICE - NET SALES
+
+export function ProductsOverviewSkeleton() {
+    return (
+        <Tabs
+            defaultValue="top"
+            className="flex w-full flex-col justify-start gap-6"
+        >
+            <div className="flex items-center justify-between px-4 lg:px-6">
+                <Label htmlFor="view-selector" className="sr-only">
+                    View
+                </Label>
+                <Select defaultValue="top" disabled>
+                    <SelectTrigger
+                        className="@4xl/main:hidden flex w-full"
+                        id="view-selector"
+                    >
+                        <Skeleton className="h-4 w-32" />
+                        <SelectValue placeholder="Select a view" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="top">Top selling products</SelectItem>
+                        <SelectItem value="low">Low selling products</SelectItem>
+                    </SelectContent>
+                </Select>
+                <TabsList className="@4xl/main:flex hidden w-full">
+                    <TabsTrigger value="top" className="gap-1" disabled>
+                        <Skeleton className="h-4 w-36" />
+                    </TabsTrigger>
+                    <TabsTrigger value="low" className="gap-1" disabled>
+                        <Skeleton className="h-4 w-36" />
+                    </TabsTrigger>
+                </TabsList>
+            </div>
+            <TabsContent
+                value="top"
+                className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+            >
+                <div className="overflow-hidden rounded-lg border">
+                    <Table>
+                        <TableHeader className="sticky top-0 z-10 bg-muted">
+                            <TableRow>
+                                <TableHead>
+                                    <div className="text-center">
+                                        <Skeleton className="h-4 w-12 mx-auto" />
+                                    </div>
+                                </TableHead>
+                                <TableHead>
+                                    <div className="text-left">
+                                        <Skeleton className="h-4 w-16" />
+                                    </div>
+                                </TableHead>
+                                <TableHead>
+                                    <div className="text-center">
+                                        <Skeleton className="h-4 w-20 mx-auto" />
+                                    </div>
+                                </TableHead>
+                                <TableHead>
+                                    <div className="text-right">
+                                        <Skeleton className="h-4 w-20 ml-auto" />
+                                    </div>
+                                </TableHead>
+                                <TableHead>
+                                    <div className="text-right">
+                                        <Skeleton className="h-4 w-16 ml-auto" />
+                                    </div>
+                                </TableHead>
+                                <TableHead>
+                                    <div className="text-right">
+                                        <Skeleton className="h-4 w-12 ml-auto" />
+                                    </div>
+                                </TableHead>
+                                <TableHead>
+                                    <div className="text-center">
+                                        <Skeleton className="h-4 w-14 mx-auto" />
+                                    </div>
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Array.from({ length: 8 }).map((_, index) => (
+                                <TableRow key={index}>
+                                    {/* Rank */}
+                                    <TableCell>
+                                        <div className="flex items-center justify-center">
+                                            <Skeleton className="h-6 w-8 rounded-full" />
+                                        </div>
+                                    </TableCell>
+                                    {/* Product Name */}
+                                    <TableCell>
+                                        <div className="text-left">
+                                            <Skeleton className="h-4 w-32" />
+                                        </div>
+                                    </TableCell>
+                                    {/* Items Sold */}
+                                    <TableCell>
+                                        <div className="text-center">
+                                            <Skeleton className="h-4 w-12 mx-auto" />
+                                        </div>
+                                    </TableCell>
+                                    {/* Gross Sales */}
+                                    <TableCell>
+                                        <div className="text-right">
+                                            <Skeleton className="h-4 w-16 ml-auto" />
+                                        </div>
+                                    </TableCell>
+                                    {/* Net Sales */}
+                                    <TableCell>
+                                        <div className="text-right">
+                                            <Skeleton className="h-4 w-16 ml-auto" />
+                                        </div>
+                                    </TableCell>
+                                    {/* Profit */}
+                                    <TableCell>
+                                        <div className="text-right">
+                                            <Skeleton className="h-4 w-14 ml-auto" />
+                                        </div>
+                                    </TableCell>
+                                    {/* Actions */}
+                                    <TableCell>
+                                        <div className="flex justify-center">
+                                            <Skeleton className="h-8 w-8 rounded" />
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </TabsContent>
+            <TabsContent
+                value="low"
+                className="flex flex-col px-4 lg:px-6"
+            >
+                <div className="aspect-video w-full flex-1 rounded-lg border border-dashed flex items-center justify-center">
+                    <Skeleton className="h-6 w-48" />
+                </div>
+            </TabsContent>
+        </Tabs>
+    )
+}
