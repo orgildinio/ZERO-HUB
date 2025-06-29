@@ -101,7 +101,10 @@ export const authRouter = createTRPCRouter({
                     slug: input.username,
                     phone: input.phone,
                     store: input.store,
-                    activeTemplate: 'default'
+                    activeTemplate: 'default',
+                    subscription: {
+                        isTrialActive: true
+                    }
                 }
             })
             await ctx.db.create({

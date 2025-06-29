@@ -38,12 +38,36 @@ export const Tenants: CollectionConfig = {
                     const now = new Date();
                     const trialEnd = new Date(data.subscription.trialEndDate);
 
-                    if (data.subscription.subscriptionStatus === 'trial' && now > trialEnd) {
+                    const timeDiff = trialEnd.getTime() - now.getTime();
+                    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                    data.subscription.trialDaysRemaining = Math.max(0, daysRemaining);
+
+                    data.subscription.isTrialActive = daysRemaining > 0 && data.subscription.subscriptionStatus === 'trial';
+
+                    if (data.subscription.subscriptionStatus === 'trial' && daysRemaining <= 0) {
                         data.subscription.subscriptionStatus = 'expired';
+                        data.subscription.isTrialActive = false;
                     }
                 }
 
                 return data;
+            }
+        ],
+        afterRead: [
+            ({ doc }) => {
+                if (doc.subscription?.trialEndDate) {
+                    const now = new Date();
+                    const trialEnd = new Date(doc.subscription.trialEndDate);
+
+                    const timeDiff = trialEnd.getTime() - now.getTime();
+                    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                    doc.subscription.trialDaysRemaining = Math.max(0, daysRemaining);
+                    doc.subscription.isTrialActive = daysRemaining > 0 && doc.subscription.subscriptionStatus === 'trial';
+                }
+
+                return doc;
             }
         ]
     },
@@ -111,6 +135,7 @@ export const Tenants: CollectionConfig = {
             defaultValue: 'default',
             type: 'text',
             admin: {
+                readOnly: true,
                 description: "Currently active template configuration for this tenant.",
                 position: "sidebar"
             },
@@ -249,31 +274,6 @@ export const Tenants: CollectionConfig = {
                         update: () => false
                     }
                 },
-                {
-                    name: 'trialExtended',
-                    type: 'checkbox',
-                    defaultValue: false,
-                    admin: {
-                        description: "Whether the trial has been extended beyond the standard 14 days.",
-                        condition: (data) => isSuperAdmin(data?.user)
-                    },
-                    access: {
-                        read: ({ req }) => isSuperAdmin(req.user),
-                        update: ({ req }) => isSuperAdmin(req.user)
-                    }
-                },
-                {
-                    name: 'trialExtensionReason',
-                    type: 'textarea',
-                    admin: {
-                        description: "Reason for extending the trial period.",
-                        condition: (data) => data?.trialExtended === true
-                    },
-                    access: {
-                        read: ({ req }) => isSuperAdmin(req.user),
-                        update: ({ req }) => isSuperAdmin(req.user)
-                    }
-                }
             ]
         },
         {

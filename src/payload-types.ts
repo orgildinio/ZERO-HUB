@@ -230,14 +230,6 @@ export interface Tenant {
      * Whether the trial period is currently active.
      */
     isTrialActive?: boolean | null;
-    /**
-     * Whether the trial has been extended beyond the standard 14 days.
-     */
-    trialExtended?: boolean | null;
-    /**
-     * Reason for extending the trial period.
-     */
-    trialExtensionReason?: string | null;
   };
   /**
    * Banking and payout information for payment processing
@@ -996,8 +988,6 @@ export interface TenantsSelect<T extends boolean = true> {
         trialEndDate?: T;
         trialDaysRemaining?: T;
         isTrialActive?: T;
-        trialExtended?: T;
-        trialExtensionReason?: T;
       };
   bankDetails?:
     | T

@@ -12,8 +12,15 @@ export const Tags: CollectionConfig = {
     access: {
         create: ({ req }) => {
             if (isSuperAdmin(req.user)) return true
+
             const tenant = req.user?.tenants?.[0]?.tenant as Tenant
-            return Boolean(tenant?.subscription?.subscriptionDetailsSubmitted)
+            if (!tenant) return false
+
+            const hasSubscriptionDetails = Boolean(tenant?.subscription?.subscriptionDetailsSubmitted)
+            const hasBankDetails = Boolean(tenant?.bankDetails?.bankDetailsSubmitted)
+            const isTrialActive = Boolean(tenant?.subscription?.isTrialActive)
+
+            return hasSubscriptionDetails || isTrialActive || hasBankDetails
         }
     },
     fields: [

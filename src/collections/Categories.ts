@@ -20,14 +20,21 @@ export const Categories: CollectionConfig = {
     access: {
         create: ({ req }) => {
             if (isSuperAdmin(req.user)) return true
+
             const tenant = req.user?.tenants?.[0]?.tenant as Tenant
-            return Boolean(tenant?.subscription?.subscriptionDetailsSubmitted)
+            if (!tenant) return false
+
+            const hasSubscriptionDetails = Boolean(tenant?.subscription?.subscriptionDetailsSubmitted)
+            const hasBankDetails = Boolean(tenant?.bankDetails?.bankDetailsSubmitted)
+            const isTrialActive = Boolean(tenant?.subscription?.isTrialActive)
+
+            return hasSubscriptionDetails || isTrialActive || hasBankDetails
         }
     },
     admin: {
         useAsTitle: 'name',
         group: "Store",
-        description: "Manage product categories. You must verify your account before creating categories.",
+        description: "Manage product categories. You can create categories during your trial period or after verifying your account.",
     },
     hooks: {
         beforeChange: [
