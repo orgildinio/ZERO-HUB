@@ -1,9 +1,9 @@
 import React from 'react'
 
-const Page = () => {
+const MojitoPage = ({ tenant }: { tenant: string }) => {
   return (
-    <div>Page</div>
+    <div>MojitoPage</div>
   )
 }
 
-export default Page
+export default MojitoPage

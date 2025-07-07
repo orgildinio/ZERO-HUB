@@ -1,9 +1,16 @@
 import React from 'react'
 
-const Layout = () => {
+const MojitoLayout = ({
+  tenant,
+  children
+}: {
+  tenant: string;
+  children: React.ReactNode
+}) => {
+
   return (
-    <div>Layout</div>
+    <div>MojitoLayout</div>
   )
 }
 
-export default Layout
+export default MojitoLayout
