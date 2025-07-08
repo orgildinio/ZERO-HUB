@@ -72,7 +72,7 @@ const store = createStore({
 ## 🏗️ System Architecture
 
 <div align="center">
-<img src="./public/arch/hld.png" alt="Architecture Diagram" width="90%" />
+<img src="./public/arch/hld.png" alt="Architecture Diagram" width="100%" />
 <p><em>Microservices architecture built for scale and performance</em></p>
 </div>
 
