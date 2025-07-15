@@ -1,3 +1,3 @@
 export const getGrossNetSales = () => {
-    await redis.get("")
+    await redis.get("").watch()
 }
