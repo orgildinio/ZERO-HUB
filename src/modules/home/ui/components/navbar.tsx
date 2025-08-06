@@ -195,15 +195,6 @@ export const Navbar = memo(() => {
                 <Logo />
 
                 <nav className="md:flex items-center gap-2 hidden">
-                    {/* <NavbarDropdown
-                        title="Features"
-                        subtitle="Explore Features"
-                        active={pathname}
-                        containerRef={overflowData.featuresContainerRef}
-                        dropdownRef={overflowData.featuresDropdownRef}
-                        items={featureItems}
-                        overflow={overflowData.featuresOverflow}
-                    /> */}
                     <NavLink
                         href="/"
                         active={activeRoutes.home}

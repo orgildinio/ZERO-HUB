@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react'
 
 import '@/templates/default/style.css'
-import { getQueryClient, trpc } from '@/trpc/server'
+import { caller, getQueryClient, trpc } from '@/trpc/server'
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query'
 import { Footer, FooterSkeleton } from '@/templates/default/components/footer'
 import { Header, HeaderSkeleton } from '@/templates/default/components/header'
@@ -15,6 +15,9 @@ const TenantLayout = async ({ params, children }: Props) => {
 
     const { slug } = await params
     const queryClient = getQueryClient();
+
+    const tenant = await caller.tenants.getOne({ slug: slug });
+    const template = tenant.activeTemplate;
 
     void queryClient.prefetchQuery(trpc.tenants.getOne.queryOptions({ slug: slug }))
 
